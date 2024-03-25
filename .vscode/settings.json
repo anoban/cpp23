@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        ".clang-format": "yaml",
+        ".clang-tidy": "yaml",
+        "*.cu": "cuda-cpp",
+        "*.hpp": "cpp",
+        "*.h": "c",
+        "*.c": "c",
+        "*.cpp": "cpp"
+    }
+}
