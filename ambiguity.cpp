@@ -7,8 +7,8 @@
 
 class T {
     public:
-        T() { std::wcout << L"T()\n"; }
-        T(int) { std::wcout << __FUNCTIONW__ << L"(int)\n"; } // note the absence of the parameter name
+        T() noexcept { std::wcout << L"T()\n"; }
+        T(int) throw() { std::wcout << __FUNCTIONW__ << L"(int)\n"; } // note the absence of the parameter name
 };
 
 int a = 87, b { 54 }; //globals
