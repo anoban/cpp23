@@ -130,12 +130,47 @@ Checks: >
   bugprone-unhandled-self-assignment,
   bugprone-unique-ptr-array-mismatch,
   bugprone-unsafe-functions,
+  bugprone-unused-local-non-trivial-variable,
+  bugprone-unused-raii,
   bugprone-unused-return-value,
+  bugprone-use-after-move,
+  bugprone-virtual-near-miss,
+  cert-dcl50-cpp,
+  cert-dcl58-cpp,
   cert-env33-c,
   cert-err34-c,
   cert-flp30-c,
+  cert-err52-cpp,
+  cert-err58-cpp,
+  cert-err60-cpp,
+  cert-mem57-cpp,
+  cert-oop57-cpp,
+  cert-oop58-cpp,
+  cppcoreguidelines-avoid-capturing-lambda-coroutines,
+  cppcoreguidelines-avoid-const-or-ref-data-members,
+  cppcoreguidelines-avoid-non-const-global-variables,
+  cppcoreguidelines-avoid-reference-coroutine-parameters,
   cppcoreguidelines-init-variables,
-  google-runtime-int,
+  cppcoreguidelines-interfaces-global-init,
+  cppcoreguidelines-macro-usage,
+  cppcoreguidelines-misleading-capture-default-by-value,
+  cppcoreguidelines-missing-std-forward,
+  cppcoreguidelines-narrowing-conversions,
+  cppcoreguidelines-no-suspend-with-lock,
+  cppcoreguidelines-prefer-member-initializer,
+  cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  cppcoreguidelines-pro-bounds-constant-array-index,
+  cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  cppcoreguidelines-pro-type-const-cast,
+  cppcoreguidelines-pro-type-cstyle-cast,
+  cppcoreguidelines-pro-type-member-init,
+  cppcoreguidelines-pro-type-static-cast-downcast,
+  cppcoreguidelines-pro-type-union-access,
+  cppcoreguidelines-pro-type-vararg,
+  cppcoreguidelines-rvalue-reference-param-not-moved,
+  cppcoreguidelines-slicing,
+  cppcoreguidelines-special-member-functions,
+  cppcoreguidelines-virtual-class-destructor,
   llvm-include-order,
   misc-confusable-identifiers,
   misc-definitions-in-headers,
@@ -158,7 +193,6 @@ Checks: >
   readability-implicit-bool-conversion,
   readability-inconsistent-declaration-parameter-name,
   readability-isolate-declaration,
-  readability-magic-numbers,
   readability-misleading-indentation,
   readability-misplaced-array-index,
   readability-non-const-parameter,
@@ -272,13 +306,6 @@ CheckOptions:
   - key: bugprone-too-small-loop-variable.MagnitudeBitsUpperLimit
     value: 30
 
-  - key: google-runtime-int.UnsignedTypePrefix
-    value: uint
-  - key: google-runtime-int.SignedTypePrefix
-    value: int
-  - key: google-runtime-int.TypeSuffix
-    value: 32_t
-
   - key: misc-unused-parameters.StrictMode
     value: true
 
@@ -297,14 +324,20 @@ CheckOptions:
 
   - key: readability-identifier-length.MinimumVariableNameLength
     value: 3
+  - key: readability-identifier-length.IgnoredVariableNames
+    value: ^[abcinxyz]$
   - key: readability-identifier-length.MinimumParameterNameLength
     value: 3
   - key: readability-identifier-length.IgnoredParameterNames
-    value: ^[abcnxy]$
+    value: ^[abcnxyz]$
   - key: readability-identifier-length.MinimumLoopCounterNameLength
     value: 3
   - key: readability-identifier-length.IgnoredLoopCounterNames
     value: ^[ijn_]$
+  - key: readability-identifier-length.MinimumExceptionNameLength
+    value: 3
+  - key: readability-identifier-length.IgnoredExceptionVariableNames
+    value: ^[e]$
 
   - key: readability-inconsistent-declaration-parameter-name.IgnoreMacros
     value: false
@@ -332,10 +365,6 @@ CheckOptions:
 
   - key: readability-identifier-naming.ConstantCase
     value: UPPER_CASE
-  - key: readability-identifier-naming.ConstantParameterCase
-    value: lower_case
-  - key: readability-identifier-naming.ConstantPointerParameterCase
-    value: lower_case
   - key: readability-identifier-naming.EnumCase
     value: UPPER_CASE
   - key: readability-identifier-naming.EnumConstantCase
@@ -348,21 +377,30 @@ CheckOptions:
     value: UPPER_CASE
   - key: readability-identifier-naming.GlobalConstantPointerPrefix
     value: g
-  - key: readability-identifier-naming.GlobalPointerCase
-    value: lower_case
   - key: readability-identifier-naming.GlobalPointerPrefix
     value: g
   - key: readability-identifier-naming.IgnoreMainLikeFunctions
     value: true
-  - key: readability-identifier-naming.LocalConstantCase
-    value: UPPER_CASE
-  - key: readability-identifier-naming.LocalConstantPointerCase
-    value: UPPER_CASE
   - key: readability-identifier-naming.MacroDefinitionCase
     value: UPPER_CASE
-  - key: readability-identifier-naming.ParameterCase
-    value: lower_case
-  - key: readability-identifier-naming.ParameterPackCase
-    value: lower_case
   - key: readability-identifier-naming.StaticConstantCase
     value: UPPER_CASE
+
+  - key: cppcoreguidelines-narrowing-conversions.WarnOnIntegerNarrowingConversion
+    value: true
+  - key: cppcoreguidelines-narrowing-conversions.WarnOnIntegerToFloatingPointNarrowingConversion
+    value: true
+  - key: cppcoreguidelines-narrowing-conversions.WarnOnFloatingPointNarrowingConversion
+    value: true
+  - key: cppcoreguidelines-narrowing-conversions.WarnWithinTemplateInstantiation
+    value: true
+  - key: cppcoreguidelines-narrowing-conversions.WarnOnEquivalentBitWidth
+    value: true
+  - key: cppcoreguidelines-narrowing-conversions.PedanticMode
+    value: true
+
+  - key: cppcoreguidelines-pro-type-const-cast.StrictMode
+    value: true
+
+  - key: cppcoreguidelines-pro-type-member-init.IgnoreArrays
+    value: true
