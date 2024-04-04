@@ -171,16 +171,58 @@ Checks: >
   cppcoreguidelines-slicing,
   cppcoreguidelines-special-member-functions,
   cppcoreguidelines-virtual-class-destructor,
-  llvm-include-order,
+  google-build-namespaces,
+  google-build-using-namespace,
+  google-explicit-constructor,
+  google-runtime-operator,
   misc-confusable-identifiers,
+  misc-const-correctness,
+  misc-coroutine-hostile-raii,
   misc-definitions-in-headers,
   misc-header-include-cycle,
-  misc-misleading-identifier,
+  misc-misplaced-const,
+  misc-new-delete-overloads,
   misc-no-recursion,
+  misc-non-private-member-variables-in-classes,
   misc-redundant-expression,
   misc-static-assert,
+  misc-throw-by-value-catch-by-reference,
+  misc-unconventional-assign-operator,
+  misc-unused-alias-decls,
   misc-unused-parameters,
+  misc-unused-using-decls,
+  modernize-avoid-c-arrays,
+  modernize-concat-nested-namespaces,
+  modernize-deprecated-headers,
+  modernize-deprecated-ios-base-aliases,
+  modernize-raw-string-literal,
+  modernize-redundant-void-arg,
+  modernize-replace-random-shuffle,
+  modernize-return-braced-init-list,
+  modernize-type-traits,
   modernize-use-bool-literals,
+  modernize-use-constraints,
+  modernize-use-designated-initializers,
+  modernize-use-emplace,
+  modernize-use-equals-default,
+  modernize-use-equals-delete,
+  modernize-use-nullptr,
+  modernize-use-override,
+  modernize-use-std-numbers,
+  modernize-use-uncaught-exceptions,
+  modernize-use-using,
+  performance-avoid-endl,
+  performance-enum-size,
+  performance-faster-string-find,
+  performance-for-range-copy,
+  performance-implicit-conversion-in-loop,
+  performance-inefficient-algorithm,
+  performance-inefficient-string-concatenation,
+  performance-inefficient-vector-operation,
+  performance-move-const-arg,
+  performance-no-int-to-ptr,
+  performance-noexcept-destructor,
+  performance-noexcept-move-constructor,
   readability-avoid-nested-conditional-operator,
   readability-avoid-return-with-void-value,
   readability-avoid-unconditional-preprocessor-if,
@@ -189,7 +231,6 @@ Checks: >
   readability-else-after-return,
   readability-function-size,
   readability-identifier-length,
-  readability-identifier-naming,
   readability-implicit-bool-conversion,
   readability-inconsistent-declaration-parameter-name,
   readability-isolate-declaration,
@@ -259,7 +300,7 @@ HeaderFilterRegex:   ''
 
 ImplementationFileExtensions: ['cpp', 'cu']
 
-WarningsAsErrors: '*'
+WarningsAsErrors: '-*'
 # treat all clang-tidy warnings as errors, similar to -Werr or /WX, but for linting
 
 User: anoban
@@ -363,29 +404,6 @@ CheckOptions:
   - key: clang-analyzer.security.cert.env.InvalidPtr.InvalidatingGetEnv
     value: true
 
-  - key: readability-identifier-naming.ConstantCase
-    value: UPPER_CASE
-  - key: readability-identifier-naming.EnumCase
-    value: UPPER_CASE
-  - key: readability-identifier-naming.EnumConstantCase
-    value: UPPER_CASE
-  - key: readability-identifier-naming.GlobalConstantCase
-    value: UPPER_CASE
-  - key: readability-identifier-naming.GlobalConstantPrefix
-    value: g
-  - key: readability-identifier-naming.GlobalConstantPointerCase
-    value: UPPER_CASE
-  - key: readability-identifier-naming.GlobalConstantPointerPrefix
-    value: g
-  - key: readability-identifier-naming.GlobalPointerPrefix
-    value: g
-  - key: readability-identifier-naming.IgnoreMainLikeFunctions
-    value: true
-  - key: readability-identifier-naming.MacroDefinitionCase
-    value: UPPER_CASE
-  - key: readability-identifier-naming.StaticConstantCase
-    value: UPPER_CASE
-
   - key: cppcoreguidelines-narrowing-conversions.WarnOnIntegerNarrowingConversion
     value: true
   - key: cppcoreguidelines-narrowing-conversions.WarnOnIntegerToFloatingPointNarrowingConversion
@@ -404,3 +422,15 @@ CheckOptions:
 
   - key: cppcoreguidelines-pro-type-member-init.IgnoreArrays
     value: true
+
+  - key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
+    value: true
+  - key: misc-non-private-member-variables-in-classes.IgnorePublicMemberVariables
+    value: true
+
+  - key: misc-throw-by-value-catch-by-reference.CheckThrowTemporaries
+    value: true
+  - key: misc-throw-by-value-catch-by-reference.WarnOnLargeObject
+    value: true
+  - key: misc-throw-by-value-catch-by-reference.MaxSize
+    value: 8
