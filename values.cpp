@@ -1,5 +1,6 @@
 #include <cmath>
 #include <limits>
+#include <numbers>
 
 // practiced following Ben Sak's Cppcon 2019 talk on C++ value categories.
 // value categories are not language features, they are heuristics usd by the compiler to understand storage type information
@@ -18,9 +19,12 @@ struct coordinate {
         double z {};
 };
 
-constexpr coordinate GetMaxCoord() noexcept { return { DBL_MAX, DBL_MAX, DBL_MAX }; }
+constexpr coordinate GetMaxCoord() noexcept {
+    return { DBL_MAX, DBL_MAX, DBL_MAX };
+} // since we have an explicit return type, specifying it after the return keyword like return coordinate { };
+// becomes redundant!
 
-int                  main() {
+int main() {
     long  x { 12345 }; // a variable definition
     // long x declares a variable of type long and gives it the identifier x
     // at this point the variable x has secured a storage of sizeof(long)
@@ -35,7 +39,7 @@ int                  main() {
 
     float f32pi; // declaration
     // variable declaration secures the asked type of storage for the given variable
-    f32pi = 3.14159265358979; // assignment
+    f32pi = std::numbers::pi_v<float>; // assignment
     // assignment writes the provided object/value to the lvalue's storage
     // f32pi is an lvalue and 3.14159265358979 is an rvalue
 
@@ -68,6 +72,49 @@ int                  main() {
     // doesn't lead to a buffer overrun!
     // static_cast<unsigned>(pow(2.0L, 4.0L)) - 10 is an rvalue that doesn't have a addressable storage.
     // sure the programme will have to evaluate this expression at runtime and ultimately come up with an integer literal
-    // but it doesn't have to give that literal a storage
+    // but it doesn't have to give that literal an addressable storage!
+
+    // static_cast<unsigned>(fmax(ptrorigin->x, ptrorigin->y)) is an rvalue.
+    // a temporary without a addressable storage.
+
+    // WHY DOES THIS DISTINCTION EXIST??
+    // VALUE CATEGORIES ALLOW COMPILERS TO GENERATE MORE EFFICIENT MACHINE CODE GRANTED THAT THE LANGUAGE SPECS DO NOT EXPECT RVALUES TO
+    // HAVE ADDRESSABLE STORAGE.
+    // IF RVALUES WERE TO HAVE ADDRESSABLE STORAGE, THE MACHINE CODE MUST INCLUDE INSTRUCTIONS TO COMPUTE THE TEMPORARIES AND MOVE THEM
+    // TO A STACK LOCATION (TO MAKE THE TEMPORARY ADDRESSABLE) AND USE IT IN THE SUBSEQUENT COMPUTATIONS.
+    // THIS WILL BE TERRIBLY INEFFICIENT AS THERE IS GRATUITOUS COPIES IN AND OUT OF REGISTERS AND THE STACK.
+
+    // SINCE THIS IS NOT THE CASE, THE COMPILER COULD CHOOSE TO KEEP THE TEMPORARIES IN REGISTERS AND USE THEM AS IT SEES FIT
+    // THIS AVOIDS GRATUITOUS COPIES TO AND FROM STACK AND REGISTERS
+    // AND FOR LITERALS, THESE VALUES COULD SIMPLY BE HARDCODED INTO THE MACHINE INSTRUCTIONS AS WE DO NOT REQUIRE ITS STORAGE BE ADDRESSABLE!
+    // E.G mov n, 45    ; store 45 at n's memory location
+    // IF LITERLAS (RVALUES) HAD TO OCCUPY STORAGE, THE COMPILER WOULDN'T BE ABLE TO DO THIS!
+    // THE CODE WOULD HAVE LOOKED SOMETHING LIKE,
+    // .DATA
+    // n                                 DWORD ?
+    // _@@tmp@@rvalue_08497cpp_rt2023xx_ DWORD 42   ; giving the rvalue a storage
+    // .CODE
+    // .....
+    // mov n, _@@tmp@@rvalue_08497cpp_rt2023xx_
+
+    const int dummy                                      = 12;
+    1 = dummy; // ERROR: expression must be a modifiable lvalue, expression is not assignable
+    // we know the above line is invalid, BUT WHY?
+    // 1 and d have the same types (int)
+    // but 1 is an rvalue that doesn't have a storage. We cannot write to a memory location that is not addressable!
+
+    // this is true for builtin types, but the situation is a little more nuanced and complicated for class types
+    // i.e classes, structs and unions
+
+    // SO, WHAT TYPES OF LITERALS ARE RVALUES?
+    // INTEGERS, FLOATS, CHARACTERS
+    // STRING LITERLAS ARE LVALUES!! EVEN THOUGH THEIR MEMORY IS READ ONLY, THEY ARE LVALUES AS WE NEED TO BE ABLE TO SUBSCRIPT INTO
+    // STRING LITERALS AND THIS WILL NOT BE POSSIBLE WITHOUT THE STRING HAVING A BASE ADDRESS SO THE COMPILER CAN GET US THE
+    // REQUESTED CHARACTER FROM (BASE_ADDR + OFFSET)
+
+    auto           str { "STRING LITERAL" };
+    constexpr auto path { R"(C:\Users\Jamie\Documents\Books)" }; // raw string literal
+    auto J { "SAMUEL JACKSON"[9] }; // see, we indexed into an anonymous string literal. BECAUSE IT HAD AN ADDRESSABLE YER READ-ONLY STORAGE
+    "NATALIE"[4] = 'L';             // ERROR: expression must be a modifiable lvalue, read-only variable is not assignable
     return 0;
 }
