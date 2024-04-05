@@ -1,3 +1,4 @@
+#include <array>
 #include <cmath>
 #include <limits>
 #include <numbers>
@@ -14,15 +15,17 @@
 // with modern C++, value categories became exponentially more convoluted :) classic C++ stuff.
 
 struct coordinate {
-        double x {};
-        double y {};
-        double z {};
+        double               x {};
+        double               y {};
+        std::array<float, 4> z {};
 };
 
-constexpr coordinate GetMaxCoord() noexcept {
-    return { DBL_MAX, DBL_MAX, DBL_MAX };
-} // since we have an explicit return type, specifying it after the return keyword like return coordinate { };
-// becomes redundant!
+consteval coordinate GetMaxCoord() noexcept {
+    return {
+        .x = std::numeric_limits<long double>::max(), .y = FLT_MAX, .z = { std::numeric_limits<float>::min() }
+    }; // since we have an explicit return type, specifying it after the return keyword like return coordinate { };
+    // becomes redundant!
+}
 
 int main() {
     long  x { 12345 }; // a variable definition
@@ -49,24 +52,24 @@ int main() {
     // AND WE UPDATE THE VALUE AT squares[0], as it points to a modifiable and addressable storage
 
     squares[3LLU * 3] = 49; // here the subexpression inside the subscript operator is an rvalue that evaluates to 9LLU
-    // and squares[3LLU * 3] represents a modofiable lvalue!
+    // and squares[3LLU * 3] yields a modofiable lvalue!
 
     // NOT ALL IDENTIFIERS WITH A STORAGE ARE MODIFIABLE! IDENTIFIERS QUALIFIED WITH CONST WILL BE STORED IN READ-ONLY PAGES
     // AND CANNOT BE OVERWRITTEN! THEY ARE CONSIDERED LVALUES BUT THEY CANNOT BE ASSIGNED TO OR OVERWRITTEN
-    const double f64pi { 3.14159265358979 };
+    const auto f64pi { std::numbers::pi_v<double> };
     // here f64pi is an lvalue with storage, but it is a const qualified object in read-only memory!
-    auto         ptrf64pi { &f64pi }; // that's the captured address of the identifier f64pi
-    f64pi = 1.234567890;              // compile time error - the left expression must be a modofiable lvalue
-                                      // THE KEY PHRASE HERE IS "MODIFIABLE LVALUE"
-                                      // FOR AN IDENTIFIER TO BE ASSIGNED TO, IT MUST BE A MODIFIABLE LVALUE
+    auto       ptrf64pi { &f64pi }; // that's the captured address of the identifier f64pi
+    f64pi = 1.234567890;            // compile time error - the left expression must be a modofiable lvalue
+                                    // THE KEY PHRASE HERE IS "MODIFIABLE LVALUE"
+                                    // FOR AN IDENTIFIER TO BE ASSIGNED TO, IT MUST BE A MODIFIABLE LVALUE
 
-                                      // consider another definition with a slightly more convoluted rvalue expression
+                                    // consider another definition with a slightly more convoluted rvalue expression
     auto origin {
         coordinate { 0.000, 0.000, 0.000 }
     };
-    auto ptrorigin { &origin };
+    auto ptr_origin { &origin };
 
-    squares[static_cast<unsigned>(pow(2.0L, 4.0L)) - 10] = static_cast<unsigned>(fmax(ptrorigin->x, ptrorigin->y));
+    squares[static_cast<unsigned>(pow(2.0L, 4.0L)) - 10] = static_cast<unsigned>(fmax(ptr_origin->x, ptr_origin->y));
     // let's dissect this
     // squares[static_cast<unsigned>(pow(2.0L, 4.0L)) - 10] is a modifiable lvalue, granted the subexpression inside the subscript operator
     // doesn't lead to a buffer overrun!
@@ -74,7 +77,7 @@ int main() {
     // sure the programme will have to evaluate this expression at runtime and ultimately come up with an integer literal
     // but it doesn't have to give that literal an addressable storage!
 
-    // static_cast<unsigned>(fmax(ptrorigin->x, ptrorigin->y)) is an rvalue.
+    // static_cast<unsigned>(fmax(ptr_origin->x, ptr_origin->y)) is an rvalue.
     // a temporary without a addressable storage.
 
     // WHY DOES THIS DISTINCTION EXIST??
@@ -112,9 +115,75 @@ int main() {
     // STRING LITERALS AND THIS WILL NOT BE POSSIBLE WITHOUT THE STRING HAVING A BASE ADDRESS SO THE COMPILER CAN GET US THE
     // REQUESTED CHARACTER FROM (BASE_ADDR + OFFSET)
 
-    auto           str { "STRING LITERAL" };
+    const auto*    str { "STRING LITERAL" };
     constexpr auto path { R"(C:\Users\Jamie\Documents\Books)" }; // raw string literal
-    auto J { "SAMUEL JACKSON"[9] }; // see, we indexed into an anonymous string literal. BECAUSE IT HAD AN ADDRESSABLE YER READ-ONLY STORAGE
-    "NATALIE"[4] = 'L';             // ERROR: expression must be a modifiable lvalue, read-only variable is not assignable
+    auto           J { "SAMUEL JACKSON"[9] };
+    // above, we indexed into an anonymous string literal. BECAUSE IT HAD AN ADDRESSABLE YET READ-ONLY STORAGE
+    // i.e the literal had a base address, so the 10th element could be captured by offsetting 9 bytes right of the base address
+    "NATALIE"[4] = 'L'; // ERROR: expression must be a modifiable lvalue, read-only variable is not assignable
+
+    // OPERANDS ON THE RIGHT HAND SIDE OF AN ASSIGNMENT OR DEFINITION OR INITIALIZATION DOESN'T NEED TO BE A RVALUE
+    // E.G.
+    auto       eps { 1.000E-4L };
+    const auto threshold { eps }; // the operand on the right hand side is an lvalue.
+    // C++ semantics say that when an lvalue is used as the right jhand operand in an assignment/definition/initialization, an
+    // lvalue to rvalue conversion takes place.
+
+    // operands of an arithmetic operator can be either an  rvalue or an lvalue.
+    eps += std::numbers::inv_pi_v<float>; // here the right operand of the + operator is an rvalue
+    eps -= threshold; // here the right operand of the - operator is an lvalue, which ensues an LVALUE TO RVALUE CONVERSION
+
+    // the temporary that results from evaluating the RHS of the assignment operation is also an rvalue
+    // i.e eps -= threshold; expands as eps = eps - threshold;
+    // evaluation of the subexpression eps - threshold results in an rvalue temporary.
+
+    // pointer indirection operator unary *, yields an lvalue
+    unsigned    number { 100 };
+    auto* const numptr { &number };
+    *numptr *= 3; // is an lvalue - has an addressable storage
+    // dereferecing a pointer yields an lvalue (can be a read only lvalue BUT STILL AN LVALUE)
+    constexpr auto cost { 1'340'599.99L };
+    auto*          costptr { &cost }; // pointer to a constant varible, lvalue but unmodifiable
+    *costptr /= 36.6435F;             // Error: expression must be a modifiable lvalue, read-only variable is not assignable
+
+    int* thevoid { nullptr };         // pointer to an integer
+    int  ten { 10 };
+    // dereferencing thevoid still gives a valid lvalue, from a language semantics perspective.
+    // but will result in undefined behaviour.
+
+    thevoid = &ten; // valid, because the pointer thevoid is an lvalue - has an addressable and modifiable storage
+
+    thevoid = nullptr;
+    *thevoid /* supposed to yield a modifiable lvalue, but dereferences a nullptr */ = 212;
+    // will probably raise an access violation exception
+
+    // when operands become large, like class types, the penalty of increased binary size may outweigh the benefits of inlining the values in binary
+    // the compiler may opt to give the temporaries a storage, but will not expose it's address to users or programmers
+    // but programmers are expected to program as if this doesn't happen
+
+    auto           origin_0 { GetMaxCoord() };
+    constexpr auto FLOAT32_MAX { GetMaxCoord().y }; // GetMaxCoord() is expected to return a temporary rvalue
+    // but GetMaxCoord().y requests a member of the returned struct
+    // assemblers find struct members using a base address and an offset to the requested member variable.
+    // in order to have a base address, we need to store the type in memory i.e the stack or the heap.
+    // so in this case, an lvalue temporary will be materialized in stack, before offsetting to find out the member variable y.
+    // BECAUSE CLASS TYPE RVALUES DO OCCUPY DATA STORAGE
+
+    // ENUMERATIONS ARE RVALUES, LIKE INTEGER LITERALS
+    enum class PREDICATES : unsigned char { NO, MAYBE, YES };
+    unsigned char* whereNO { &(PREDICATES::NO) }; // Error: cannot take the address of an rvalue of type 'PREDICATES'
+    PREDICATES::YES *= 17;                        // Error: expression is not assignable
+    // Error: in C++ enums are special types, not regular ints as in C, so to use a compound *= operator, it must be oberloaded to support the PREDICATES type
+
+    // use of value categories in reference types
+    int    integer { 1000 };
+    int&   ref { integer }; // unlike pointers, references function like an alias for the referred variable
+    // unlike pointers, references can only refer to valid existing objects (no NULL references)
+    // one cannot even declare a reference without providing a valid object as right operand.
+    float& floatref;            // Error:  reference variable "floatref" requires an initializer
+    float& nullref { nullptr }; // Error: a value of type "std::nullptr_t" cannot be used to initialize an entity of type "float"
+
+    auto   where_ref { &ref };  // note the type, it is an int*, NOT int**
+    // because &ref actually yields the address of the object that the reference points to, not the address of the reference itself.
     return 0;
 }

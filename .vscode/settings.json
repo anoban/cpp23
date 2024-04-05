@@ -8,6 +8,8 @@
         "*.c": "c",
         "*.hpp": "cpp",
         "*.cpp": "cpp",
-        "ranges": "cpp"
+        "ranges": "cpp",
+        "limits": "cpp",
+        "ios": "cpp"
     }
 }
