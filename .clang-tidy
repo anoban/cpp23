@@ -223,24 +223,51 @@ Checks: >
   performance-no-int-to-ptr,
   performance-noexcept-destructor,
   performance-noexcept-move-constructor,
+  performance-trivially-destructible,
+  performance-type-promotion-in-math-fn,
+  performance-unnecessary-copy-initialization,
+  performance-unnecessary-value-param,
+  readability-avoid-const-params-in-decls,
   readability-avoid-nested-conditional-operator,
   readability-avoid-return-with-void-value,
   readability-avoid-unconditional-preprocessor-if,
   readability-const-return-type,
+  readability-container-size-empty,
+  readability-convert-member-functions-to-static,
+  readability-delete-null-pointer,
   readability-duplicate-include,
   readability-else-after-return,
-  readability-function-size,
+  readability-enum-initial-value,
   readability-identifier-length,
   readability-implicit-bool-conversion,
   readability-inconsistent-declaration-parameter-name,
   readability-isolate-declaration,
+  readability-make-member-function-const,
   readability-misleading-indentation,
   readability-misplaced-array-index,
   readability-non-const-parameter,
+  readability-qualified-auto,
+  readability-redundant-access-specifiers,
   readability-redundant-casting,
   readability-redundant-control-flow,
   readability-redundant-declaration,
+  readability-redundant-function-ptr-dereference,
+  readability-redundant-inline-specifier,
+  readability-redundant-member-init,
   readability-redundant-preprocessor,
+  readability-redundant-smartptr-get,
+  readability-redundant-string-cstr,
+  readability-redundant-string-init,
+  readability-reference-to-constructed-temporary,
+  readability-simplify-boolean-expr,
+  readability-simplify-subscript-expr,
+  readability-static-accessed-through-instance,
+  readability-static-definition-in-anonymous-namespace,
+  readability-string-compare,
+  readability-uniqueptr-delete-release,
+  readability-uppercase-literal-suffix,
+  readability-use-anyofallof,
+  readability-use-std-min-max,
   clang-analyzer-core.BitwiseShift,
   clang-analyzer-core.CallAndMessage,
   clang-analyzer-core.DivideZero,
@@ -350,18 +377,10 @@ CheckOptions:
   - key: misc-unused-parameters.StrictMode
     value: true
 
-  - key: readability-function-size.LineThreshold
-    value: 500
-  - key: readability-function-size.StatementThreshold
-    value: 400
-  - key: readability-function-size.BranchThreshold
-    value: 100
-  - key: readability-function-size.ParameterThreshold
-    value: 6
-  - key: readability-function-size.NestingThreshold
-    value: 10
-  - key: readability-function-size.VariableThreshold
-    value: 20
+  - key: readability-enum-initial-value.AllowExplicitZeroFirstInitialValue
+    value: true
+  - key: readability-enum-initial-value.AllowExplicitSequentialInitialValues
+    value: true
 
   - key: readability-identifier-length.MinimumVariableNameLength
     value: 3
@@ -385,18 +404,11 @@ CheckOptions:
   - key: readability-inconsistent-declaration-parameter-name.Strict
     value: true
 
-  - key: readability-magic-numbers.IgnoredIntegerValues
-    value: ''
-  - key: readability-magic-numbers.IgnorePowersOf2IntegerValues
-    value: false
-  - key: readability-magic-numbers.IgnoredFloatingPointValues
-    value: ''
-  - key: readability-magic-numbers.IgnoreAllFloatingPointValues
-    value: false
-  - key: readability-magic-numbers.IgnoreBitFieldsWidths
+  - key: readability-redundant-inline-specifier.StrictMode
     value: true
-  - key: readability-magic-numbers.IgnoreTypeAliases
-    value: false
+
+  - key: readability-uppercase-literal-suffix.NewSuffixes
+    value: 'L;LU;LLU;I8;U8,I16,U16,I32,U32,I64,U64'
 
   - key: clang-analyzer-core.BitwiseShift.Pedantic
     value: true
