@@ -10,6 +10,7 @@
         "*.cpp": "cpp",
         "ranges": "cpp",
         "limits": "cpp",
-        "ios": "cpp"
+        "ios": "cpp",
+        "cstdio": "cpp"
     }
 }

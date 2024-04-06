@@ -168,6 +168,7 @@ int main() {
     // in order to have a base address, we need to store the type in memory i.e the stack or the heap.
     // so in this case, an lvalue temporary will be materialized in stack, before offsetting to find out the member variable y.
     // BECAUSE CLASS TYPE RVALUES DO OCCUPY DATA STORAGE
+    constexpr auto FLOATMIN { GetMaxCoord().z[2] }; // same story here
 
     // ENUMERATIONS ARE RVALUES, LIKE INTEGER LITERALS
     enum class PREDICATES : unsigned char { NO, MAYBE, YES };

@@ -1,7 +1,7 @@
 #include <iomanip>
 #include <iostream>
 
-inline void dummy() noexcept {
+static void dummy() noexcept {
     double        some {};                       // a regular variable
     auto&         refto_some { some };           // a reference to `some`
     auto*         pointerto_some { &some };      // pointer to `some`
@@ -21,7 +21,7 @@ inline void dummy() noexcept {
 // there are no const references because references are const by definition
 // but there is a distinction between references to modifiable objects and const objects
 
-inline void example() noexcept {
+static void example() noexcept {
     const auto marks { 98.4L };
     auto       age { 29UI8 };
     auto&      refto_constobj { marks };
@@ -34,7 +34,7 @@ inline void example() noexcept {
 // consider the following enum
 enum MONTHS { JANUARY, FEBRUARY, MARCH, APRIL, MAY, JUNE, JULY, AUGUST, SEPTEMBER, OCTOBER, NOVEMBER, DECEMBER };
 
-static inline void months_increment() noexcept {
+static void months_increment() noexcept {
     // in plain C, one could do something like this
     for (MONTHS i = JANUARY; i < DECEMBER;
          ++i /* Error: this operation on an enumerated type requires an applicable user-defined operator function */)
@@ -49,11 +49,37 @@ static inline void months_increment() noexcept {
     // THE PROBLEM ARISES WHEN WE TRY TO TREAT ENUMS LIKE LVALUES!
     const MONTHS now { APRIL };     // okay
     static_assert(sizeof now == 4); // MONTHS uses int type
-    now++;                          // Error
+    now++;                          // Error: this operation on an enumerated type requires an applicable user-defined operator function
     // now look
-    unsigned january { JANUARY };                                         // type is unsigned NOT MONTHS
-    january++;                                                            // okay
-    for (short i = JANUARY; i < DECEMBER; ++i) std::wcout << L"Yeehaw\n"; // fine too
+    unsigned january { JANUARY }; // type is unsigned NOT MONTHS
+    january++;                    // okay
+    for (short i = JANUARY; i < DECEMBER; ++i) std::wcout << L"Yeehaw\n";
+    // fine because we use a variable of type short and initialize it using an enum
+}
+
+static void rebind() noexcept {
+    // references are like constant pointers, once bound to an object they cannot be rebound to another object
+    auto  name { LR"(Anoban)" };
+    auto& refwstr { name };
+    auto  machine { LR"(Dell inspiron)" };
+    refwstr = machine; // this doesn't modify the rference but modifies the pointer it refers to
+    // since the object referred to by refwstr is a non-constant pointer it can be modified
+    // AGAIN WE ARE NOT MUTATING THE REFERENCE ITSELF
+
+    // IF A REFERENCE REFERS TO A CONSTANT POINTER, THIS WON'T BE POSSIBLE EVEN IF THE OBJECT IS NON-CONST
+    long              age { 45 };       // a non-const variable
+    auto&             refage { age };   // regular reference
+    const auto&       crefage { age };  // const reference
+
+    const auto* const cptrage { &age }; // a constant pointer to a constant long
+    // we cannot modify age through cptrage, but age can be modified directly
+    age      += 8; // Okay
+    *cptrage /= 3; // Error: expression must be a modifiable lvalue
+
+    refage   -= 8; // okay
+    crefage  += 2; // Error: expression must be a modifiable lvalue
+
+    // THE SAME GOES FOR OBJECTS THAT ARE CONST QUALIFIED THEMSELVES
 }
 
 auto main() -> int {
