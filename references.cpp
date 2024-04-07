@@ -57,6 +57,37 @@ static void months_increment() noexcept {
     // fine because we use a variable of type short and initialize it using an enum
 }
 
+namespace incrementenums {
+    enum class DAYS : unsigned char { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY };
+    // now we have another enum we'd like to support increment and decrement operators
+    // increment and decrement perators in C and C++ behave like statements and exressions
+    // they materialize in-place mutations and return the mutated value
+    // e.g. x++ returns x and then increments x by 1
+    // ++x increments x by 1 and then returns the new value
+
+    [[nodiscard]] constexpr DAYS operator++(DAYS x) noexcept { return static_cast<DAYS>(static_cast<unsigned>(x) + 1U); }
+    // the caveat with the above implementation is that it operates on values, it will of course return an incremented value
+    // but the in-place mutation won't be materialized
+
+    constexpr void               test() noexcept {
+        auto today { DAYS::SATURDAY };
+        ++today; // today is still SATURDAY
+    }
+
+    // let's try using pointers then
+    [[nodiscard]] constexpr DAYS operator++(DAYS* x) noexcept {
+        *x = static_cast<DAYS>(static_cast<unsigned>(*x) + 1U);
+        return static_cast<DAYS>(static_cast<unsigned>(*x) + 1U);
+        // this implementation is theoretically sound but semantically wrong as C++ requires overloaded nonmember operator to have a parameter with class or enum types
+        // but we use a pointer type here.
+        // overloading ++ on pointer types obfuscates the usual semantics of pointer arithmetic.
+        // BESIDES WITH POINTERS AS ARGUMENT TYPE. ++ NEEDS A POINTER TO BE THE RHS OPERAND
+        // e.g. ++today; won't work
+        // we'll need to use something like (&today)++;
+    }
+
+} // namespace incrementenums
+
 static void rebind() noexcept {
     // references are like constant pointers, once bound to an object they cannot be rebound to another object
     auto  name { LR"(Anoban)" };
