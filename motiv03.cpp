@@ -13,27 +13,34 @@ class object { // let's create an expensive to copy class
         object() : nums_f32(100), nums_i64(100), nums_u8(100) { }
 
         // copy ctor
-        object(const object& rhside) : nums_f32 { rhside.nums_f32 }, nums_i64 { rhside.nums_i64 }, nums_u8 { rhside.nums_u8 } {
+        object(const object& other) : nums_f32 { other.nums_f32 }, nums_i64 { other.nums_i64 }, nums_u8 { other.nums_u8 } {
             std::wcout << L"object is being copied!\n";
+        }
+
+        // move ctor
+        object(const object&& xvalue) noexcept : nums_f32 { xvalue.nums_f32 }, nums_i64 { xvalue.nums_i64 }, nums_u8 { xvalue.nums_u8 } {
+            std::wcout << L"object is being moved!\n";
         }
 
         // defaulted dtor
         ~object() = default;
 
-        [[nodiscard]] object operator+(const object& rhside) const {
+        [[nodiscard]] object operator+(const object& other) const {
+            std::wcout << L"new object is being created!\n";
             auto result { object {} };
-            std::transform(nums_f32.cbegin(), nums_f32.cend(), rhside.nums_f32.cbegin(), result.nums_f32.begin(), std::plus<float> {});
-            std::transform(nums_i64.cbegin(), nums_i64.cend(), rhside.nums_i64.cbegin(), result.nums_i64.begin(), std::plus<int64_t> {});
-            std::transform(nums_u8.cbegin(), nums_u8.cend(), rhside.nums_u8.cbegin(), result.nums_u8.begin(), std::plus<uint8_t> {});
+            std::transform(nums_f32.cbegin(), nums_f32.cend(), other.nums_f32.cbegin(), result.nums_f32.begin(), std::plus<float> {});
+            std::transform(nums_i64.cbegin(), nums_i64.cend(), other.nums_i64.cbegin(), result.nums_i64.begin(), std::plus<int64_t> {});
+            std::transform(nums_u8.cbegin(), nums_u8.cend(), other.nums_u8.cbegin(), result.nums_u8.begin(), std::plus<uint8_t> {});
             return result;
         }
 
         // copy assignment
-        object& operator=(object& lhside) {
-            lhside.nums_f32 = nums_f32;
-            lhside.nums_i64 = nums_i64;
-            lhside.nums_u8  = nums_u8;
-            return;
+        object& operator=(const object& other) {
+            std::wcout << L"object is being copy assigned!\n";
+            nums_f32 = other.nums_f32;
+            nums_i64 = other.nums_i64;
+            nums_u8  = other.nums_u8;
+            return *this;
         }
 
         friend std::wostream& operator<<(std::wostream& wistr, const object& obj) {
@@ -55,14 +62,18 @@ class object { // let's create an expensive to copy class
 int main() {
     std::vector<object> objvector {};
 
-    const auto          obj_0 {
+    auto                obj_0 {
         object { 5.5F, 78, 121 }
     },
         obj_1 { object { 4.5F, 12, 134 } };
 
-    objvector.push_back(obj_0);         // copy
-    objvector.push_back(obj_1);         // copy
-    objvector.push_back(obj_0 + obj_1); // this creates a temporary, which gets copied into the vector
+    const auto cpy = obj_0;
+
+    objvector.push_back(obj_0);            // copy
+    objvector.push_back(obj_1);            // copy
+    objvector.push_back(obj_0 + obj_1);    // this creates a temporary, which gets moved into the vector
+    objvector.push_back(std::move(obj_1)); // move
+    objvector.push_back(std::move(obj_0)); // move
 
     std::wcout << objvector.at(2);
 
