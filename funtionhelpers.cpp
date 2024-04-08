@@ -8,7 +8,7 @@
 template<typename T> static constexpr T sum(T x, T y) noexcept { return x + y; }
 
 // a function that takes three arguments
-static double                           sumthree(double a, double b, double c) {
+static double                           sumthree(double a, double b, double c) noexcept {
     ::wprintf_s(L"a = %lf, b = %lf, c = %lf\n", a, b, c);
     return a + b + c;
 }
@@ -37,7 +37,7 @@ int main() {
     constexpr auto add10and20 { std::bind(sumthree, std::placeholders::_1, 10, 20) };
     add10and20(17);
 
-    auto add100 = std::bind_front(sumthree, std::placeholders::_1, 100, std::placeholders::_3);
+    constexpr auto add100 = std::bind_front(sumthree, 100, std ::placeholders::_1, std::placeholders::_2);
     add100(78, 54);
 
     return EXIT_SUCCESS;
