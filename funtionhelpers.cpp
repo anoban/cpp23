@@ -37,8 +37,8 @@ int main() {
     constexpr auto add10and20 { std::bind(sumthree, std::placeholders::_1, 10, 20) };
     add10and20(17);
 
-    constexpr auto add100 = std::bind_front(sumthree, 100, std ::placeholders::_1, std::placeholders::_2);
-    add100(78, 54);
+    constexpr auto add100 = std::bind_front(sumthree, 100.00);
+    add100(78.05, 54.68754);
 
     return EXIT_SUCCESS;
 }
