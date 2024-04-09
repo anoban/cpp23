@@ -16,9 +16,12 @@ int main() {
     };
 
     const std::vector<int> coll(20, 7);                 // auto didn't work either
-    std::for_each(coll.begin(), coll.end(), functor()); // .cebegin() and .cend() methods seems unavailable in C++98
+    std::for_each(coll.begin(), coll.end(), functor()); // .cebegin() and .cend() methods seem unavailable in C++98
     return EXIT_SUCCESS;
 }
+
+// in C++98 templates could not be instantiated with local types
+// std::for_each is a templated algorithm, so won't work with local classes in C++98
 
 /*
 $ g++ cpp98lambdas.cpp -Wall -O3 -std=c++98 gives the following diagnostics

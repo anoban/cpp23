@@ -40,5 +40,13 @@ int main() {
     constexpr auto add100 = std::bind_front(sumthree, 100.00);
     add100(78.05, 54.68754);
 
+    constexpr auto diff = std::bind_front(std::minus<float> {}, 23.0000);
+    // std::minus{}(x, y) returns x - y
+    std::wcout << L"23.000 - 45984.87752476 is " << diff(45984.87752476) << L'\n';
+
+    // std::less evaluates whether thr first argument is less than the second argument
+    constexpr auto is_lessthan100 = std::bind(std::less<double> {}, std::placeholders::_1, 100.000);
+    std::wcout << L"Is 67345.764131 less than 100.000? " << std::boolalpha << is_lessthan100(67345.764131) << L'\n';
+
     return EXIT_SUCCESS;
 }
