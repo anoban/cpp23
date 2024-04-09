@@ -54,7 +54,7 @@ static void months_increment() noexcept {
     unsigned january { JANUARY }; // type is unsigned NOT MONTHS
     january++;                    // okay
     for (short i = JANUARY; i < DECEMBER; ++i) std::wcout << L"Yeehaw\n";
-    // fine because we use a variable of type short and initialize it using an enum
+    // fine because we use a variable of type short and initialize it using an enum, ++ operator works on an short not on an enum
 }
 
 namespace incrementenums {
@@ -71,10 +71,11 @@ namespace incrementenums {
 
     constexpr void               test() noexcept {
         auto today { DAYS::SATURDAY };
-        ++today; // today is still SATURDAY
+        ++today;        // today is still SATURDAY
+        ++DAYS::SUNDAY; // incrementation on an rvalue! this shouldn't be possible
     }
 
-    // let's try using pointers then
+    // using pointers is a possiblity but in C++ overloaded opeators cannot take pointers as arguments! so ....
     [[nodiscard]] constexpr DAYS operator++(DAYS* x) noexcept {
         *x = static_cast<DAYS>(static_cast<unsigned>(*x) + 1U);
         return static_cast<DAYS>(static_cast<unsigned>(*x) + 1U);
@@ -82,8 +83,7 @@ namespace incrementenums {
         // but we use a pointer type here.
         // overloading ++ on pointer types obfuscates the usual semantics of pointer arithmetic.
         // BESIDES WITH POINTERS AS ARGUMENT TYPE. ++ NEEDS A POINTER TO BE THE RHS OPERAND
-        // e.g. ++today; won't work
-        // we'll need to use something like (&today)++;
+        // e.g. ++today; won't work! we'll need to use something like (&today)++;
     }
 
 } // namespace incrementenums
