@@ -15,6 +15,9 @@ int main() {
             void operator()(int x) const { std::wcout << x << L' '; }
     };
 
+    // with C++11 local class types can be declared with operator()
+    // and C++11 brough lambdas to the table.
+
     const std::vector<int> coll(20, 7);                 // auto didn't work either
     std::for_each(coll.begin(), coll.end(), functor()); // .cebegin() and .cend() methods seem unavailable in C++98
     return EXIT_SUCCESS;
