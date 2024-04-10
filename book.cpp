@@ -53,7 +53,7 @@ std::basic_ostream<char_t>& operator<<(std::basic_ostream<char_t>& ostr, const b
 
 int main() {
     long x { 45 };
-    auto gbs { book { 565LL } };
+    auto HarryPotterAndTheChamberOfSecrets { book { 565LL } };
 
     // in C, both prefix and postfix ++ & -- operators return values
     // after all C does not have references
@@ -68,15 +68,15 @@ int main() {
     // x++ = 0; Error: expression must be a modifiable lvalue
     // assignment is an error here because x++ returns a prvalue, which cannot be assigned to
 
-    std::wcout << gbs;
+    std::wcout << HarryPotterAndTheChamberOfSecrets;
 
-    std::wcout << gbs++; // 565
-    std::wcout << gbs--; // 566
-    std::wcout << gbs;   // 565
+    std::wcout << HarryPotterAndTheChamberOfSecrets++; // 565
+    std::wcout << HarryPotterAndTheChamberOfSecrets--; // 566
+    std::wcout << HarryPotterAndTheChamberOfSecrets;   // 565
 
-    std::wcout << ++gbs; // 566
-    std::wcout << --gbs; // 565
-    std::wcout << gbs;   // 565
+    std::wcout << ++HarryPotterAndTheChamberOfSecrets; // 566
+    std::wcout << --HarryPotterAndTheChamberOfSecrets; // 565
+    std::wcout << HarryPotterAndTheChamberOfSecrets;   // 565
 
     return 0;
 }
