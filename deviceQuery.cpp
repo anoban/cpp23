@@ -1,6 +1,10 @@
 // refactored version of https://raw.githubusercontent.com/NVIDIA/cuda-samples/master/Samples/1_Utilities/deviceQuery/deviceQuery.cpp
 // tailored for CUDA runtimes 12.3 and later on Windows
 
+// clang .\deviceQuery.cpp -Wall -Wextra -pedantic -O3 -std=c++20 -I "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.4\include" -L "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.4\lib\x64\" -o .\deviceQuery.exe
+// or simply use nvcc
+// nvcc .\deviceQuery.cpp -O3 -std=c++20  --run
+
 /* Copyright (c) 2022, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,15 +32,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* This sample queries the properties of the CUDA devices present in the system
- * via CUDA Runtime API. */
+// This sample queries the properties of the CUDA devices present in the system via CUDA Runtime API.
 
 #include <array>
-#include <iostream>
-#include <string>
-#include <vector>
+#include <cassert>
+#include <cstdio>
 
 #include <cuda_runtime.h>
+
+// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
+// we don't want clang-tidy moaning about C's stdio functions
 
 #pragma comment(lib, "cudart.lib") // CUDA runtime APIs
 #pragma comment(lib, "cuda.lib")   // CUDA driver APIs
@@ -44,10 +49,14 @@
 constexpr auto    BYTES_PER_MB { 1024.0L * 1024.0L };
 constexpr int64_t MAX_ANTICIPATED_DEVICES { 12 }; // define the maximum number of devices you expec a system to have
 // defaulting to 64 seems a little far fetched
-static_assert(sizeof(cudaDeviceProp) == 40); // because cudaDeviceProp is a really huge struct
+
+static_assert(sizeof(cudaDeviceProp) == 1032); // because cudaDeviceProp is a really huge struct
+// imagine the size 64 such structs would take up on the stack
 
 // an error handler for CUDA runtime API calls
-static void check(cudaError_t status, const wchar_t* const function, const wchar_t* const file, int const line) noexcept {
+// NOTE THE CHECK TAKES PLACE ON A PRVALUE!
+// THE RETURN VALUE OF API CALLS IS NOT BEING CAPTURED IN A VARIABLE
+static void check(cudaError_t status, const wchar_t* const function, const wchar_t* const file, const int line) noexcept {
     // handle if the status is not cudaSuccess
     if (status != cudaSuccess) {
         ::fwprintf(
@@ -59,7 +68,7 @@ static void check(cudaError_t status, const wchar_t* const function, const wchar
             ::cudaGetErrorName(status),
             function
         );
-        ::exit(EXIT_FAILURE); // avoiding heap allocations as this could potentially lead to memory leaks
+        ::exit(EXIT_FAILURE); // avoiding heap allocations as this premature exit could potentially lead to memory leaks
     }
 }
 
@@ -75,7 +84,7 @@ static int _ConvertSMVer2Cores(int& major, int& minor) noexcept {
             int Cores;
     };
 
-    static constexpr std::array<sSMtoCores> nGpuArchCoresPerSM {
+    static constexpr std::array<sSMtoCores, 19> nGpuArchCoresPerSM {
         {
          { 0x30, 192 },
          { 0x32, 192 },
@@ -140,7 +149,7 @@ int main() {
         ::cudaSetDevice(i);                           // select device i for consideration
         ::cudaGetDeviceProperties_v2(&deviceProp, i); // collect device i's properties
 
-        ::wprintf_s(L"\nDevice %d: \"%s\"\n", i, deviceProp.name);
+        ::wprintf_s(L"\nDevice %d: \"%S\"\n", i, deviceProp.name);
 
         ::cudaDriverGetVersion(&driverVersion);
         ::cudaRuntimeGetVersion(&runtimeVersion);
@@ -188,12 +197,10 @@ int main() {
             deviceProp.maxTexture3D[2]
         );
         ::wprintf_s(
-            L"  Maximum Layered 1D Texture Size, (num) layers  1D=(%d), %d layers\n",
-            deviceProp.maxTexture1DLayered[0],
-            deviceProp.maxTexture1DLayered[1]
-        );
-        ::wprintf_s(
+            L"  Maximum Layered 1D Texture Size, (num) layers  1D=(%d), %d layers\n"
             L"  Maximum Layered 2D Texture Size, (num) layers  2D=(%d, %d), %d layers\n",
+            deviceProp.maxTexture1DLayered[0],
+            deviceProp.maxTexture1DLayered[1],
             deviceProp.maxTexture2DLayered[0],
             deviceProp.maxTexture2DLayered[1],
             deviceProp.maxTexture2DLayered[2]
@@ -217,8 +224,8 @@ int main() {
         );
 
         ::wprintf_s(
-            L"  Max dimension size of a thread block (x,y,z): (%d, %d, %d)\n"
-            "  Max dimension size of a grid size    (x,y,z): (%d, %d, %d)\n",
+            L"  Max dimension size of a thread block  (x,y,z): (%d, %d, %d)\n"
+            L"  Max dimension size of a grid size     (x,y,z): (%d, %d, %d)\n",
             deviceProp.maxThreadsDim[0],
             deviceProp.maxThreadsDim[1],
             deviceProp.maxThreadsDim[2],
@@ -227,12 +234,16 @@ int main() {
             deviceProp.maxGridSize[2]
         );
 
-        printf("  Maximum memory pitch:                          %zu bytes\n", deviceProp.memPitch);
-        printf("  Texture alignment:                             %zu bytes\n", deviceProp.textureAlignment);
-        printf(
-            "  Concurrent copy and kernel execution:          %s with %d copy "
-            "engine(s)\n",
-            (deviceProp.deviceOverlap ? "Yes" : "No"),
+        ::wprintf_s(
+            L"  Maximum memory pitch:                          %zu bytes\n"
+            L"  Texture alignment:                             %zu bytes\n",
+            deviceProp.memPitch,
+            deviceProp.textureAlignment
+        );
+
+        ::wprintf_s(
+            L"  Concurrent copy and kernel execution:          %s with %d copy engine(s)\n",
+            (deviceProp.deviceOverlap ? L"Yes" : L"No"),
             deviceProp.asyncEngineCount
         );
 
@@ -249,24 +260,32 @@ int main() {
             deviceProp.ECCEnabled ? L"Enabled" : L"Disabled"
         );
 
-        printf(
-            "  CUDA Device Driver Mode (TCC or WDDM):         %s\n",
-            deviceProp.tccDriver ? "TCC (Tesla Compute Cluster Driver)" : "WDDM (Windows Display Driver Model)"
+        ::wprintf_s(
+            L"  CUDA Device Driver Mode (TCC or WDDM):         %s\n",
+            deviceProp.tccDriver ? L"TCC (Tesla Compute Cluster Driver)" : L"WDDM (Windows Display Driver Model)"
         );
 
-        printf("  Device supports Unified Addressing (UVA):      %s\n", deviceProp.unifiedAddressing ? "Yes" : "No");
-        printf("  Device supports Managed Memory:                %s\n", deviceProp.managedMemory ? "Yes" : "No");
-        printf("  Device supports Compute Preemption:            %s\n", deviceProp.computePreemptionSupported ? "Yes" : "No");
-        printf("  Supports Cooperative Kernel Launch:            %s\n", deviceProp.cooperativeLaunch ? "Yes" : "No");
-        printf("  Supports MultiDevice Co-op Kernel Launch:      %s\n", deviceProp.cooperativeMultiDeviceLaunch ? "Yes" : "No");
-        printf(
-            "  Device PCI Domain ID / Bus ID / location ID:   %d / %d / %d\n",
+        ::wprintf_s(
+            L"  Device supports Unified Addressing (UVA):      %s\n"
+            L"  Device supports Managed Memory:                %s\n"
+            L"  Device supports Compute Preemption:            %s\n"
+            L"  Supports Cooperative Kernel Launch:            %s\n"
+            L"  Supports MultiDevice Co-op Kernel Launch:      %s\n",
+            deviceProp.unifiedAddressing ? L"Yes" : L"No",
+            deviceProp.managedMemory ? L"Yes" : L"No",
+            deviceProp.computePreemptionSupported ? L"Yes" : L"No",
+            deviceProp.cooperativeLaunch ? L"Yes" : L"No",
+            deviceProp.cooperativeMultiDeviceLaunch ? L"Yes" : L"No"
+        );
+
+        ::wprintf_s(
+            L"  Device PCI Domain ID / Bus ID / location ID:   %d / %d / %d\n",
             deviceProp.pciDomainID,
             deviceProp.pciBusID,
             deviceProp.pciDeviceID
         );
 
-        constexpr std::array<wchar_t*> sComputeMode {
+        constexpr std::array<const wchar_t*, 6> sComputeMode {
             L"Default (multiple host threads can use ::cudaSetDevice() with device simultaneously)",
             L"Exclusive (only one host thread in one process is able to use ::cudaSetDevice() with this device)",
             L"Prohibited (no host thread can use ::cudaSetDevice() with this device)",
@@ -286,7 +305,7 @@ int main() {
         int32_t                                                    p2pCount {};
 
         for (int32_t i {}; i < deviceCount; i++) {
-            checkCudaErrors(cudaGetDeviceProperties_v2(&devProps[i], i));
+            checkCudaErrors(::cudaGetDeviceProperties_v2(&devProps[i], i));
 
             // only boards based on Fermi or later can support P2P
             // on Windows (64-bit), the Tesla Compute Cluster driver for windows must be enabled to support this
@@ -300,51 +319,30 @@ int main() {
             for (int32_t i = 0; i < p2pCount; i++) {
                 for (int32_t j = 0; j < p2pCount; j++) {
                     if (P2PGpuIds[i] == P2PGpuIds[j]) continue;
-                    checkCudaErrors(cudaDeviceCanAccessPeer(&can_access_peer, P2PGpuIds[i], P2PGpuIds[j]));
-                    printf(
-                        "> Peer access from %s (GPU%d) -> %s (GPU%d) : %s\n",
+                    checkCudaErrors(::cudaDeviceCanAccessPeer(&can_access_peer, P2PGpuIds[i], P2PGpuIds[j]));
+                    ::wprintf_s(
+                        L"> Peer access from %S (GPU%d) -> %S (GPU%d) : %s\n",
                         devProps[P2PGpuIds[i]].name,
                         P2PGpuIds[i],
                         devProps[P2PGpuIds[j]].name,
                         P2PGpuIds[j],
-                        can_access_peer ? "Yes" : "No"
+                        can_access_peer ? L"Yes" : L"No"
                     );
                 }
             }
         }
     }
 
-    // csv masterlog info
-    // *****************************
-    // exe and CUDA driver name
-    printf("\n");
-    std::string sProfileString = "deviceQuery, CUDA Driver = CUDART";
-    char        cTemp[16];
-
-    // driver version
-    sProfileString += ", CUDA Driver Version = ";
-
-    sprintf_s(cTemp, 10, "%d.%d", driverVersion / 1000, (driverVersion % 100) / 10);
-
-    sProfileString += cTemp;
-
-    // Runtime version
-    sProfileString += ", CUDA Runtime Version = ";
-
-    sprintf_s(cTemp, 10, "%d.%d", runtimeVersion / 1000, (runtimeVersion % 100) / 10);
-
-    sProfileString += cTemp;
-
-    // Device count
-    sProfileString += ", NumDevs = ";
-
-    sprintf_s(cTemp, 10, "%d", deviceCount);
-
-    sProfileString += cTemp;
-    sProfileString += "\n";
-    printf("%s", sProfileString.c_str());
-
-    printf("Result = PASS\n");
+    ::wprintf_s(
+        L"deviceQuery, CUDA Driver = CUDART, CUDA Driver Version = %d.%d, CUDA Runtime Version = %d.%d, Number of Devices = %d\nResult = PASS\n\n",
+        driverVersion / 1000,
+        (driverVersion % 1000) / 10,
+        runtimeVersion / 1000,
+        (runtimeVersion % 100) / 10,
+        deviceCount
+    );
 
     return EXIT_SUCCESS;
 }
+
+// NOLINTEND(cppcoreguidelines-pro-type-vararg)
