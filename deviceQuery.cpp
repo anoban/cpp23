@@ -47,7 +47,7 @@
 #pragma comment(lib, "cuda.lib")   // CUDA driver APIs
 
 constexpr auto    BYTES_PER_MB { 1024.0L * 1024.0L };
-constexpr int64_t MAX_ANTICIPATED_DEVICES { 12 }; // define the maximum number of devices you expec a system to have
+constexpr int64_t MAX_ANTICIPATED_DEVICES { 4 }; // define the maximum number of devices you expec a system to have
 // defaulting to 64 seems a little far fetched
 
 static_assert(sizeof(cudaDeviceProp) == 1032); // because cudaDeviceProp is a really huge struct
@@ -59,7 +59,7 @@ static_assert(sizeof(cudaDeviceProp) == 1032); // because cudaDeviceProp is a re
 static void check(cudaError_t status, const wchar_t* const function, const wchar_t* const file, const int line) noexcept {
     // handle if the status is not cudaSuccess
     if (status != cudaSuccess) {
-        ::fwprintf(
+        ::fwprintf_s(
             stderr,
             L"CUDA error in %s @ line %d :: code = %d (%S) in call to \"%s\" \n",
             file,
@@ -77,11 +77,11 @@ static void check(cudaError_t status, const wchar_t* const function, const wchar
 #define checkCudaErrors(expression) ::check((expression), L#expression, __FILEW__, __LINE__)
 
 // function copied and refactored from https://raw.githubusercontent.com/NVIDIA/cuda-samples/master/Common/helper_cuda.h
-static int _ConvertSMVer2Cores(int& major, int& minor) noexcept {
+static int CoreCountFromSMLookup(int& major, int& minor) noexcept {
     // defines for GPU Architecture types (using the SM version to determine the # of cores per SM
     struct sSMtoCores {
-            int SM; // 0xMm (hexidecimal notation), M = SM Major version and m = SM minor version
-            int Cores;
+            int32_t SM; // 0xMm (hexidecimal notation), M = SM Major version and m = SM minor version
+            int32_t Cores;
     };
 
     static constexpr std::array<sSMtoCores, 19> nGpuArchCoresPerSM {
@@ -108,7 +108,7 @@ static int _ConvertSMVer2Cores(int& major, int& minor) noexcept {
         }
     };
 
-    int index {};
+    int32_t index {};
 
     while (nGpuArchCoresPerSM[index].SM != -1) { // until we reach to the last sSMtoCores struct
         if (nGpuArchCoresPerSM[index].SM == ((major << 4) + minor)) return nGpuArchCoresPerSM[index].Cores;
@@ -171,8 +171,8 @@ int main() {
         ::wprintf_s(
             L"  (%03d) Multiprocessors, (%03d) CUDA Cores/MP:    %d CUDA Cores\n",
             deviceProp.multiProcessorCount,
-            ::_ConvertSMVer2Cores(deviceProp.major, deviceProp.minor),
-            ::_ConvertSMVer2Cores(deviceProp.major, deviceProp.minor) * deviceProp.multiProcessorCount
+            ::CoreCountFromSMLookup(deviceProp.major, deviceProp.minor),
+            ::CoreCountFromSMLookup(deviceProp.major, deviceProp.minor) * deviceProp.multiProcessorCount
         );
         ::wprintf_s(
             L"  GPU Max Clock rate:                            %.0Lf MHz (%0.2Lf GHz)\n",
@@ -285,7 +285,7 @@ int main() {
             deviceProp.pciDeviceID
         );
 
-        constexpr std::array<const wchar_t*, 6> sComputeMode {
+        static constexpr std::array<const wchar_t*, 6> sComputeMode {
             L"Default (multiple host threads can use ::cudaSetDevice() with device simultaneously)",
             L"Exclusive (only one host thread in one process is able to use ::cudaSetDevice() with this device)",
             L"Prohibited (no host thread can use ::cudaSetDevice() with this device)",
@@ -332,7 +332,7 @@ int main() {
             }
         }
     }
-
+    ::_putws(L"");
     ::wprintf_s(
         L"deviceQuery, CUDA Driver = CUDART, CUDA Driver Version = %d.%d, CUDA Runtime Version = %d.%d, Number of Devices = %d\nResult = PASS\n\n",
         driverVersion / 1000,
