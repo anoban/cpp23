@@ -13,5 +13,13 @@ int         main() {
 
     foo(static_cast<void*>(0));
 
+    auto type { nullptr }; // type of nullptr is std::nullptr
+
+    if (type) ::_putws(L":)");
+
+    unsigned long long x {
+        nullptr
+    }; // Error: cannot initialize a variable of type 'unsigned long long' with an rvalue of type 'std::nullptr_t'
+
     return EXIT_SUCCESS;
 }

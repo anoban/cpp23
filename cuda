@@ -1,0 +1,10 @@
+// a C++ header style include wrapper for CUDA sources
+#pragma once
+#ifndef __CUDA__
+    #define __CUDA__
+    #include <cuda.h>
+    #include <cuda_runtime.h>
+
+    #pragma comment(lib, "cuda.lib")
+    #pragma comment(lib, "cudart.lib")
+#endif // !__CUDA__
