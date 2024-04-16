@@ -20,6 +20,7 @@ int main() {
 
     const std::vector<int> coll(20, 7);                 // auto didn't work either
     std::for_each(coll.begin(), coll.end(), functor()); // .cebegin() and .cend() methods seem unavailable in C++98
+    // in C++98 locally defined types cannot be used as template arguments!
     return EXIT_SUCCESS;
 }
 
