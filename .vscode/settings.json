@@ -82,6 +82,8 @@
         "sstream": "cpp",
         "stop_token": "cpp",
         "thread": "cpp",
-        "__nullptr": "cpp"
+        "__nullptr": "cpp",
+        "fstream": "cpp",
+        "__string": "cpp"
     }
 }
