@@ -84,6 +84,9 @@
         "thread": "cpp",
         "__nullptr": "cpp",
         "fstream": "cpp",
-        "__string": "cpp"
+        "__string": "cpp",
+        "deque": "cpp",
+        "filesystem": "cpp",
+        "stack": "cpp"
     }
 }

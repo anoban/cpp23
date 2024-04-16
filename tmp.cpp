@@ -59,3 +59,6 @@ static constexpr double cube(T x) noexcept {
 
 // arguments passed to a templated entity at call site is called template arguments
 constexpr double coobe(long long a) noexcept { return cube<long long /* template argument */>(a); }
+
+// when the compiler has successfully deduced the template arguments or when the template arguments have been explicitly provided,
+// the template will be instantiated.
