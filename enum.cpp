@@ -1,8 +1,10 @@
-// clang .\enum.cpp -Wall -Wextra -O3 -std=c++20 -pedantic
+// clang .\enum.cpp -Wall -Wextra -std=c++20 -O3 -pedantic -DDEBUG  -o enum.exe
 
 #include <cassert>
 #include <concepts>
 #include <iostream>
+
+constexpr std::size_t TEST_MAX_ITERS { 49 }; // loop through this many times!
 
 enum class DAY { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY };
 
@@ -41,14 +43,6 @@ constexpr DAY operator--(DAY& day, int) noexcept { // postfix--
     }
 }
 
-template<typename T> requires std::integral<T> && std::is_unsigned<T>::value constexpr DAY operator+(const DAY& day, const T integer) {
-    return static_cast<DAY>(day + integer);
-}
-
-template<typename T> requires std::integral<T> && std::is_unsigned<T>::value constexpr DAY operator-(const DAY& day, const T integer) {
-    return static_cast<DAY>(day - integer);
-}
-
 template<typename T> concept is_printable = std::is_same_v<T, char> || std::is_same_v<T, wchar_t>;
 
 template<typename T> requires ::is_printable<T> std::basic_ostream<T>& operator<<(std::basic_ostream<T>& bostr, const DAY day) {
@@ -59,15 +53,36 @@ template<typename T> requires ::is_printable<T> std::basic_ostream<T>& operator<
     return bostr;
 }
 
-static constexpr void testOperators() noexcept {
+// works :)))
+static constexpr void TestIncrementOperators() noexcept {
     auto prefix { DAY::MONDAY };
     auto postfix { DAY::SUNDAY };
 
-    for (unsigned i = 0; i < 28; ++i) {
-        assert(++prefix == DAY::MONDAY + (i % 7));
-        assert(postfix++ == DAY::SUNDAY + (i % 7) - 1);
+    for (unsigned i = 1; i <= TEST_MAX_ITERS; ++i) {
+        assert(++prefix == static_cast<DAY>(i % 7)); // DAY::MONDAY is 0!
+        // after five ++prefix calls prefix will be 5
+        assert(postfix++ == static_cast<DAY>((i + 5) % 7)); // DAY::SUNDAY is 6!, hence the 6 - 1 = 5!
     }
 }
+
+// works too :)))
+static constexpr void TestDecrementOperators() noexcept {
+    auto     prefix { DAY::THURSDAY };
+    auto     postfix { DAY::TUESDAY };
+
+    unsigned pre { 3 /* DAY::THRUSDAY */ }, post { 1 /* DAY::TUESDAY */ };
+
+    for (unsigned i = 1; i <= TEST_MAX_ITERS; ++i) {
+        pre = (pre) ? pre - 1 : 6; // --prefix will do the decrement first and then the return, so this needs to precede that statement
+                                   // for correct evaluation
+        assert(--prefix == static_cast<DAY>(pre));
+
+        assert(postfix-- == static_cast<DAY>(post)); // postfix-- will return the decremented value and will then materialize the decrement
+        // internally, thus the decrement of post follows that statement!
+        post = (post) ? post - 1 : 6;
+    }
+}
+
 auto main() -> int {
     auto day { DAY::MONDAY };
 
@@ -81,7 +96,8 @@ auto main() -> int {
 
     std::wcout << day; // MONDAY
 
-    testOperators();
+    TestIncrementOperators();
+    TestDecrementOperators();
 
     return EXIT_SUCCESS;
 }
