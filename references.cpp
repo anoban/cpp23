@@ -11,7 +11,7 @@ static void dummy() noexcept {
     // assigning to a reference overwrites the referenced object, unlike pointers where the pointer will be modified
     short         height(10);
     auto&         refto_height { height };
-    refto_height += 10;  // height = 20 now
+    refto_height += 10; // height = 20 now
     auto* ptrto_height { &height };
     ptrto_height  += 10; // ptrto_height now points to a location 20 bytes right to where height is stored, height is still 10
     // to realize an equivalent effect with pointers,
@@ -98,9 +98,9 @@ static void rebind() noexcept {
     // AGAIN WE ARE NOT MUTATING THE REFERENCE ITSELF
 
     // IF A REFERENCE REFERS TO A CONSTANT POINTER, THIS WON'T BE POSSIBLE EVEN IF THE OBJECT IS NON-CONST
-    long              age { 45 };       // a non-const variable
-    auto&             refage { age };   // regular reference
-    const auto&       crefage { age };  // const reference
+    long              age { 45 };      // a non-const variable
+    auto&             refage { age };  // regular reference
+    const auto&       crefage { age }; // const reference
 
     const auto* const cptrage { &age }; // a constant pointer to a constant long
     // we cannot modify age through cptrage, but age can be modified directly
