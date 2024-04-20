@@ -8,7 +8,10 @@ constexpr std::size_t TEST_MAX_ITERS { 49 }; // loop through this many times!
 
 enum class DAY { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY };
 
-static constexpr const char* const    DAYS[] { "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY", nullptr };
+static constexpr const char* const DAYS[] {
+    "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY", nullptr
+}; // ending with a nullptr in MS style
+
 static constexpr const wchar_t* const WDAYS[] {
     L"MONDAY", L"TUESDAY", L"WEDNESDAY", L"THURSDAY", L"FRIDAY", L"SATURDAY", L"SUNDAY", nullptr
 };
