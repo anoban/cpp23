@@ -20,6 +20,7 @@ $cflags = @(
     "/arch:AVX512",
     "/diagnostics:caret",
     "/DNDEBUG",
+    "/EHa",
     "/F0x10485100",
     "/favor:INTEL64",
     "/fp:strict",
