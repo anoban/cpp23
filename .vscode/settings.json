@@ -88,6 +88,7 @@
         "deque": "cpp",
         "filesystem": "cpp",
         "stack": "cpp",
-        "codecvt": "cpp"
+        "codecvt": "cpp",
+        "valarray": "cpp"
     }
 }
