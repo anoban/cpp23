@@ -87,6 +87,7 @@
         "__string": "cpp",
         "deque": "cpp",
         "filesystem": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "codecvt": "cpp"
     }
 }
