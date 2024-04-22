@@ -11,12 +11,12 @@ template<unsigned V> struct tricky {
         [[nodiscard]] consteval unsigned funcv2(unsigned i = 0) noexcept { return i / V; }
 
         // this will result in a compile time error without the need to be made consteval or constexpr
-        [[nodiscard]] unsigned           funcv3() noexcept { return V / V; }
+        [[nodiscard]] unsigned funcv3() noexcept { return V / V; }
 };
 
 template<size_t N> static size_t func() { return N / N; }
 
-auto                             main() -> int {
+auto main() -> int {
     tricky<100> hundred {};
     tricky<0>   zero {};
 
@@ -29,7 +29,7 @@ auto                             main() -> int {
     std::wcout << hundred.func(500) << std::endl; // 5
     std::wcout << zero.func(100) << std::endl;    // 0
 
-    constexpr auto x { zero.func(12) };           // since our function is constexpr we could evaluate it at
+    constexpr auto x { zero.func(12) }; // since our function is constexpr we could evaluate it at
     // compile time to detect the zero division errors
 
     // since division by zero is undefined, constexpr result is not technically a constant - is undefined

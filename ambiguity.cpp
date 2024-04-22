@@ -14,8 +14,8 @@ class T {
 int a = 87, b { 54 }; //globals
 
 int main(void) {
-    T(a);                  // declaration of avariable a of type T, equivalent to T a;
-    double(527);           // function style cast
+    T(a);        // declaration of avariable a of type T, equivalent to T a;
+    double(527); // function style cast
     T          v;
     const auto x { T(b) }; // construction using the myclass(int) constructor
     const auto z { T {} }; // construction using the myclass() constructor
@@ -26,8 +26,8 @@ int main(void) {
     // or as an argument of type T, with a redundant parenthesis around it, i.e T p(T b);
 
     // if the intention is to declare an object of type T, use an explicit static cast
-    T          P(static_cast<T>(b));
-    T          Q { b }; // or use the braced initializer
+    T P(static_cast<T>(b));
+    T Q { b }; // or use the braced initializer
 
     std::wcout << LINE(__LINE__) << std::endl;
     PRINT(89);

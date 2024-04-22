@@ -13,7 +13,7 @@ struct randf {
 int main() {
     srand(time(NULL));
     // std::array<float, 100> arr; std::array is a C++11 feature
-    float       arr[100];
+    float arr[100];
 
     // std::begin and std::end are C++11 features
     const randf rng; // const randf rng(); gets interpreted as a function declaration

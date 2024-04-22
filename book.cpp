@@ -23,7 +23,7 @@ template<typename T> requires std::integral<T> class book {
         // used to replicate the behaviour of postfixed ++ & -- operators with primitive types.
         constexpr book operator++(int) noexcept { // postfix++
             nborrows++;
-            return book { nborrows - 1 };         // return the older state
+            return book { nborrows - 1 }; // return the older state
         }
 
         constexpr book operator--(int) noexcept { // postfix--

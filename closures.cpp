@@ -15,7 +15,7 @@ struct greeter {
         const wchar_t* get_name() const throw() { return name; }
 
         // operator() captures the member variables name and ncalls for use!
-        void           operator()() {
+        void operator()() {
             std::wcout << name << L" said helloooo!\n";
             ncalls++;
         }

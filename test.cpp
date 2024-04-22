@@ -41,11 +41,11 @@ template<typename T> class TClass {
 // a templated class type can have templated member functions whose template arguments may or may not depend on the class templates' arguments
 template<typename T, typename U, T t_scalar, U u_scalar> class TUClass {
     public:
-        static const T                   value_t { t_scalar };
-        static const U                   value_u { u_scalar };
+        static const T value_t { t_scalar };
+        static const U value_u { u_scalar };
 
         // a member function dependent on the class template's arguments
-        static constexpr T               value() noexcept { return value_t; } // return type T is a type argument of class TUClass
+        static constexpr T value() noexcept { return value_t; } // return type T is a type argument of class TUClass
 
         // a member function using new templates
         template<typename X> constexpr X func(const X one, const X two) noexcept { return one + two; }
@@ -80,10 +80,10 @@ int main() {
     auto       fifty_ { product_v<float, 10.00F, 5.000F>::result };
     const auto thirty { product_v<int, 15, 2>::result };
 
-    auto       okay { product_v<double, 1867.6540, 97565.565>::result };
+    auto okay { product_v<double, 1867.6540, 97565.565>::result };
 
     // an explicit cast helps with template arguments
-    auto       __fifty { product_v<float, static_cast<float>(10.00), static_cast<float>(5.000L)>::result };
+    auto __fifty { product_v<float, static_cast<float>(10.00), static_cast<float>(5.000L)>::result };
 
     evaluate<product<7, 6>::result>();
 

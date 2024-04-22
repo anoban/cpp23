@@ -50,7 +50,7 @@ int main() {
     std::wcout << L"C++ standard version " << __cplusplus << L'\n';
     std::println("C++ standard version {}", __cplusplus); // looks like std::println doesn't yet have overloads for wchar_t
 #ifdef _MSVC_LANG
-    std::print("_MSVC_LANG {}\n", _MSVC_LANG);            // even with /std:latest MSVC uses 202004L for _MSVC_LANG
+    std::print("_MSVC_LANG {}\n", _MSVC_LANG); // even with /std:latest MSVC uses 202004L for _MSVC_LANG
 #endif
     // with /std:c++latest, __cplusplus seems to be defined 199711L in MSVC
     // with clang++ it is 202302L

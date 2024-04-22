@@ -70,8 +70,8 @@ static constexpr void TestIncrementOperators() noexcept {
 
 // works too :)))
 static constexpr void TestDecrementOperators() noexcept {
-    auto     prefix { DAY::THURSDAY };
-    auto     postfix { DAY::TUESDAY };
+    auto prefix { DAY::THURSDAY };
+    auto postfix { DAY::TUESDAY };
 
     unsigned pre { 3 /* DAY::THRUSDAY */ }, post { 1 /* DAY::TUESDAY */ };
 

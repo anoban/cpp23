@@ -53,7 +53,7 @@ std::size_t decrementor::ncalls {}; // static members can only be defined inside
 // inside functions, struct::static_member is an expression not a declaration
 // in the above definition, removing the storage class type (std::size_t) will make it an expression
 
-int         main() {
+int main() {
     auto                 x { 100 };
     std::vector<int32_t> integrals(100);
     std::iota(integrals.begin(), integrals.end(), 1);

@@ -27,14 +27,14 @@ namespace ascii {
             }
 
             // check whether the internal buffer is empty i.e (filled with 0s)
-            bool                          is_empty() const noexcept { }
+            bool is_empty() const noexcept { }
 
             // empty (zero out) the internal buffer
-            void                          empty() noexcept { }
+            void empty() noexcept { }
 
-            void                          shrink_to_fit() { }
+            void shrink_to_fit() { }
 
-            T*                            c_str() const noexcept { return buffer; }
+            T* c_str() const noexcept { return buffer; }
 
             friend std::basic_ostream<T>& operator<<(const std::basic_ostream<T>& ostr, const basic_string& str) {
                 ostr << str.c_str();

@@ -8,7 +8,7 @@
 template<typename T> static constexpr T sum(T x, T y) noexcept { return x + y; }
 
 // a function that takes three arguments
-static double                           sumthree(double a, double b, double c) noexcept {
+static double sumthree(double a, double b, double c) noexcept {
     ::wprintf_s(L"a = %lf, b = %lf, c = %lf\n", a, b, c);
     return a + b + c;
 }

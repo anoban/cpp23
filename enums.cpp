@@ -45,7 +45,7 @@ static constexpr int addconsts(const int& a /* const reference */, const int& b 
 
 static constexpr int add(int& a /* mutable reference */, int& b /* mutable reference */) noexcept { return a + b; }
 
-int                  main() {
+int main() {
     auto day { days::THURSDAY };
     for (unsigned i = 0; i < 14; ++i) std::wcout << ++day; // works as expected
 

@@ -28,7 +28,7 @@ consteval coordinate GetMaxCoord() noexcept {
 }
 
 int main() {
-    long  x { 12345 }; // a variable definition
+    long x { 12345 }; // a variable definition
     // long x declares a variable of type long and gives it the identifier x
     // at this point the variable x has secured a storage of sizeof(long)
     // { 12345 } writes (stores) the value 12345 to the storage of variable x
@@ -63,7 +63,7 @@ int main() {
                                     // THE KEY PHRASE HERE IS "MODIFIABLE LVALUE"
                                     // FOR AN IDENTIFIER TO BE ASSIGNED TO, IT MUST BE A MODIFIABLE LVALUE
 
-                                    // consider another definition with a slightly more convoluted rvalue expression
+    // consider another definition with a slightly more convoluted rvalue expression
     auto origin {
         coordinate { 0.000, 0.000, 0.000 }
     };
@@ -146,7 +146,7 @@ int main() {
     auto*          costptr { &cost }; // pointer to a constant varible, lvalue but unmodifiable
     *costptr /= 36.6435F;             // Error: expression must be a modifiable lvalue, read-only variable is not assignable
 
-    int* thevoid { nullptr };         // pointer to an integer
+    int* thevoid { nullptr }; // pointer to an integer
     int  ten { 10 };
     // dereferencing thevoid still gives a valid lvalue, from a language semantics perspective.
     // but will result in undefined behaviour.
@@ -184,7 +184,7 @@ int main() {
     float& floatref;            // Error:  reference variable "floatref" requires an initializer
     float& nullref { nullptr }; // Error: a value of type "std::nullptr_t" cannot be used to initialize an entity of type "float"
 
-    auto   where_ref { &ref };  // note the type, it is an int*, NOT int**
+    auto where_ref { &ref }; // note the type, it is an int*, NOT int**
     // because &ref actually yields the address of the object that the reference points to, not the address of the reference itself.
     return 0;
 }

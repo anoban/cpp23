@@ -4,7 +4,7 @@
 #include <vector>
 
 int main() {
-    constexpr auto       value { 54I16 };
+    constexpr auto value { 54I16 };
 
     std::vector<int32_t> randoms {};
     randoms.resize(100);
