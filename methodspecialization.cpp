@@ -16,6 +16,8 @@ template<class T, class U> class Manager {
 template<class T, class U> void Manager<T, U>::func() throw() { ::_putws(L"Hi Manager!"); }
 
 // partial specialization of func method for Manager class
+// class methods does not allow partial specialization on class template arguments
+// THIS IS NOT ABOUT TEMPLATED MEMBER FUNCTIONS
 template<class T> void Manager<float>::func() throw() { ::_putws(L"Partial specialization of member functions IS NOT ALLOWED!"); }
 
 // complete specialization
