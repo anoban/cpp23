@@ -1,4 +1,4 @@
-//
+//  g++ binary_function.cpp  -Wall -Wextra -Wpedantic -O3 -std=c++14
 
 #include <algorithm>
 #include <functional>
@@ -38,12 +38,18 @@ template<class T> struct square {
 static constexpr auto NELEMENTS { 12'000LLU };
 
 int main() {
-    std::random_device rdev {};
+    std::random_device rdev {};	// for seeding the random number engine
     std::mt19937_64    rengine { rdev() };
     std::vector<float> randoms(NELEMENTS);
+    std::vector<float> results(NELEMENTS);
 
     std::generate(randoms.begin(), randoms.end(), rengine);
-    for (std::vector<float>::const_iterator it = randoms.cbegin(), end = randoms.cend(); it != end; ++it) ::wprintf_s(L"%.4f\t", *it);
+    std::transform(randoms.cbegin(), randoms.cend(), results.begin(), square<float>{});
+
+    // for (std::vector<float>::const_iterator it = randoms.cbegin(), end = randoms.cend(); it != end; ++it) ::wprintf_s(L"%.4f\t", *it);
+    for(size_t i {}; i < randoms.size(); ++i) {
+	::wprintf_s(L"%f^2 = %f\n", randoms.at(i), results.at(i));
+}
 
     return EXIT_SUCCESS;
 }
