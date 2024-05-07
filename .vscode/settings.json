@@ -89,6 +89,11 @@
         "filesystem": "cpp",
         "stack": "cpp",
         "codecvt": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "_70_exception": "cpp",
+        "_70_new": "cpp",
+        "_70_xstddef": "cpp",
+        "xstddef": "cpp",
+        "complex": "cpp"
     }
 }
