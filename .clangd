@@ -1,0 +1,17 @@
+If:
+  PathMatch: .*/.(c|h)$ # .c and .h
+
+CompileFlags:
+  Add: [-Wall, -Wextra, -pedantic, -O0, -std=c23, -c, -isystem]
+  Compiler:  clang.exe
+
+---
+
+If:
+  PathMatch: .*/.(c|h)pp$  # .cpp and .hpp
+
+CompileFlags:
+  Add: [-Wall, -Wextra, -pedantic, -O0, -std=c++20, -c, -isystem]
+  Compiler:  clang++.exe
+
+---
