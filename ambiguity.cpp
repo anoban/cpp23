@@ -11,9 +11,9 @@ class T {
         T(int) throw() { std::wcout << __FUNCTIONW__ << L"(int)\n"; } // note the absence of the parameter name
 };
 
-int a = 87, b { 54 }; //globals
+static constexpr int a = 87, b { 54 }; //globals
 
-int main(void) {
+int main() {
     T(a);        // declaration of avariable a of type T, equivalent to T a;
     double(527); // function style cast
     T          v;

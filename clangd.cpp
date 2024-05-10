@@ -44,6 +44,6 @@ constexpr typename std::enable_if<!std::is_signed<T>::value, T>::type usum(const
 auto main() -> int {
     constexpr auto x { ::usum(12U, 645U) };
 
-    constexpr auto s { ::usum(12U, 0.3546321) };
+    constexpr auto s { ::usum(12U, 3546321Ui32) };
     return EXIT_SUCCESS;
 }
