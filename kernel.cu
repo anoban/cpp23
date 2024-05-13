@@ -9,15 +9,15 @@
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
-__global__ void addKernel(_Inout_ float* c, _In_ const float* const a, _In_ const float* const b) {
+template<typename scalar_t> requires std::is_scalar_v<scalar_t>
+__global__ void addKernel(_Inout_ scalar_t* out, _In_ const scalar_t* const in_0, _In_ const scalar_t* const in_1) {
     const auto i { threadIdx.x + threadIdx.y + threadIdx.z };
-    c[i] = a[i] + b[i];
+    out[i] = in_0[i] + in_1[i];
     return;
 }
 
-static constexpr size_t nthreads { 100 };
-template<typename T, typename = std::enable_if<std::is_scalar<T>::value, T>::type>
-static constexpr std::size_t memsize = sizeof(T) * nthreads;
+static constexpr size_t                                                                                    nthreads { 450 };
+template<typename T, typename = std::enable_if<std::is_scalar<T>::value, T>::type> static constexpr size_t memsize = sizeof(T) * nthreads;
 
 // Helper function for using CUDA to add vectors in parallel.
 template<typename scalar_t>
@@ -72,12 +72,12 @@ cudaError_t addWithCuda(
     }
 
     // Launch a kernel on the GPU with one thread for each element.
-    addKernel<<<1, nthreads>>>(dev_out, dev_in0, dev_in1);
+    addKernel<scalar_t><<<1, nthreads>>>(dev_out, dev_in0, dev_in1);
 
     // Check for any errors launching the kernel
-    cudaStatus = cudaGetLastError();
+    cudaStatus = ::cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
-        ::fwprintf_s(stderr, L"addKernel launch failed: %S\n", cudaGetErrorString(cudaStatus));
+        ::fwprintf_s(stderr, L"addKernel launch failed: %S\n", ::cudaGetErrorString(cudaStatus));
         goto Error;
     }
 
@@ -113,11 +113,11 @@ int main() {
     std::mt19937_64    rand_engine { rdevice() };
 
     // fill arrays a and b with random floats
-    std::generate(a.begin(), a.end(), rand_engine);
-    std::generate(b.begin(), b.end(), rand_engine);
+    std::generate(a.begin(), a.end(), [&rand_engine]() noexcept { return static_cast<float>(rand_engine()); });
+    std::generate(b.begin(), b.end(), [&rand_engine]() noexcept { return static_cast<float>(rand_engine()); });
 
     // Add vectors in parallel.
-    cudaError_t cudaStatus = addWithCuda<float>(c, a, b);
+    cudaError_t cudaStatus { ::addWithCuda<float>(c, a, b) };
     if (cudaStatus != cudaSuccess) {
         ::fputws(L"addWithCuda failed!", stderr);
         return EXIT_FAILURE;
