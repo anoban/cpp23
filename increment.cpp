@@ -1,4 +1,4 @@
-// g++ increment.cpp -Wall -Wextra -Wpedantic -std=c++20 -O3
+// g++ increment.cpp -Wall -Wextra -Wpedantic -std=c++20 -O3 -municode
 
 // increment and decrement operator overloading
 
@@ -104,24 +104,81 @@ enum class months : uint64_t { January, February, March, April, May, June, July,
 
 enum ten : uint16_t { One = 1, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten };
 
-int main() {
-    auto nineteen { ::number(9) };
+constexpr days& operator++(days& day) noexcept {
+    day = (day == days::Sunday) ? days::Monday : static_cast<days>(static_cast<uint8_t>(day) + 1);
+    return day;
+}
+
+constexpr days& operator--(days& day) noexcept {
+    day = (day == days::Monday) ? days::Sunday : static_cast<days>(static_cast<uint8_t>(day) - 1);
+    return day;
+}
+
+static constexpr const wchar_t* const _wmonths[] { L"January", L"February", L"March",     L"April",   L"May",      L"June",
+                                                   L"July",    L"August",   L"September", L"October", L"November", L"December" };
+
+static constexpr const wchar_t* const _wdays[] { L"Monday", L"Tuesday", L"Wednesday", L"Thursday", L"Friday", L"Saturday", L"Sunday" };
+
+static std::wostream& operator<<(std::wostream& wostr, days& day) {
+    wostr << _wdays[static_cast<uint8_t>(day)] << L'\n';
+    return wostr;
+}
+
+// takes two references to const Ts
+template<typename T> requires std::is_scalar_v<T> [[nodiscard]] static constexpr T func(const T& _x, const T& _y) noexcept {
+    return _x + _y;
+}
+
+// takes two rvalues
+template<typename T> requires std::is_scalar_v<T> [[nodiscard]] static constexpr T func(T _x, T _y) noexcept { return _x + _y; }
+
+// passing by reference to const and passing by value both engenders the arguments to be read-only
+// in pass by value, only a copy of the argument gets passed to the function
+// in pass by reference to const, the argument gets passed in as a non-mutable (read only) value
+
+// takes two mutable references
+template<typename T> requires std::is_scalar_v<T> [[nodiscard]] static constexpr T func(T& _x, T& _y) noexcept { return _x + _y; }
+
+int wmain() {
+    auto nine { ::number(9) };
     // std::wcout << nineteen;
 
-    for (const auto& _ : std::ranges::views::iota(0, 15)) std::wcout << nineteen--;
+    for (const auto& _ : std::ranges::views::iota(0, 15)) std::wcout << nine--;
     ::_putws(L"");
-    for (const auto& _ : std::ranges::views::iota(0, 25)) std::wcout << nineteen++;
+    for (const auto& _ : std::ranges::views::iota(0, 25)) std::wcout << nine++;
     ::_putws(L"");
 
-    (++nineteen).reset();
+    (++nine).reset();
 
-    for (const auto& _ : std::ranges::views::iota(0, 25)) std::wcout << --nineteen;
+    for (const auto& _ : std::ranges::views::iota(0, 25)) std::wcout << --nine;
     ::_putws(L"");
-    for (const auto& _ : std::ranges::views::iota(0, 25)) std::wcout << ++nineteen;
+    for (const auto& _ : std::ranges::views::iota(0, 25)) std::wcout << ++nine;
     ::_putws(L"");
 
     [[maybe_unused]] constexpr auto nl32 { ::newline<char32_t> };
     static_assert(sizeof nl32 == 4);
 
+    auto tuesday { ::days::Tuesday };
+    for (size_t i = 0; i < 8; ++i) std::wcout << ++tuesday;
+    ::_putws(L"");
+
+    ++tuesday = days::Wednesday; // accepted because the return type is days&, an lvalue
+    std::wcout << tuesday;
+    ::_putws(L"");
+
+    for (size_t i = 0; i < 8; ++i) std::wcout << --tuesday;
+    ::_putws(L"");
+
+    unsigned           a { 11 }, b { 19 };
+    constexpr unsigned c { 12 }, d { 18 };
+
+    constexpr auto v { ::func(12, 34) };
+    constexpr auto vv { ::func(a, b) };
+    constexpr auto vvv { ::func(c, d) };
+
     return EXIT_SUCCESS;
 }
+
+// there's a performance penalty that accompanies passing by value semantics when the argument types are expensive to copy
+// like class types - classes, structs & unions
+// in such iocassions, passing a reference or a pointer is relatively inexpensive
