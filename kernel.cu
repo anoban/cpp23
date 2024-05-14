@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdio>
+#include <numeric>
 #include <random>
 #include <ranges>
 
@@ -16,7 +17,8 @@ __global__ void addKernel(_Inout_ scalar_t* out, _In_ const scalar_t* const in_0
     return;
 }
 
-static constexpr size_t                                                                                    nthreads { 450 };
+static constexpr size_t nthreads { 450 };
+
 template<typename T, typename = std::enable_if<std::is_scalar<T>::value, T>::type> static constexpr size_t memsize = sizeof(T) * nthreads;
 
 // Helper function for using CUDA to add vectors in parallel.
@@ -40,25 +42,25 @@ cudaError_t addWithCuda(
     }
 
     // Allocate GPU buffers for three vectors (two input, one output)    .
-    cudaStatus = ::cudaMalloc((void**) &dev_out, memsize<scalar_t>);
+    cudaStatus = ::cudaMalloc(reinterpret_cast<void**>(&dev_out), memsize<scalar_t>);
     if (cudaStatus != cudaSuccess) {
         ::fputws(L"cudaMalloc failed!", stderr);
         goto Error;
     }
 
-    cudaStatus = ::cudaMalloc((void**) &dev_in0, memsize<scalar_t>);
+    cudaStatus = ::cudaMalloc(reinterpret_cast<void**>(&dev_in0), memsize<scalar_t>);
     if (cudaStatus != cudaSuccess) {
         ::fputws(L"cudaMalloc failed!", stderr);
         goto Error;
     }
 
-    cudaStatus = ::cudaMalloc((void**) &dev_in1, memsize<scalar_t>);
+    cudaStatus = ::cudaMalloc(reinterpret_cast<void**>(&dev_in1), memsize<scalar_t>);
     if (cudaStatus != cudaSuccess) {
         ::fputws(L"cudaMalloc failed!", stderr);
         goto Error;
     }
 
-    // Copy input vectors from host memory to GPU buffers.
+    // copy input arrays from host memory to GPU buffers.
     cudaStatus = ::cudaMemcpy(dev_in0, in_0.data(), memsize<scalar_t>, cudaMemcpyHostToDevice);
     if (cudaStatus != cudaSuccess) {
         ::fputws(L"cudaMemcpy failed!", stderr);
@@ -113,17 +115,28 @@ int main() {
     std::mt19937_64    rand_engine { rdevice() };
 
     // fill arrays a and b with random floats
-    std::generate(a.begin(), a.end(), [&rand_engine]() noexcept { return static_cast<float>(rand_engine()); });
-    std::generate(b.begin(), b.end(), [&rand_engine]() noexcept { return static_cast<float>(rand_engine()); });
+    std::generate(a.begin(), a.end(), [&rand_engine]() noexcept {
+        return static_cast<float>(rand_engine() / static_cast<double>(RAND_MAX));
+    });
+    std::generate(b.begin(), b.end(), [&rand_engine]() noexcept {
+        return static_cast<float>(rand_engine() / static_cast<double>(RAND_MAX));
+    });
 
-    // Add vectors in parallel.
+    const auto host_sum { std::accumulate(a.cbegin(), a.cend(), 0.0F, std::plus<float> {}) +
+                          std::accumulate(b.cbegin(), b.cend(), 0.0F, std::plus<float> {}) };
+
+    ::_putws(L"so far so good :)");
+
     cudaError_t cudaStatus { ::addWithCuda<float>(c, a, b) };
     if (cudaStatus != cudaSuccess) {
         ::fputws(L"addWithCuda failed!", stderr);
         return EXIT_FAILURE;
     }
 
-    for (const auto& i : std::ranges::views::iota(nthreads)) ::wprintf_s(L"%.4f + %.4f = %.4f\n", a.at(i), b.at(i), c.at(i));
+    ::_putws(L"kernel launch is over :)");
+
+    for (const auto& i : std::ranges::views::iota(0LLU, nthreads)) ::wprintf_s(L"%.4f + %.4f = %.4f\n", a.at(i), b.at(i), c.at(i));
+    // for (size_t i {}; i < nthreads; ++i) ::wprintf_s(L"%.4f + %.4f = %.4f\n", a.at(i), b.at(i), c.at(i));
 
     // cudaDeviceReset must be called before exiting in order for profiling and
     // tracing tools such as Nsight and Visual Profiler to show complete traces.
@@ -132,6 +145,11 @@ int main() {
         ::fputws(L"cudaDeviceReset failed!", stderr);
         return EXIT_FAILURE;
     }
+
+    const auto device_sum { std::reduce(c.cbegin(), c.cend(), 0.0F, std::plus<float> {}) };
+
+    ::_putws(L"all's good :)");
+    ::wprintf_s(L"host :: %.5f, device :: %.5f\n", host_sum, device_sum);
 
     return EXIT_SUCCESS;
 }

@@ -4,7 +4,7 @@
 #include <vector>
 
 int main() {
-    constexpr auto value { 54I16 };
+    [[maybe_unused]] constexpr auto value { 54I16 };
 
     std::vector<int32_t> randoms {};
     randoms.resize(100);
@@ -18,8 +18,20 @@ int main() {
 
     for (const auto& oddelem : odds) std::wcout << oddelem << L' ';
     std::wcout << L'\n';
+    std::wcout << L'\n';
+
     for (const auto& evenelem : evens) std::wcout << evenelem << L' ';
     std::wcout << L'\n';
+    std::wcout << L'\n';
+
+    for (const auto& i : std::ranges::views::iota(10)) {
+        std::wcout << i << L' ';
+        if (i > 25) break;
+    }
+    std::wcout << L'\n';
+    std::wcout << L'\n';
+
+    for (const auto& i : std::ranges::views::iota(100, 115)) std::wcout << i << L' ';
 
     return EXIT_SUCCESS;
 }
