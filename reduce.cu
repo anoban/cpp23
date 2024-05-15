@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <ctime>
 #include <numeric>
+#include <random>
 #include <ranges>
 #include <type_traits>
 #include <vector>
@@ -39,8 +40,8 @@ __global__ void fold(
 }
 
 auto wmain() -> int {
-    // std::random_device rdevice {};
-    // std::mt19937_64    rengine { rdevice() };
+    std::random_device rdevice {};
+    std::mt19937_64    rengine { rdevice() };
 
     srand(time(nullptr));
     std::vector<int32_t> randoms(NRANDOMS);
@@ -56,46 +57,65 @@ auto wmain() -> int {
     cudaError_t cuStatus {};
     cuStatus = ::cudaMalloc(&d_randoms, memsize<int32_t>);
     if (cuStatus != cudaSuccess) {
-        ::fputws(L"Error :: cudaMalloc failed!", stderr);
+        ::fwprintf_s(stderr, L"Error @ line %d in %s:: cudaMalloc failed!", __LINE__, __FILEW__);
         return EXIT_FAILURE;
     }
 
     cuStatus = ::cudaMalloc(&d_sums, sizeof(double) * NTHREADS);
     if (cuStatus != cudaSuccess) {
-        ::fputws(L"Error :: cudaMalloc failed!", stderr);
+        ::fwprintf_s(stderr, L"Error @ line %d in %s:: cudaMalloc failed!", __LINE__, __FILEW__);
         goto PREMATURE_EXIT;
     }
 
     cuStatus = ::cudaMalloc(&d_total, sizeof(double));
     if (cuStatus != cudaSuccess) {
-        ::fputws(L"Error :: cudaMalloc failed!", stderr);
+        ::fwprintf_s(stderr, L"Error @ line %d in %s:: cudaMalloc failed!", __LINE__, __FILEW__);
         goto PREMATURE_EXIT;
     }
 
     cuStatus = ::cudaMemcpy(d_randoms, randoms.data(), memsize<int32_t>, cudaMemcpyHostToDevice);
     if (cuStatus != cudaSuccess) {
-        ::fputws(L"Error :: cudaMalloc failed!", stderr);
+        ::fwprintf_s(stderr, L"Error @ line %d in %s:: cudaMemcpy failed!", __LINE__, __FILEW__);
         goto PREMATURE_EXIT;
     }
 
     sum<<<1, NTHREADS>>>(d_randoms, d_sums);
+    cuStatus = cudaGetLastError();
+    if (cuStatus != cudaSuccess) {
+        ::fwprintf_s(stderr, L"Error @ line %d in %s:: sum kernel launch failed! (%S)", __LINE__, __FILEW__, cudaGetErrorString(cuStatus));
+        goto PREMATURE_EXIT;
+    }
+
     cuStatus = ::cudaDeviceSynchronize();
+    if (cuStatus != cudaSuccess) {
+        ::fwprintf_s(stderr, L"cudaDeviceSynchronize returned error code %d after launching sum kernel!\n", cuStatus);
+        goto PREMATURE_EXIT;
+    }
 
     fold<<<1, 1>>>(d_sums, d_total);
+    cuStatus = cudaGetLastError();
+    if (cuStatus != cudaSuccess) {
+        ::fwprintf_s(stderr, L"Error @ line %d in %s:: fold kernel launch failed! (%S)", __LINE__, __FILEW__, cudaGetErrorString(cuStatus));
+        goto PREMATURE_EXIT;
+    }
+
     cuStatus = ::cudaDeviceSynchronize();
+    if (cuStatus != cudaSuccess) {
+        ::fwprintf_s(stderr, L"cudaDeviceSynchronize returned error code %d after launching fold kernel!\n", cuStatus);
+        goto PREMATURE_EXIT;
+    }
 
     cuStatus = ::cudaMemcpy(&device_sum, d_total, sizeof(double), cudaMemcpyDeviceToHost);
+    if (cuStatus != cudaSuccess) {
+        ::fwprintf_s(stderr, L"Error @ line %d in %s:: cudaMemcpy failed!", __LINE__, __FILEW__);
+        goto PREMATURE_EXIT;
+    }
 
     ::wprintf_s(L"device sum :: %.5lf, host sum :: %.5Lf\n", device_sum, host_sum);
-
-    ::cudaFree(d_randoms);
-    ::cudaFree(d_sums);
-    ::cudaFree(d_total);
-    return EXIT_SUCCESS;
 
 PREMATURE_EXIT:
     ::cudaFree(d_randoms);
     ::cudaFree(d_sums);
     ::cudaFree(d_total);
-    return EXIT_FAILURE;
+    return EXIT_SUCCESS;
 }
