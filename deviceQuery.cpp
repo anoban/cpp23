@@ -43,11 +43,11 @@
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
 // we don't want clang-tidy moaning about C's stdio functions
 
-#pragma comment(lib, "cudart.lib") // CUDA runtime APIs
-#pragma comment(lib, "cuda.lib")   // CUDA driver APIs
+#pragma comment(lib, "cudart.lib") // CUDA runtime API
+#pragma comment(lib, "cuda.lib")   // CUDA driver API
 
 constexpr auto    BYTES_PER_MB { 1024.0L * 1024.0L };
-constexpr int64_t MAX_ANTICIPATED_DEVICES { 4 }; // define the maximum number of devices you expec a system to have
+constexpr int64_t MAX_ANTICIPATED_DEVICES { 4 }; // define the maximum number of devices you expect a system to have
 // defaulting to 64 seems a little far fetched
 
 static_assert(sizeof(cudaDeviceProp) == 1032); // because cudaDeviceProp is a really huge struct
@@ -77,7 +77,7 @@ static void check(cudaError_t status, const wchar_t* const function, const wchar
 #define checkCudaErrors(expression) ::check((expression), L#expression, __FILEW__, __LINE__)
 
 // function copied and refactored from https://raw.githubusercontent.com/NVIDIA/cuda-samples/master/Common/helper_cuda.h
-static int CoreCountFromSMLookup(int& major, int& minor) noexcept {
+static inline int CoreCountFromSMLookup(int& major, int& minor) noexcept {
     // defines for GPU Architecture types (using the SM version to determine the # of cores per SM
     struct sSMtoCores {
             int32_t SM; // 0xMm (hexidecimal notation), M = SM Major version and m = SM minor version
