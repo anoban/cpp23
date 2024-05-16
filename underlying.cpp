@@ -7,7 +7,7 @@
 #include <type_traits>
 #include <utility>
 
-typedef enum cstyle { O, P, Q } cstyle;
+using cstyle = enum cstyle { O, P, Q };
 
 enum dummy : unsigned short { A, B };
 

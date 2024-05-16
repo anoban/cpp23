@@ -8,10 +8,16 @@
 #include <list>
 #include <ranges>
 #include <type_traits>
+#include <vector>
 
-template<typename T> [[nodiscard]] constexpr size_t distance(const T start, const T end) noexcept {
-    std::iterator_traits<T>::value_type;
-    return (static_cast<char*>(end) - static_cast<char*>(start)) / sizeof(T);
+// assumes the inputs are random access iterators
+template<typename const_iterator>
+[[nodiscard]] constexpr ptrdiff_t distance(const const_iterator begin, const const_iterator end) noexcept {
+    using value_type = const_iterator::value_type; // okay
+    // return end._Unwrapped() - begin._Unwrapped();    // okay too :)
+    static_assert(!std::is_pointer<value_type>::value);
+    return (reinterpret_cast<const char*>(end._Unwrapped()) - reinterpret_cast<const char*>(begin._Unwrapped())) /
+           static_cast<ptrdiff_t>(sizeof(value_type));
 }
 
 int wmain() {
@@ -22,10 +28,17 @@ int wmain() {
     std::wcout << list.back() << L'\n';
 
     std::wcout << std::distance(list.cbegin(), list.cend()) << L" doubles! \n";
-    // linked lists do not provide random access iterators yikes!
+    // linked lists do not provide random access iterators
+
     // std::wcout << ::distance(list.cbegin(), list.cend()) << L" doubles! \n";
-    std::array<float, 100> array;
-    std::wcout << ::distance(array.cbegin(), array.cend()) << L" doubles! \n";
+    std::array<float, 100> array {};
+    std::vector<short>     vector(10000);
+
+    std::wcout << ::distance(array.cbegin(), array.cend()) << L" floats! \n";
+    std::wcout << std::distance(array.cbegin(), array.cend()) << L" floats! \n";
+
+    std::wcout << ::distance(vector.begin(), vector.end()) << L" shorts! \n";
+    std::wcout << std::distance(vector.begin(), vector.end()) << L" shorts! \n";
 
     return EXIT_SUCCESS;
 }
