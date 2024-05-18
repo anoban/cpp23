@@ -10,13 +10,13 @@
 #include <type_traits>
 #include <vector>
 
-// assumes the inputs are random access iterators
+// assumes the inputs are random access iterators and expects class `const_iterator` to have a typedef named `value_type`
 template<typename const_iterator>
-[[nodiscard]] constexpr ptrdiff_t distance(const const_iterator begin, const const_iterator end) noexcept {
+[[nodiscard]] constexpr ptrdiff_t distance(const const_iterator first, const const_iterator last) noexcept {
     using value_type = const_iterator::value_type; // okay
     // return end._Unwrapped() - begin._Unwrapped();    // okay too :)
     static_assert(!std::is_pointer<value_type>::value);
-    return (reinterpret_cast<const char*>(end._Unwrapped()) - reinterpret_cast<const char*>(begin._Unwrapped())) /
+    return (reinterpret_cast<const char*>(last._Unwrapped()) - reinterpret_cast<const char*>(first._Unwrapped())) /
            static_cast<ptrdiff_t>(sizeof(value_type));
 }
 

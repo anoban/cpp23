@@ -28,9 +28,9 @@ const auto printer         = [](const auto& o) { std::print("{}", o); }; // std:
 static void captures() noexcept {
     // lambdas can capture variables from their environment
 
-    float              local { 0.12345 }; // a local variable confined to the scope of captures()
-    const std::wstring name { L"Anoban" };
-    size_t             age { 78 };
+    [[maybe_unused]] float local { 0.12345 }; // a local variable confined to the scope of captures()
+    const std::wstring     name { L"Anoban" };
+    size_t                 age { 78 };
 
     // the mutable keyword is essential if a lambda is to mutate its capture!
     // however if variables are passed in as arguments, mutable qualifier is not necessary!
