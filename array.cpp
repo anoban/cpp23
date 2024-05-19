@@ -1,16 +1,32 @@
 #include <cstddef>
 #include <cstdlib>
+#include <iterator>
 #include <numbers>
 #include <type_traits>
 
 #include <sal.h>
 
-template<typename scalar_t, size_t _length, typename = std::enable_if<std::is_scalar<scalar_t>::value, scalar_t>::type>
-class random_access_iterator { };
+template<typename T, size_t _length, typename = std::enable_if<std::is_scalar<T>::value, T>::type> class random_access_iterator {
+        using value_type        = T;
+        using difference_type   = ptrdiff_t;
+        using pointer           = T*;
+        using reference         = T&;
+        using iterator_category = std::random_access_iterator_tag;
 
-template<typename scalar_t, size_t _length, typename = std::enable_if<std::is_scalar<scalar_t>::value, scalar_t>::type> class array {
-        using value_type   = scalar_t;
-        using pointer_type = scalar_t*;
+    public:
+        constexpr random_access_iterator() noexcept : _ptr { nullptr }, _count {} { }
+
+        constexpr explicit random_access_iterator(pointer _p) noexcept : _ptr { _p }, _count { _length } { }
+
+    private:
+        pointer _ptr;
+        size_t  _count;
+};
+
+template<typename T, size_t _length> requires std::is_scalar_v<T> class array {
+        using value_type   = T;
+        using pointer_type = T*;
+        using reference    = T&;
         using iterator     = random_access_iterator<value_type, _length>;
         // using const_iterator = ;
 
@@ -27,13 +43,13 @@ template<typename scalar_t, size_t _length, typename = std::enable_if<std::is_sc
 
         constexpr size_t size() const noexcept { return _size; }
 
-        constexpr bool is_empty() const noexcept { return _size != 0u; }
+        constexpr bool is_empty() const noexcept { return _size != 0LLU; }
 
         constexpr pointer_type data() const noexcept { return _buffer; }
 
     private:
-        scalar_t _buffer[_length]; // avoiding in-class initializers for perfromance
-        size_t   _size;
+        T      _buffer[_length]; // avoiding in-class initializers for perfromance
+        size_t _size;
 };
 
 int wmain() {
