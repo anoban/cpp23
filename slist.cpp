@@ -18,12 +18,12 @@ template<typename T /* template parameter to specify the node type */> class lis
 
         constexpr explicit list_iterator(_In_ const_pointer _start_node) noexcept : _node { _start_node } { }
 
-        constexpr list_iterator& operator++() noexcept {
+        [[nodiscard]] constexpr list_iterator& operator++() noexcept {
             _node = _node->_next;
             return *this;
         }
 
-        constexpr list_iterator operator++(int) noexcept {
+        [[nodiscard]] constexpr list_iterator operator++(int) noexcept {
             const auto temp { *_node };
             _node = _node->next;
             return list_iterator(_node);
@@ -51,8 +51,8 @@ template<typename T, typename allocator = std::allocator<T> /* default allocator
     private:
         // a plain C style aggregate type for the linked list nodes
         template<typename U> struct link {
-                link* _next {};
-                U     _value {};
+                link<U>* _next {}; // data stored in the all nodes of the linked list must be of the same type
+                U        _value {};
         };
 
         using link_type = link<T>;
