@@ -1,135 +1,155 @@
-﻿#include <algorithm>
+﻿// nvcc .\kernel.cu -std=c++20 -O3 -o .\kernel.exe
+
+#include <algorithm>
+#include <array>
 #include <cstdio>
 #include <numeric>
 #include <random>
+#include <ranges>
 
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
-cudaError_t addWithCuda(int* c, const int* a, const int* b, unsigned int size);
-
-__global__ void addKernel(int* c, const int* a, const int* b) {
-    int i = threadIdx.x + threadIdx.y + threadIdx.z;
-    c[i]  = a[i] + b[i];
+template<typename scalar_t> requires std::is_scalar_v<scalar_t>
+__global__ void addKernel(_Inout_ scalar_t* out, _In_ const scalar_t* const in_0, _In_ const scalar_t* const in_1) {
+    const auto i { threadIdx.x + threadIdx.y + threadIdx.z };
+    out[i] = in_0[i] + in_1[i];
+    return;
 }
 
-int main() {
-    // std::random_device rdevice {};
-    // std::mt19937       rand_eng { rdevice() };
-    srand(time(nullptr));
-    const int arraySize = 800;
-    int       a[arraySize];
-    int       b[arraySize];
-    int       c[arraySize];
+static constexpr size_t nthreads { 450 };
 
-    int64_t sum_dev {}, sum_host {};
-
-    std::generate(std::begin(a), std::end(a), rand);
-    std::generate(std::begin(b), std::end(b), rand);
-
-    sum_host               += std::accumulate(std::begin(a), std::end(a), 0i64, std::plus<int> {});
-    sum_host               += std::accumulate(std::begin(b), std::end(b), 0i64, std::plus<int> {});
-
-    // Add vectors in parallel.
-    cudaError_t cudaStatus  = addWithCuda(c, a, b, arraySize);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "addWithCuda failed!");
-        return 1;
-    }
-
-    for (size_t i = 0; i < arraySize; ++i) {
-        // wprintf_s(L"%d + %d = %d\n", a[i], b[i], c[i]);
-        sum_dev += c[i];
-    }
-
-    wprintf_s(L"host sum = %lld, device sum = %lld\n", sum_host, sum_dev);
-
-    // cudaDeviceReset must be called before exiting in order for profiling and
-    // tracing tools such as Nsight and Visual Profiler to show complete traces.
-    cudaStatus = cudaDeviceReset();
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaDeviceReset failed!");
-        return 1;
-    }
-
-    return 0;
-}
+template<typename T, typename = std::enable_if<std::is_scalar<T>::value, T>::type> static constexpr size_t memsize = sizeof(T) * nthreads;
 
 // Helper function for using CUDA to add vectors in parallel.
-cudaError_t addWithCuda(int* c, const int* a, const int* b, unsigned int size) {
-    int*        dev_a = 0;
-    int*        dev_b = 0;
-    int*        dev_c = 0;
-    cudaError_t cudaStatus;
+template<typename scalar_t>
+cudaError_t addWithCuda(
+    _Inout_ std::array<scalar_t, nthreads>& out,
+    _In_ const std::array<scalar_t, nthreads>& in_0,
+    _In_ const std::array<scalar_t, nthreads>& in_1,
+    _In_opt_ typename std::enable_if<std::is_scalar<scalar_t>::value, scalar_t>::type = static_cast<scalar_t>(0)
+) noexcept {
+    scalar_t*   dev_in0 {};
+    scalar_t*   dev_in1 {};
+    scalar_t*   dev_out {};
+    cudaError_t cudaStatus {};
 
     // Choose which GPU to run on, change this on a multi-GPU system.
-    cudaStatus = cudaSetDevice(0);
+    cudaStatus = ::cudaSetDevice(0);
     if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");
+        ::fputws(L"cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?", stderr);
         goto Error;
     }
 
     // Allocate GPU buffers for three vectors (two input, one output)    .
-    cudaStatus = cudaMalloc((void**) &dev_c, size * sizeof(int));
+    cudaStatus = ::cudaMalloc(reinterpret_cast<void**>(&dev_out), memsize<scalar_t>);
     if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMalloc failed!");
+        ::fputws(L"cudaMalloc failed!", stderr);
         goto Error;
     }
 
-    cudaStatus = cudaMalloc((void**) &dev_a, size * sizeof(int));
+    cudaStatus = ::cudaMalloc(reinterpret_cast<void**>(&dev_in0), memsize<scalar_t>);
     if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMalloc failed!");
+        ::fputws(L"cudaMalloc failed!", stderr);
         goto Error;
     }
 
-    cudaStatus = cudaMalloc((void**) &dev_b, size * sizeof(int));
+    cudaStatus = ::cudaMalloc(reinterpret_cast<void**>(&dev_in1), memsize<scalar_t>);
     if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMalloc failed!");
+        ::fputws(L"cudaMalloc failed!", stderr);
         goto Error;
     }
 
-    // Copy input vectors from host memory to GPU buffers.
-    cudaStatus = cudaMemcpy(dev_a, a, size * sizeof(int), cudaMemcpyHostToDevice);
+    // copy input arrays from host memory to GPU buffers.
+    cudaStatus = ::cudaMemcpy(dev_in0, in_0.data(), memsize<scalar_t>, cudaMemcpyHostToDevice);
     if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy failed!");
+        ::fputws(L"cudaMemcpy failed!", stderr);
         goto Error;
     }
 
-    cudaStatus = cudaMemcpy(dev_b, b, size * sizeof(int), cudaMemcpyHostToDevice);
+    cudaStatus = ::cudaMemcpy(dev_in1, in_1.data(), memsize<scalar_t>, cudaMemcpyHostToDevice);
     if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy failed!");
+        ::fputws(L"cudaMemcpy failed!", stderr);
         goto Error;
     }
 
     // Launch a kernel on the GPU with one thread for each element.
-    addKernel<<<1, size>>>(dev_c, dev_a, dev_b);
+    addKernel<scalar_t><<<1, nthreads>>>(dev_out, dev_in0, dev_in1);
 
     // Check for any errors launching the kernel
-    cudaStatus = cudaGetLastError();
+    cudaStatus = ::cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "addKernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
+        ::fwprintf_s(stderr, L"addKernel launch failed: %S\n", ::cudaGetErrorString(cudaStatus));
         goto Error;
     }
 
     // cudaDeviceSynchronize waits for the kernel to finish, and returns
     // any errors encountered during the launch.
-    cudaStatus = cudaDeviceSynchronize();
+    cudaStatus = ::cudaDeviceSynchronize();
     if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching addKernel!\n", cudaStatus);
+        ::fwprintf_s(stderr, L"cudaDeviceSynchronize returned error code %d after launching addKernel!\n", cudaStatus);
         goto Error;
     }
 
     // Copy output vector from GPU buffer to host memory.
-    cudaStatus = cudaMemcpy(c, dev_c, size * sizeof(int), cudaMemcpyDeviceToHost);
+    cudaStatus = ::cudaMemcpy(out.data(), dev_out, memsize<scalar_t>, cudaMemcpyDeviceToHost);
     if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy failed!");
+        ::fputws(L"cudaMemcpy failed!", stderr);
         goto Error;
     }
 
 Error:
-    cudaFree(dev_c);
-    cudaFree(dev_a);
-    cudaFree(dev_b);
+    ::cudaFree(dev_out);
+    ::cudaFree(dev_in0);
+    ::cudaFree(dev_in1);
 
     return cudaStatus;
+}
+
+int wmain() {
+    std::array<float, nthreads> a {};
+    std::array<float, nthreads> b {};
+    std::array<float, nthreads> c {};
+
+    std::random_device rdevice {};
+    std::mt19937_64    rand_engine { rdevice() };
+
+    // fill arrays a and b with random floats
+    std::generate(a.begin(), a.end(), [&rand_engine]() noexcept {
+        return static_cast<float>(rand_engine() / static_cast<double>(RAND_MAX));
+    });
+    std::generate(b.begin(), b.end(), [&rand_engine]() noexcept {
+        return static_cast<float>(rand_engine() / static_cast<double>(RAND_MAX));
+    });
+
+    const auto host_sum { std::accumulate(a.cbegin(), a.cend(), 0.0F, std::plus<float> {}) +
+                          std::accumulate(b.cbegin(), b.cend(), 0.0F, std::plus<float> {}) };
+
+    ::_putws(L"so far so good :)");
+
+    cudaError_t cudaStatus { ::addWithCuda<float>(c, a, b) };
+    if (cudaStatus != cudaSuccess) {
+        ::fputws(L"addWithCuda failed!", stderr);
+        return EXIT_FAILURE;
+    }
+
+    ::_putws(L"kernel launch is over :)");
+
+    for (const auto& i : std::ranges::views::iota(0LLU, nthreads)) ::wprintf_s(L"%.4f + %.4f = %.4f\n", a.at(i), b.at(i), c.at(i));
+    // for (size_t i {}; i < nthreads; ++i) ::wprintf_s(L"%.4f + %.4f = %.4f\n", a.at(i), b.at(i), c.at(i));
+
+    // cudaDeviceReset must be called before exiting in order for profiling and
+    // tracing tools such as Nsight and Visual Profiler to show complete traces.
+    cudaStatus = ::cudaDeviceReset();
+    if (cudaStatus != cudaSuccess) {
+        ::fputws(L"cudaDeviceReset failed!", stderr);
+        return EXIT_FAILURE;
+    }
+
+    const auto device_sum { std::reduce(c.cbegin(), c.cend(), 0.0F, std::plus<float> {}) };
+
+    ::_putws(L"all's good :)");
+    ::wprintf_s(L"host :: %.5f, device :: %.5f\n", host_sum, device_sum);
+
+    return EXIT_SUCCESS;
 }

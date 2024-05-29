@@ -84,7 +84,7 @@ template<typename T> class random_access_iterator final { // unchecked iterator!
 
         constexpr bool operator==(const random_access_iterator& other) noexcept {
             return _start == other._start && _offset == other._offset && _length == other._length;
-        } 
+        }
 
         constexpr bool operator!=(const random_access_iterator& other) noexcept {
             return _start != other._start || _offset != other._offset || _length != other._length;
@@ -105,7 +105,7 @@ template<typename T> requires std::is_arithmetic_v<T> class vector final {
         using reference       = T&;
         using const_reference = const T&;
         using iterator        = ::random_access_iterator<T>;
-        using const_iterator  = const ::random_access_iterator<T>;
+        using const_iterator  = ::random_access_iterator<const T>;
 
         constexpr static size_t default_size { 100 };
 
