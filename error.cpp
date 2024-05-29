@@ -1,6 +1,6 @@
 #pragma once
-
 // clang-format off
+#define _AMD64_
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_EXTRA_MEAN
 #define NOMINMAX
@@ -16,7 +16,7 @@
 // clang-format on
 
 namespace bmp {
-    [[nodiscard("Expensive")]] static inline std::optional<std::vector<uint8_t>> Open(_In_ const wchar_t* const filename) {
+    [[nodiscard("expensive")]] static inline std::optional<std::vector<uint8_t>> Open(_In_ const wchar_t* const filename) noexcept {
         DWORD                nbytes {};
         LARGE_INTEGER        liFsize = { .QuadPart = 0LLU };
         const HANDLE64       hFile   = ::CreateFileW(filename, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_READONLY, NULL);
@@ -33,11 +33,10 @@ namespace bmp {
         }
 
         buffer.resize(liFsize.QuadPart);
-        const auto bReadStatus { ::ReadFile(hFile, buffer.data(), liFsize.QuadPart, &nbytes, NULL) };
 
-        if (!bReadStatus) {
+        if (!::ReadFile(hFile, buffer.data(), liFsize.QuadPart, &nbytes, NULL)) {
             ::fwprintf_s(stderr, L"Error %lu in ReadFile\n", ::GetLastError()); // NOLINT(cppcoreguidelines-pro-type-vararg)
-            goto READFILE_ERR;
+            goto GET_FILESIZE_ERR;
         }
 
         ::CloseHandle(hFile);
