@@ -94,6 +94,7 @@
         "_70_new": "cpp",
         "_70_xstddef": "cpp",
         "xstddef": "cpp",
-        "complex": "cpp"
+        "complex": "cpp",
+        "source_location": "cpp"
     }
 }

@@ -10,19 +10,19 @@
 #include <type_traits>
 #include <utility>
 
-template<typename T> class random_access_iterator final { // unchecked iterator!
+template<typename scalar_t> class random_access_iterator final { // unchecked iterator!
     private:
-        T*     _start;
-        size_t _offset;
-        size_t _length;
+        scalar_t* _start;
+        size_t    _offset;
+        size_t    _length;
 
     public:
-        using value_type        = T;
+        using value_type        = scalar_t;
         using size_type         = size_t;
-        using pointer           = T*;
-        using const_pointer     = const T*;
-        using reference         = T&;
-        using const_reference   = const T&;
+        using pointer           = scalar_t*;
+        using const_pointer     = const scalar_t*;
+        using reference         = scalar_t&;
+        using const_reference   = const scalar_t&;
         using iterator_category = std::random_access_iterator_tag;
         using difference_type   = ptrdiff_t;
 
@@ -91,34 +91,34 @@ template<typename T> class random_access_iterator final { // unchecked iterator!
         }
 };
 
-template<typename T> requires std::is_arithmetic_v<T> class vector final {
+template<typename scalar_t> requires std::is_arithmetic_v<scalar_t> class vector final {
     private:
-        T*     _buffer;
-        size_t _size;
+        scalar_t* _buffer;
+        size_t    _size;
 
     public:
         // even typedefs and using aliases inside class types obey the private, public and protected accessibility restrictions
-        using value_type      = T;
+        using value_type      = scalar_t;
         using size_type       = size_t;
-        using pointer         = T*;
-        using const_pointer   = const T*;
-        using reference       = T&;
-        using const_reference = const T&;
-        using iterator        = ::random_access_iterator<T>;
-        using const_iterator  = ::random_access_iterator<const T>;
+        using pointer         = scalar_t*;
+        using const_pointer   = const scalar_t*;
+        using reference       = scalar_t&;
+        using const_reference = const scalar_t&;
+        using iterator        = ::random_access_iterator<scalar_t>;
+        using const_iterator  = ::random_access_iterator<const scalar_t>;
 
         constexpr static size_t default_size { 100 };
 
-        inline vector() noexcept : _buffer(new T[default_size]), _size(default_size) { } // default ctor
+        inline vector() noexcept : _buffer(new scalar_t[default_size]), _size(default_size) { } // default ctor
 
-        inline explicit vector(const size_t& _len) noexcept : _buffer(new T[_len]), _size(_len) { } // ctor
+        inline explicit vector(const size_t& _len) noexcept : _buffer(new scalar_t[_len]), _size(_len) { } // ctor
 
         ~vector() noexcept { // dtor
             delete[] _buffer;
             _size = 0;
         }
 
-        inline vector(const vector& other) noexcept : _buffer(new T[other._size]), _size(other._size) { // copy ctor
+        inline vector(const vector& other) noexcept : _buffer(new scalar_t[other._size]), _size(other._size) { // copy ctor
             std::copy(other._buffer, other._buffer + _size, _buffer);
         }
 
@@ -135,7 +135,7 @@ template<typename T> requires std::is_arithmetic_v<T> class vector final {
                 std::copy(other._buffer, other._buffer + other._size, _buffer);
             } else {
                 delete[] _buffer;
-                _buffer = new T[other._size];
+                _buffer = new scalar_t[other._size];
                 std::copy(other._buffer, other._buffer + other._size, _buffer);
                 _size = other._size;
             }
