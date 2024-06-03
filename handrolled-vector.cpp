@@ -7,6 +7,7 @@
 #include <iterator>
 #include <numbers>
 #include <numeric>
+#include <random>
 #include <type_traits>
 #include <utility>
 
@@ -30,7 +31,7 @@ template<typename scalar_t> class random_access_iterator final { // unchecked it
 
         constexpr random_access_iterator(const pointer& _ptr, const size_type& _len) noexcept : _start(_ptr), _offset(), _length(_len) { }
 
-        constexpr random_access_iterator(const pointer& _ptr, const size_type& _off, const size_type& _len) noexcept :
+        constexpr random_access_iterator(const pointer& _ptr, const size_type& _len, const size_type& _off) noexcept :
             _start(_ptr), _offset(_off), _length(_len) { }
 
         constexpr random_access_iterator(const random_access_iterator& other) noexcept :
@@ -83,12 +84,16 @@ template<typename scalar_t> class random_access_iterator final { // unchecked it
         }
 
         constexpr bool operator==(const random_access_iterator& other) noexcept {
-            return _start == other._start && _offset == other._offset && _length == other._length;
+            return _start == other._start && _offset == other._offset;
         }
 
         constexpr bool operator!=(const random_access_iterator& other) noexcept {
-            return _start != other._start || _offset != other._offset || _length != other._length;
+            return _start != other._start || _offset != other._offset;
         }
+
+        constexpr reference operator*() noexcept { return _start[_offset]; }
+
+        constexpr const_reference operator*() const noexcept { return _start[_offset]; }
 };
 
 template<typename scalar_t> requires std::is_arithmetic_v<scalar_t> class vector final {
@@ -109,16 +114,16 @@ template<typename scalar_t> requires std::is_arithmetic_v<scalar_t> class vector
 
         constexpr static size_t default_size { 100 };
 
-        inline vector() noexcept : _buffer(new scalar_t[default_size]), _size(default_size) { } // default ctor
+        inline vector() noexcept : _buffer(new (std::nothrow) scalar_t[default_size]), _size(default_size) { } // default ctor
 
-        inline explicit vector(const size_t& _len) noexcept : _buffer(new scalar_t[_len]), _size(_len) { } // ctor
+        inline explicit vector(const size_t& _len) noexcept : _buffer(new (std::nothrow) scalar_t[_len]), _size(_len) { } // ctor
 
         ~vector() noexcept { // dtor
             delete[] _buffer;
             _size = 0;
         }
 
-        inline vector(const vector& other) noexcept : _buffer(new scalar_t[other._size]), _size(other._size) { // copy ctor
+        inline vector(const vector& other) noexcept : _buffer(new (std::nothrow) scalar_t[other._size]), _size(other._size) { // copy ctor
             std::copy(other._buffer, other._buffer + _size, _buffer);
         }
 
@@ -135,7 +140,7 @@ template<typename scalar_t> requires std::is_arithmetic_v<scalar_t> class vector
                 std::copy(other._buffer, other._buffer + other._size, _buffer);
             } else {
                 delete[] _buffer;
-                _buffer = new scalar_t[other._size];
+                _buffer = new (std::nothrow) scalar_t[other._size];
                 std::copy(other._buffer, other._buffer + other._size, _buffer);
                 _size = other._size;
             }
@@ -158,35 +163,46 @@ template<typename scalar_t> requires std::is_arithmetic_v<scalar_t> class vector
 
         inline const_pointer data() const noexcept { return _buffer; }
 
-        inline iterator begin() noexcept { }
+        inline iterator begin() noexcept { return { _buffer, _size }; }
 
-        inline const_iterator begin() const noexcept { }
+        inline const_iterator begin() const noexcept { return { _buffer, _size, 0 }; }
 
-        inline iterator end() noexcept { }
+        inline iterator end() noexcept { return { _buffer, _size, _size }; }
 
-        inline const_iterator end() const noexcept { }
+        inline const_iterator end() const noexcept { return { _buffer, _size, _size }; }
 
-        inline const_iterator cbegin() const noexcept { }
+        inline const_iterator cbegin() const noexcept { return { _buffer, _size, 0 }; }
 
-        inline const_iterator cend() const noexcept { }
+        inline const_iterator cend() const noexcept { return { _buffer, _size, _size }; }
 };
 
-auto wmain() -> int {
-    auto integers { ::vector<short> { 250 } };
-    std::generate(integers.data(), integers.data() + integers.size(), rand);
-    const auto sum { std::accumulate(integers.data(), integers.data() + integers.size(), 0.0L) };
-    std::wcout << integers.size() << std::endl;
+// starting to love C++ :)
 
-    const auto randoms { std::move(integers) };
-    const auto rsum { std::accumulate(randoms.data(), randoms.data() + randoms.size(), 0.0L) };
+auto wmain() -> int {
+    auto rdev { std::random_device {} };
+    auto rngine { std::knuth_b { rdev() } };
+
+    auto numbers { ::vector<int> { 500'000 } };
+    std::generate(numbers.begin(), numbers.end(), rngine);
+    const auto sum { std::accumulate(numbers.cbegin(), numbers.cend(), 0.0L) };
+
+    std::wcout << numbers.size() << std::endl;
+
+    const auto randoms { std::move(numbers) };
+    const auto rsum { std::accumulate(randoms.cbegin(), randoms.cend(), 0.0L) };
 
     std::wcout << randoms.size() << std::endl;
-    std::wcout << integers.size() << std::endl;
+    std::wcout << numbers.size() << std::endl;
     std::wcout << sum << L' ' << rsum << std::endl;
 
-    if (!integers.data()) std::wcout << L"Yes! nullptr\n";
+    if (!numbers.data()) std::wcout << L"Yes! nullptr\n";
 
     constexpr ::vector<float>::value_type x { std::numbers::pi_v<decltype(x)> };
+
+    ::vector<double> nums(100);
+    std::iota(nums.begin(), nums.end(), 1);
+    for (unsigned i {}; const decltype(nums)::value_type& e : nums) std::wcout << L'(' << i++ << L") " << e << L' ';
+    for (decltype(nums)::const_iterator it = nums.cbegin(), end = nums.cend(); it != end; ++it) std::wcout << *it << L'\n';
 
     return EXIT_SUCCESS;
 }

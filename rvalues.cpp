@@ -5,7 +5,7 @@
 #include <numbers>
 #include <type_traits>
 
-template<typename T, typename = std::enable_if<std::is_scalar<T>::value, T>::type> class pair {
+template<typename T, typename = std::enable_if<std::is_arithmetic<T>::value, T>::type> class pair {
     private:
         T first;
         T second;
@@ -39,9 +39,10 @@ template<typename T, typename = std::enable_if<std::is_scalar<T>::value, T>::typ
             return *this;
         }
 
-        template<typename U> constexpr pair<typename std::enable_if<std::is_scalar<U>::value, U>::type> to() const noexcept {
-            return pair<U> { static_cast<U>(first), static_cast<U>(second) };
-        }
+        // universal ctor
+        template<typename U>
+        constexpr explicit pair(const ::pair<typename std::enable_if<std::is_arithmetic<U>::value, U>::type>& other) noexcept :
+            first(static_cast<decltype(first)>(other.first)), second(static_cast<decltype(second)>(other.second)) { }
 
         template<typename char_t> friend std::basic_ostream<char_t>& operator<<(std::basic_ostream<char_t>& ostream, const pair& object) {
             // using function style casts
@@ -52,23 +53,23 @@ template<typename T, typename = std::enable_if<std::is_scalar<T>::value, T>::typ
 };
 
 int wmain() {
-    constexpr ::pair<float> a { std::numbers::pi_v<float> };
-    std::wcout << a << std::endl;
+    constexpr ::pair<float> fpair { std::numbers::pi_v<float> };
+    std::wcout << fpair << std::endl;
 
-    constexpr auto x { ::pair<short> {} };
-    std::wcout << x << std::endl;
+    constexpr auto spair { ::pair<short> {} };
+    std::wcout << spair << std::endl;
 
-    constexpr auto y {
+    constexpr auto dpair {
         ::pair<double> { 12.086, 6543.0974 }
     };
-    std::wcout << y << std::endl;
+    std::wcout << dpair << std::endl;
 
-    constexpr auto z { y };
+    constexpr auto z { dpair };
     ::pair<float>  q {};
-    q = a;
+    q = fpair;
     std::wcout << q << std::endl;
 
-    constexpr auto to { y.to<float>() };
+    constexpr ::pair<long> lpair { fpair };
     std::wcout << to << std::endl;
 
     q = q;
