@@ -28,6 +28,7 @@ $cflags = @(
     "/GL",
     "/Gw",
     "/MP",
+    "/MT", # statically link the multithreaded version of Windows libs
     "/O2",
     "/Ob3",
     "/Oi",

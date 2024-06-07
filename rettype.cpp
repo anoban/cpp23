@@ -1,6 +1,9 @@
 // templated function return types
 
 #include <cstdlib>
+#include <format>
+#include <iostream>
+#include <print>
 #include <type_traits>
 
 template<typename scalar_t>
@@ -28,12 +31,25 @@ static inline constexpr auto funcc(const T& _scalar0, const U& _scalar1) noexcep
     return _scalar0 * _scalar1;
 }
 
-auto wmain() {
+namespace max {
+    template<typename T, typename U> // requires requires {
+                                     // std::numeric_limits<T>::max(); // implicitly expects T and U to be numeric types
+    // std::numeric_limits<U>::max(); looks like std::numeric_limits does not impose any type constraints on its arg YIKES!
+    // }
+    constexpr auto max(const T& _arg0, const U& _arg1) noexcept requires requires { _arg0 < _arg1; } {
+        return _arg0 > _arg1 ? _arg0 : _arg1;
+    }
+} // namespace max
+
+auto wmain() -> int {
     constexpr auto constint { function(12, 97) };
     constexpr auto constfloat { function(12.354f, 97) }; // the second overload will be instantiated here!
 
     constexpr auto what { funcc(1.5456, 54567) };        // compiler has opted for the type with largest range
     constexpr auto whatnow { funcc(7634LLU, 4.21567L) }; // sure, long double has a larger range than unsigned long long
+
+    constexpr auto maxx { max::max(400LLU, 6.8764f) };
+    std::wcout << std::format(L"{:.10f}", maxx);
 
     return EXIT_SUCCESS;
 }
