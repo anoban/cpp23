@@ -34,4 +34,3 @@ auto main() -> int {
     constexpr auto must_be_true = ::predicate_if_v<std::is_scalar<float>::value, short>; // float is a scalar
     return 0;
 }
-
