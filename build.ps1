@@ -23,12 +23,13 @@ $cflags = @(
     "/diagnostics:caret",
     "/DNDEBUG",
     "/D_NDEBUG",
+    "/EHac",
     "/F0x10485100",
     "-fcf-protection:full",
     "/fp:fast",
     "/Gd",
     "/GF",
-    "/GR-",
+    "/GR",  # RTTI
 	"/GS",
     "/guard:cf",
     "/Gw",
@@ -57,8 +58,6 @@ $cflags = @(
     "/Qipo",
 	"/Qkeep-static-consts-",
 	# "/Qlong-double", causes compiler errors with c++20 and above
-    "/Qscatter-",
-    "/Qstd:c++23",
     "/Qm64",
     "/Qopt-assume-no-loop-carried-dep=2",
     "/Qopt-dynamic-align",
@@ -66,12 +65,15 @@ $cflags = @(
     "/Qopt-prefetch:5",
     "/Qopt-prefetch-distance:10000",
 	"/Qpc80",
+    "/Qscatter-",
+    "/Qstd:c++23",
     "/Qvec",
     "/Qvec-peel-loops",
     "/Qvec-threshold:0",
     "/Qvec-with-mask",
     "/Qunroll:10000",
     "/TP",
+    "/vd3", # https://learn.microsoft.com/en-us/cpp/preprocessor/vtordisp?view=msvc-170
 	"/Wabi",
     "/Wall",
 	"/Wcomment",
@@ -94,7 +96,9 @@ $cflags = @(
     "/wd4710",
     "/wd4711",
     "/wd4820",
-	"/Zc:strictStrings"
+    "/Zc:char8_t",
+	"/Zc:strictStrings",
+    "/Zc:twoPhase"
 )
 
 Write-Host "icx.exe ${cfiles} ${cflags}" -ForegroundColor Cyan
