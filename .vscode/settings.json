@@ -95,6 +95,8 @@
         "_70_xstddef": "cpp",
         "xstddef": "cpp",
         "complex": "cpp",
-        "source_location": "cpp"
+        "source_location": "cpp",
+        "execution": "cpp",
+        "queue": "cpp"
     }
 }
