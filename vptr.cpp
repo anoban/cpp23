@@ -24,7 +24,7 @@ struct cstyle {
 };
 
 static_assert(std::is_standard_layout<cstyle>::value); // yes!
-static_assert(offsetof(cstyle, initial) == 0);         // see no fucking vptrs
+static_assert(offsetof(cstyle, initial) == 0);         // see, no fucking vptrs
 
 auto wmain() -> int {
     object dummy;
@@ -61,7 +61,7 @@ auto wmain() -> int {
 
     // we could emulate std::type_info very easily using a POD type
     struct type_info {
-            uintptr_t            _vptr;
+            uintptr_t*           _vptr; // a dummy to remove the first 8 bytes
             __std_type_info_data _data;
     };
 
