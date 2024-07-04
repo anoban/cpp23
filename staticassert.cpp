@@ -7,7 +7,7 @@ struct node_t {
         unsigned      frequency;
 };
 
-static_assert(!offsetof(node_t, byte));
+static_assert(!offsetof(node_t, byte)); // this results in a compile time error in C code compiled with MSVC :(
 static_assert(!false);
 static_assert(!0);
 

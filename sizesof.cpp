@@ -1,14 +1,17 @@
 #include <cstdio>
 #include <cstdlib>
+#include <initializer_list>
 #include <type_traits>
 
-template<class C, typename T, typename... TList, unsigned size, unsigned... sizes> requires std::is_arithmetic_v<T> && std::is_class_v<C>
-[[nodiscard]] consteval bool sizes_of() noexcept {
-    if constexpr (!sizeof...(TList)) return true; // when the parameter pack is exhausted,
-    return sizeof(C<T>) == size && sizes_of<C, TList..., sizes...>();
+// implement a templated function that can return the sizes of a list of types
+template<typename T, typename... TList> [[nodiscard]] std::initializer_list<unsigned> consteval sizesof() noexcept {
+    return std::initializer_list<unsigned> { sizeof(T), sizesof<TList...>() };
 }
 
+template<typename T> [[nodiscard]] unsigned consteval sizesof() noexcept { return sizeof(T); }
+
 auto wmain() -> int {
-    //
+    constexpr auto sizes = ::sizesof<char, short, unsigned, long, long long, float, double, long double>();
+
     return EXIT_SUCCESS;
 }

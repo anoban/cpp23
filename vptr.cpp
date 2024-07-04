@@ -26,6 +26,26 @@ struct cstyle {
 static_assert(std::is_standard_layout<cstyle>::value); // yes!
 static_assert(offsetof(cstyle, initial) == 0);         // see, no fucking vptrs
 
+namespace dummies {
+    extern "C" {
+        struct __std_type_info_data {
+                const char* _UndecoratedName;
+                const char  _DecoratedName[1];
+
+                __std_type_info_data() noexcept : _UndecoratedName(nullptr), _DecoratedName() {};
+                __std_type_info_data(const __std_type_info_data&)            = default;
+                __std_type_info_data(__std_type_info_data&&)                 = default;
+
+                __std_type_info_data& operator=(const __std_type_info_data&) = default;
+                __std_type_info_data& operator=(__std_type_info_data&&)      = default;
+                ~__std_type_info_data()                                      = default;
+        };
+    }
+
+} // namespace dummies
+
+static_assert(std::is_standard_layout_v<dummies::__std_type_info_data>);
+
 auto wmain() -> int {
     object dummy;
 

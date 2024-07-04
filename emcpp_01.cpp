@@ -2,10 +2,11 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <string>
+
+using std::wstring;
 
 template<typename T> [[nodiscard]] constexpr double power_v(T base /* by value */, const unsigned exp) noexcept {
-    using deduced_type = T;
-
     if (!exp || !base) return 1.00;
     double result = base;
     for (unsigned i = 1; i < exp; ++i) result *= base;
@@ -13,8 +14,6 @@ template<typename T> [[nodiscard]] constexpr double power_v(T base /* by value *
 }
 
 template<typename T> [[nodiscard]] constexpr double power_r(T& base /* by reference */, const unsigned exp) noexcept {
-    using deduced_type = T;
-
     if (!exp || !base) return 1.00;
     double result = base;
     for (unsigned i = 1; i < exp; ++i) result *= base;
@@ -22,8 +21,6 @@ template<typename T> [[nodiscard]] constexpr double power_r(T& base /* by refere
 }
 
 template<typename T> [[nodiscard]] constexpr double power_cr(const T& base /* by const reference */, const unsigned exp) noexcept {
-    using deduced_type = T;
-
     if (!exp || !base) return 1.00;
     double result = base;
     for (unsigned i = 1; i < exp; ++i) result *= base;
@@ -31,20 +28,16 @@ template<typename T> [[nodiscard]] constexpr double power_cr(const T& base /* by
 }
 
 template<typename T> [[nodiscard]] constexpr double power_p(T* base /* by pointer */, const unsigned exp) noexcept {
-    using deduced_type = T;
-
     if (!exp || !base) return 1.00;
     double result = *base;
-    for (unsigned i = 1; i < exp; ++i) result *= base;
+    for (unsigned i = 1; i < exp; ++i) result *= *base;
     return result;
 }
 
 template<typename T> [[nodiscard]] constexpr double power_cp(const T* base /* by pointer to const */, const unsigned exp) noexcept {
-    using deduced_type = T;
-
     if (!exp || !base) return 1.00;
     double result = *base;
-    for (unsigned i = 1; i < exp; ++i) result *= base;
+    for (unsigned i = 1; i < exp; ++i) result *= *base;
     return result;
 }
 
@@ -57,17 +50,39 @@ static_assert(::power_cr(2, 10) == 1024);
 // let's implement a type capturer
 template<typename T> struct _type_capture_v {
         using deduced_type = T;
-
         explicit _type_capture_v([[maybe_unused]] T _deduce_from) noexcept { }
 };
 
-template<typename T> struct _type_capture_r {
+template<typename T> struct _type_capture_ref {
         using deduced_type = T;
-
-        explicit _type_capture_r([[maybe_unused]] T& _deduce_from) noexcept { }
+        explicit _type_capture_ref([[maybe_unused]] T& _deduce_from) noexcept { }
 };
 
-auto wmain() {
+template<typename T> struct _type_capture_cref {
+        using deduced_type = T;
+        explicit _type_capture_cref([[maybe_unused]] const T& _deduce_from) noexcept { }
+};
+
+template<typename T> struct is_reference {
+        static constexpr bool value { false };
+        using type = T;
+};
+
+template<typename T> struct is_reference<T&> {
+        static constexpr bool value { true };
+        using type = T;
+};
+
+template<typename T> struct is_reference<T&&> {
+        static constexpr bool value { true };
+        using type = T;
+};
+
+template<typename T> constexpr bool is_reference_v = ::is_reference<T>::value;
+
+template<typename T> using is_reference_t          = typename ::is_reference<T>::type;
+
+auto wmain() -> int {
     // in type deduction, when we pass an int for base, T is deduced as int, not const int&!
     constexpr double two { 2.000 };
 
@@ -75,9 +90,11 @@ auto wmain() {
     // the deduced type is just double, the adornments used in the function argument doesn't impact the type of T
 
     // when T is a reference or pointer
-    float        p { M_PI };
-    const float  pi { M_PI };
-    const float& piref { pi };
+    float              p { M_PI };
+    float* const       ppi { &p };
+    const float        pi { M_PI };
+    const float* const cppi { &pi };
+    const float&       piref { pi };
 
     ::power_v(p, 3);     // T is float
     ::power_v(pi, 3);    // T is float
@@ -102,8 +119,22 @@ auto wmain() {
     // so the const qualifer is ignored during the type deduction
     // referenceness is ignored as usual.
 
-    _type_capture_v             cap { piref };
-    decltype(cap)::deduced_type deduction; // just float, NOT const float&
+    ::power_p(ppi, 5);
+    ::power_p(cppi, 5);
 
-    _type_capture_r capr { piref };
+    ::power_cp(ppi, 3);
+    ::power_cp(cppi, 3);
+
+    [[maybe_unused]] decltype(_type_capture_v { piref })::deduced_type    deduct { M_PI_2 };    // just float, NOT const float&
+    [[maybe_unused]] decltype(_type_capture_ref { piref })::deduced_type  deduct_ref { M_PI };  // const float NOT const float&
+    [[maybe_unused]] decltype(_type_capture_cref { piref })::deduced_type deduct_cref { M_PI }; // float NOT const float&
+
+    wstring name { L"BARRACUDAAAAAA" };
+    auto&   nameref { name };
+
+    static_assert(!::is_reference_v<decltype(name)>);
+    static_assert(::is_reference_v<decltype(nameref)>);
+    static_assert(::is_reference_v<decltype(std::move(name))>);
+
+    return EXIT_SUCCESS;
 }
