@@ -41,6 +41,13 @@ template<typename T> [[nodiscard]] constexpr double power_cp(const T* base /* by
     return result;
 }
 
+template<typename T> [[nodiscard]] constexpr double power_fr(T&& base /* by a forwarding reference */, const unsigned exp) noexcept {
+    if (!exp || !base) return 1.00;
+    double result = std::forward(base);
+    for (unsigned i = 1; i < exp; ++i) result *= base;
+    return result;
+}
+
 static_assert(::power_cr(4, 2) == 16);
 static_assert(::power_cr(3, 4) == 81);
 static_assert(::power_cr(2, 5) == 32);
@@ -135,6 +142,11 @@ auto wmain() -> int {
     static_assert(!::is_reference_v<decltype(name)>);
     static_assert(::is_reference_v<decltype(nameref)>);
     static_assert(::is_reference_v<decltype(std::move(name))>);
+
+    ::power_fr(p, 4);
+    ::power_fr(pi, 4);
+    ::power_fr(piref, 4);
+    ::power_fr(4.7657, 4);
 
     return EXIT_SUCCESS;
 }
