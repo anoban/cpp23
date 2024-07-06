@@ -7,9 +7,10 @@
 // type space - consists of types int, const float&, volatile std::string and what not
 // value space - 65, 8.3846, L"Anoban"
 // SFINAE space ???
+
 // SFINAE space is like a high dimensional type space where we leverage the formation quality to develop type abstractions
 
-template<typename _Ty, _Ty _value> struct integral_constant {
+template<typename _Ty, _Ty _value> requires std::integral<_Ty> struct integral_constant {
         using value_type = _Ty;
         static inline constexpr value_type value { _value };
 
@@ -82,6 +83,40 @@ template<> struct add_lvalue_reference<const volatile void> {
 };
 // the above approach works but is too wordy and inelegant
 
+// an alternative approach to the partial specializations on void
+template<typename T, bool is_void = std::is_same_v<void, std::remove_cv_t<std::remove_reference_t<T>>>> struct is_referrable {
+        using type           = T;
+        using reference_type = T&;
+        static constexpr bool value { true };
+};
+
+template<typename T> struct is_referrable<T, true> { // partial specialzation for void variants
+        using type           = T;
+        using reference_type = T;
+        static constexpr bool value { false };
+};
+
+static_assert(::is_referrable<bool>::value);
+static_assert(::is_referrable<const float&>::value);
+static_assert(::is_referrable<const volatile int>::value);
+static_assert(::is_referrable<const volatile short&&>::value);
+static_assert(!::is_referrable<void>::value);
+static_assert(::is_referrable<void*>::value);
+
+// an alternate implementation of add_lvalue_reference, but naming it as add_reference
+template<typename T> struct add_reference {
+        using type = typename ::is_referrable<T>::reference_type; // this will return void when a reference to void is required
+        // instead of a compile time hard error
+        static constexpr bool is_referrable = ::is_referrable<T>::value;
+};
+
+static_assert(std::is_same_v<add_reference<bool>::type, bool&>);
+static_assert(std::is_same_v<add_reference<const float>::type, const float&>);
+static_assert(std::is_same_v<add_reference<volatile short&&>::type, volatile short&>);
+static_assert(std::is_same_v<add_reference<void>::type, void>);                               // :)
+static_assert(std::is_same_v<add_reference<const void>::type, const void>);                   // :)
+static_assert(std::is_same_v<add_reference<const volatile void>::type, const volatile void>); // :)
+
 extern "C" int wmain() {
     constexpr auto pi { std::numbers::pi_v<float> };
     auto* const    pip { &pi };
@@ -106,6 +141,8 @@ extern "C" int wmain() {
     static_assert(std::is_same_v<float&, ::add_lvalue_reference_t<float&&>>);
 
     static_assert(std::is_same_v<void, ::add_lvalue_reference_t<void>>); // w/o p spl - error C7683: you cannot create a reference to 'void'
+    // okay with p spl
+
     typename ::add_lvalue_reference<void>::type
         cannot_be {}; //  w/o the partial specialization - error C7683: you cannot create a reference to 'void'
     // with partial specialization -  error C2182: 'cannot_be': this use of 'void' is not valid
