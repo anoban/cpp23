@@ -103,12 +103,15 @@ static_assert(::is_referrable<const volatile short&&>::value);
 static_assert(!::is_referrable<void>::value);
 static_assert(::is_referrable<void*>::value);
 
-// an alternate implementation of add_lvalue_reference, but naming it as add_reference
+// an alternate implementation of add_lvalue_reference, but naming it as add_reference because we don't want the oldname_v2 sort of suffixes
 template<typename T> struct add_reference {
         using type = typename ::is_referrable<T>::reference_type; // this will return void when a reference to void is required
         // instead of a compile time hard error
         static constexpr bool is_referrable = ::is_referrable<T>::value;
 };
+
+// without the presence of partial specializations for add_lvalue_reference or without the is_referrable mediated add_reference
+// we will end up with illformed types with void variants as inputs
 
 static_assert(std::is_same_v<add_reference<bool>::type, bool&>);
 static_assert(std::is_same_v<add_reference<const float>::type, const float&>);
@@ -116,6 +119,9 @@ static_assert(std::is_same_v<add_reference<volatile short&&>::type, volatile sho
 static_assert(std::is_same_v<add_reference<void>::type, void>);                               // :)
 static_assert(std::is_same_v<add_reference<const void>::type, const void>);                   // :)
 static_assert(std::is_same_v<add_reference<const volatile void>::type, const volatile void>); // :)
+
+static_assert(std::is_same_v<::std::remove_reference_t<void>, void>);
+static_assert(!::remove_reference<void>::value);
 
 extern "C" int wmain() {
     constexpr auto pi { std::numbers::pi_v<float> };
@@ -143,8 +149,8 @@ extern "C" int wmain() {
     static_assert(std::is_same_v<void, ::add_lvalue_reference_t<void>>); // w/o p spl - error C7683: you cannot create a reference to 'void'
     // okay with p spl
 
-    typename ::add_lvalue_reference<void>::type
-        cannot_be {}; //  w/o the partial specialization - error C7683: you cannot create a reference to 'void'
+    // typename ::add_lvalue_reference<void>::type cannot_be {};
+    //  w/o the partial specialization - error C7683: you cannot create a reference to 'void'
     // with partial specialization -  error C2182: 'cannot_be': this use of 'void' is not valid
 
     // adding an lvalue reference to void should yield void&
