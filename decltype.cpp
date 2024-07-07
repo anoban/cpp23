@@ -24,11 +24,11 @@ template<typename...> using erased_t                                            
 
 [[maybe_unused]] const ::erased_t<float, short, char&, float*, const int&&, volatile double*>* const ptr = nullptr;
 
-static bool are_you_okay                                                                                 = false;
+static bool are_you_okay_bro                                                                             = false;
 
-static_assert(std::is_same_v<decltype(are_you_okay = true), bool&>);
+static_assert(std::is_same_v<decltype(are_you_okay_bro = true), bool&>);
 // an assignment operation's return type is the left operand's type's reference
-static_assert(std::is_same_v<decltype(are_you_okay), bool>); // that's just bool, see!
+static_assert(std::is_same_v<decltype(are_you_okay_bro), bool>); // that's just bool, see!
 
 static_assert(std::is_same_v<decltype((global)), const double&>);
 // using a parenthesis inside decltype() turns the identifier into an expression
