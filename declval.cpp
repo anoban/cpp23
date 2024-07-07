@@ -28,7 +28,8 @@ static_assert(std::is_same_v<::assignment_result_t<float&, double>, float&>);
 static_assert(std::is_same_v<::assignment_result_t<float&, double&&>, float&>);
 static_assert(std::is_same_v<::assignment_result_t<float&, short&>, float&>);
 
-static_assert(std::is_same_v<::assignment_result_t<short&, short*>, float&>); //  error C2440: '=': cannot convert from 'short *' to 'short'
+static_assert(std::is_same_v<::assignment_result_t<short&, short*>, float&>);
+// ill formed error C2440: '=': cannot convert from 'short *' to 'short'
 
 template<typename LT, typename RT> using deref_assignment_result_t = decltype(::declval<LT>() = *::declval<RT>());
 static_assert(std::is_same_v<::deref_assignment_result_t<float&, short*>, float&>); // that's cool see :)
@@ -65,7 +66,8 @@ static_assert(std::is_same_v<
               typename ::assignment_result<const float&, const volatile double>::result_type,
               void>); // const float& cannot be assigned to
 
-static_assert(std::is_same_v<typename ::assignment_result<long&, const double* const>::result_type, void>); // invalid type pair
+static_assert(std::
+                  is_same_v<typename ::assignment_result<long&, const double* const>::result_type, void>); // ill formed - invalid type pair
 static_assert(std::is_same_v<typename ::assignment_result<long, long>::result_type, void>);   // LHT must be a modifiable lvalue reference
 static_assert(std::is_same_v<typename ::assignment_result<long&&, long>::result_type, void>); // LHT must be a modifiable lvalue reference
 
@@ -81,4 +83,19 @@ auto wmain() -> int {
     // not a value type
 
     return EXIT_SUCCESS;
+}
+
+// instead of using declval we could use something that actually returns an object
+template<typename T>
+constexpr T&& materialize() noexcept requires requires {
+    T {}; /* T must be default constructible */
+} {
+    return T {};
+}
+
+// or any of the following alternaitive implementations
+template<typename T> requires std::is_default_constructible_v<T> consteval T&& realize() noexcept { return T {}; }
+
+template<typename T> consteval typename std::enable_if<std::is_default_constructible<T>::value, T&&>::type realize() noexcept {
+    return T {};
 }

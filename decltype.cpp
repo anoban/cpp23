@@ -20,6 +20,16 @@ constexpr decltype(float(), short()) what {};
 // this is a new garbage added in C++17 for what?
 template<typename...> using erased_t                                                                     = void;
 // using this we can define an single alias for a template parameter pack
-// but WHY? because it is fucking C++
+// but WHY? because it's fucking C++
 
 [[maybe_unused]] const ::erased_t<float, short, char&, float*, const int&&, volatile double*>* const ptr = nullptr;
+
+static bool are_you_okay                                                                                 = false;
+
+static_assert(std::is_same_v<decltype(are_you_okay = true), bool&>);
+// an assignment operation's return type is the left operand's type's reference
+static_assert(std::is_same_v<decltype(are_you_okay), bool>); // that's just bool, see!
+
+static_assert(std::is_same_v<decltype((global)), const double&>);
+// using a parenthesis inside decltype() turns the identifier into an expression
+// thus it evaluates to a lvalue reference

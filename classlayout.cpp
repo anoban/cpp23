@@ -15,7 +15,7 @@ class stationary {
         unsigned _stock;
 
     public:
-        virtual float how_much() const noexcept { return _price; }
+        virtual void how_much() const noexcept { _putws(L"virtual void stationary::how_much() const noexcept"); }
 };
 
 class exercise_book : public stationary {
@@ -23,10 +23,14 @@ class exercise_book : public stationary {
         unsigned _pages;
 
     public:
-        virtual float how_much() const noexcept override { return 1000.0; }
+        virtual void how_much() const noexcept override { _putws(L"virtual float exercise_book::how_much() const noexcept override"); }
 };
 
 auto wmain() -> int {
-    exercise_book ebook {}; // to make clang AST dumping work
+    constexpr exercise_book ebook {}; // to make clang AST dumping work
+
+    dynamic_cast<const stationary*>(&ebook)->how_much();
+    ebook.how_much();
+
     return EXIT_SUCCESS;
 }
