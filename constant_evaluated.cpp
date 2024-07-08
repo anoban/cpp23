@@ -10,6 +10,19 @@ template<typename T> [[nodiscard]] consteval typename std::enable_if<std::is_ari
     return T(M_2_SQRTPI);
 }
 
+template<typename T> [[nodiscard]] static consteval typename std::enable_if_t<std::is_arithmetic_v<T>, T> func() noexcept {
+    if (std::is_constant_evaluated()) return T(11);
+    return T(22); // should always return 11 because this function can only be evaluated at compile time
+}
+
+template<typename T> [[nodiscard]] static constexpr typename std::enable_if_t<std::is_arithmetic_v<T>, T> function() noexcept {
+    if (std::is_constant_evaluated()) return T(11);
+    return T(22); // should always return 11 because this function can only be evaluated at compile time
+} 
+
+// not a constexpr function
+static inline double getpi() noexcept { return std::is_constant_evaluated() ? M_PI : 0.000; }
+
 auto wmain() -> int {
     const auto pi { M_PI };
     // what happens below is the compiler frst checks whether the subexpression on the true branch can be consteval evaluated
@@ -32,6 +45,19 @@ auto wmain() -> int {
     // when the definition is made a constant expression, materialize() is used for initialization
     const auto deff = std::is_constant_evaluated() ? materialize<double>() : 0;
     std::wcout << deff << L"   " << 0 << L'\n';
+
+    auto           nobueno { func<double>() }; // static initialization
+    constexpr auto okayy { func<float>() };
+
+    std::wcout << nobueno << L"   " << 11.00 << L"? \n";
+    std::wcout << okayy << L"   " << 11.00 << L"? \n";
+
+    std::wcout << L"not huh? " << function<float>() << L'\n';
+    constexpr auto p { func<short>() };
+    std::wcout << L"huh? " << p << L'\n';
+
+    const auto pie { getpi() };
+    std::wcout << L"0.0000 huh? " << pie << L'\n';
 
     return EXIT_SUCCESS;
 }

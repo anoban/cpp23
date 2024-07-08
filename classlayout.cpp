@@ -10,27 +10,59 @@
 
 class stationary {
     protected:
-        float    _price;
-        float    _profmar;
-        unsigned _stock;
+        float    _price { 1000.0 };
+        float    _profmar { 12.35 };
+        unsigned _stock { 7'134 };
 
     public:
-        virtual void how_much() const noexcept { _putws(L"virtual void stationary::how_much() const noexcept"); }
+        virtual void           huh() const noexcept { _putws(L"virtual void stationary::huh() const noexcept"); }
+        virtual const wchar_t* name() const noexcept { return L"stationary"; }
+};
+
+static_assert(sizeof(stationary) == 24);
+
+/*
+    layout of class stationary ::
+    0000 vtableptr
+    0008 _price
+    0012 _profmar
+    0016 _stock
+    <4 padding bytes>
+*/
+
+class mimic_stationary {
+        uintptr_t _padd0 {};
+        uintptr_t _padd1 {};
+
+    public:
+        virtual void           placeholder() const noexcept { _putws(L"virtual void mimic_stationary::placeholder() const noexcept"); }
+        virtual const wchar_t* what() const noexcept { return L"mimic_stationary"; }
 };
 
 class exercise_book : public stationary {
     protected:
-        unsigned _pages;
+        unsigned _pages { 240 };
 
     public:
-        virtual void how_much() const noexcept override { _putws(L"virtual float exercise_book::how_much() const noexcept override"); }
+        virtual void           huh() const noexcept override { _putws(L"virtual void exercise_book::huh() const noexcept override"); }
+        virtual const wchar_t* name() const noexcept override { return L"exercise_book"; }
 };
+
+static_assert(sizeof(mimic_stationary) == sizeof(stationary));
 
 auto wmain() -> int {
     constexpr exercise_book ebook {}; // to make clang AST dumping work
 
-    dynamic_cast<const stationary*>(&ebook)->how_much();
-    ebook.how_much();
+    ebook.huh();
+    dynamic_cast<const stationary*>(&ebook)->huh();
+
+    constexpr mimic_stationary dummy {};
+    reinterpret_cast<const stationary*>(&dummy)->huh();          // should invoke placeholder()
+    _putws(reinterpret_cast<const stationary*>(&dummy)->name()); // should invoke what()
+
+    // this type of type punning works well with clang, msvc, icx and g++ :)
 
     return EXIT_SUCCESS;
 }
+
+// IF YOU WANT CRUDE BINARY LEVEL REIMAGINING OF CLASS USE REINTERPRET CAST NOT DYNAMIC CAST!
