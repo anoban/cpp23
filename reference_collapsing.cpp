@@ -9,6 +9,9 @@ struct pod {
 
 static inline constexpr pod get() noexcept { return { 12, 100.0 }; }
 
+template<typename T> using add_lvalue_reference_t = T&;
+template<typename T> using add_rvalue_reference_t = T&&;
+
 auto wmain() -> int {
     //
 
@@ -22,4 +25,24 @@ auto wmain() -> int {
 
     // let's try using auto
     auto& refref { refhundred }; // type is int& i.e this is another reference to hundred not a reference to reference
+
+    // say hello to reference collapsing
+    static_assert(std::is_same_v<::add_lvalue_reference_t<float>, float&>);
+    static_assert(std::is_same_v<::add_lvalue_reference_t<float&>, float&>);
+    static_assert(std::is_same_v<::add_lvalue_reference_t<float&&>, float&>);
+
+    static_assert(std::is_same_v<::add_rvalue_reference_t<float>, float&&>);
+    static_assert(std::is_same_v<::add_rvalue_reference_t<float&>, float&>);
+    static_assert(std::is_same_v<::add_rvalue_reference_t<float&&>, float&&>);
 }
+
+/*
+    THIS IS HOW REFERENCE COLLAPSING IN C++ WORKS
+
+    ORIGINAL        ADDITION        RESULT
+    T&              &               T&
+    T&              &&              T&
+    T&&             &               T&
+    T&&             &&              T&&
+
+*/
