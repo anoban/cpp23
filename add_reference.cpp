@@ -116,16 +116,23 @@ namespace __arthur_o_dwyer__ {
 
     template<typename T> using add_reference_t = typename impl<T, T>::type;
     // the problem with using = typename impl<T, T>::type; is rvalue references
-    // when T is an rvalue reference, our partial specialization is goint to attempt to form a T&&& in
+    // when T is an rvalue reference, our partial specialization is going to attempt to form a T&&& in
     // struct impl<T, std::remove_reference_t<T&>>, that is ill-formed
     // the compiler will fall back to use the base template which we do not want
+
+    // we could actually test this
+    template<typename T, typename type = std::remove_reference<T&>::type> struct refer_it {
+            using reference_type = T&;
+    };
+
+    static_assert(std::is_same_v<refer_it<float&&>::reference_type, float&>);
 
     static_assert(std::is_same_v<add_reference_t<float>, float&>);
     static_assert(std::is_same_v<add_reference_t<const float>, const float&>);
     static_assert(std::is_same_v<add_reference_t<volatile float>, volatile float&>);
     static_assert(std::is_same_v<add_reference_t<const volatile float>, const volatile float&>);
     static_assert(std::is_same_v<add_reference_t<float*>, float*&>);
-    static_assert(std::is_same_v<add_reference_t<short&&>, short&>);
+    static_assert(std::is_same_v<add_reference_t<short&&>, short&&>);
     static_assert(std::is_same_v<add_reference_t<short&>, short&>);
 
     // what will happen when T is void?
