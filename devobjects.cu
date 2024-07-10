@@ -15,40 +15,47 @@ template<typename T, typename = std::enable_if<std::is_arithmetic<T>::value, T>:
         T _value {};
 
     public:
-        constexpr scalar_wrapper() noexcept : _value {} { }
+        scalar_wrapper() noexcept : _value {} { }
 
-        constexpr scalar_wrapper(const T& _init) noexcept : _value { _init } { }
+        scalar_wrapper(const T& _init) noexcept : _value { _init } { }
 
-        constexpr scalar_wrapper(const scalar_wrapper& other) noexcept : _value { other._value } { }
+        scalar_wrapper(const scalar_wrapper& other) noexcept : _value { other._value } { }
 
-        constexpr scalar_wrapper(scalar_wrapper&& other) noexcept : _value { other._value } { other._value = 0; }
+        scalar_wrapper(scalar_wrapper&& other) noexcept : _value { other._value } { other._value = 0; }
 
-        constexpr scalar_wrapper& operator=(const scalar_wrapper& other) noexcept {
+        scalar_wrapper& operator=(const scalar_wrapper& other) noexcept {
             if (this == std::addressof(other)) return *this;
             _value = other._value;
             return *this;
         }
 
-        constexpr scalar_wrapper& operator=(scalar_wrapper&& other) noexcept {
+        scalar_wrapper& operator=(scalar_wrapper&& other) noexcept {
             if (this == std::addressof(other)) return *this;
             _value       = other._value;
             other._value = 0;
             return *this;
         }
 
-        constexpr ~scalar_wrapper() = default;
+        ~scalar_wrapper() = default;
 
-        constexpr scalar_wrapper operator+(const scalar_wrapper& other) const noexcept { return { _value + other._value }; }
+        scalar_wrapper operator+(const scalar_wrapper& other) const noexcept { return { _value + other._value }; }
 
-        constexpr scalar_wrapper& operator+=(const scalar_wrapper& other) noexcept {
+        scalar_wrapper& operator+=(const scalar_wrapper& other) noexcept {
             _value += other._value;
             return *this;
         }
 
-        constexpr type unwrapped() const noexcept { return _value; }
+        type unwrapped() const noexcept { return _value; }
 };
 
 static constexpr auto size { 1024 * 1024 };
+
+/*
+error: calling a __host__ function("scalar_wrapper<double, double> ::operator +=(const scalar_wrapper<double, double> &)") from a __global__ function("kernel<double> ") is not allowed
+error: identifier "scalar_wrapper<double, double> ::operator +=" is undefined in device code
+error: calling a __host__ function("scalar_wrapper<double, double> ::operator =(const scalar_wrapper<double, double> &)") from a __global__ function("kernel<double> ") is not allowed
+error: identifier "scalar_wrapper<double, double> ::operator =" is undefined in device code
+*/
 
 template<typename T> requires std::is_arithmetic_v<T>
 __global__ void kernel(_In_ const scalar_wrapper<T>* const array, _In_ const unsigned& length, _Inout_ scalar_wrapper<T>* const out) {

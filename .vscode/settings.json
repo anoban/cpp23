@@ -4,6 +4,7 @@
         ".clang-tidy": "yaml",
         ".clangd": "yaml",
         "*.cu": "cuda-cpp",
+        "*.cuh": "cuda-cpp",
         "*.h": "c",
         "*.c": "c",
         "*.hpp": "cpp",
@@ -97,6 +98,7 @@
         "complex": "cpp",
         "source_location": "cpp",
         "execution": "cpp",
-        "queue": "cpp"
+        "queue": "cpp",
+        "typeindex": "cpp"
     }
 }
