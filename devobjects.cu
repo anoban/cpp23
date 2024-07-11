@@ -1,3 +1,5 @@
+// nvcc .\devobjects.cu -O3 -std=c++20 --expt-relaxed-constexpr -o .\devobjects.exe     :)
+
 #include <algorithm>
 #include <chrono>
 #include <cstdlib>
@@ -15,53 +17,50 @@ template<typename T, typename = std::enable_if<std::is_arithmetic<T>::value, T>:
         T _value {};
 
     public:
-        scalar_wrapper() noexcept : _value {} { }
+        __host__ __device__ scalar_wrapper() noexcept : _value {} { }
 
-        scalar_wrapper(const T& _init) noexcept : _value { _init } { }
+        __host__ __device__ explicit scalar_wrapper(const T& _init) noexcept : _value { _init } { }
 
-        scalar_wrapper(const scalar_wrapper& other) noexcept : _value { other._value } { }
+        __host__ __device__ scalar_wrapper(const scalar_wrapper& other) noexcept : _value { other._value } { }
 
-        scalar_wrapper(scalar_wrapper&& other) noexcept : _value { other._value } { other._value = 0; }
+        __host__ __device__ scalar_wrapper(scalar_wrapper&& other) noexcept : _value { other._value } { other._value = 0; }
 
-        scalar_wrapper& operator=(const scalar_wrapper& other) noexcept {
-            if (this == std::addressof(other)) return *this;
+        __host__ __device__ scalar_wrapper& operator=(const scalar_wrapper& other) noexcept {
+            if (this == &other) return *this;
             _value = other._value;
             return *this;
         }
 
-        scalar_wrapper& operator=(scalar_wrapper&& other) noexcept {
-            if (this == std::addressof(other)) return *this;
+        __host__ __device__ scalar_wrapper& operator=(scalar_wrapper&& other) noexcept {
+            if (this == &other) return *this;
             _value       = other._value;
             other._value = 0;
             return *this;
         }
 
-        ~scalar_wrapper() = default;
+        __host__ __device__ ~scalar_wrapper() noexcept { _value = 0; }
 
-        scalar_wrapper operator+(const scalar_wrapper& other) const noexcept { return { _value + other._value }; }
+        __host__ __device__ scalar_wrapper operator+(const scalar_wrapper& other) const noexcept {
+            return scalar_wrapper { _value + other._value };
+        }
 
-        scalar_wrapper& operator+=(const scalar_wrapper& other) noexcept {
+        __host__ __device__ scalar_wrapper& operator+=(const scalar_wrapper& other) noexcept {
             _value += other._value;
             return *this;
         }
 
-        type unwrapped() const noexcept { return _value; }
+        __host__ __device__ type unwrapped() const noexcept { return _value; }
 };
 
 static constexpr auto size { 1024 * 1024 };
 
-/*
-error: calling a __host__ function("scalar_wrapper<double, double> ::operator +=(const scalar_wrapper<double, double> &)") from a __global__ function("kernel<double> ") is not allowed
-error: identifier "scalar_wrapper<double, double> ::operator +=" is undefined in device code
-error: calling a __host__ function("scalar_wrapper<double, double> ::operator =(const scalar_wrapper<double, double> &)") from a __global__ function("kernel<double> ") is not allowed
-error: identifier "scalar_wrapper<double, double> ::operator =" is undefined in device code
-*/
-
+// DO NOT USE C++ REFERENCES IN KERNEL FUNCTIONS
 template<typename T> requires std::is_arithmetic_v<T>
-__global__ void kernel(_In_ const scalar_wrapper<T>* const array, _In_ const unsigned& length, _Inout_ scalar_wrapper<T>* const out) {
+__global__ void kernel(_In_ const scalar_wrapper<T>* const array, _In_ const unsigned length, _Inout_ scalar_wrapper<T>* const out) {
     scalar_wrapper<T> temp {};
     // for (const auto& i : std::ranges::views::iota(0u, length)) temp = temp + array[i];   // error: identifier "std::ranges::views::iota" is undefined in device code
     for (auto i = 0; i < length; ++i) temp += array[i];
+    printf("sum is %Lf\n", temp.unwrapped());
     *out = temp;
 }
 
@@ -72,6 +71,8 @@ auto wmain() -> int {
     randoms.reserve(size);
 
     for (const auto& _ : std::ranges::views::iota(0, size)) randoms.emplace_back(rand());
+    std::wcout << L"size = " << size << L" randoms.size() = " << randoms.size() << L'\n';
+
     const auto sum { std::reduce(randoms.cbegin(), randoms.cend()).unwrapped() };
 
     long double loopsum {};
@@ -85,9 +86,9 @@ auto wmain() -> int {
     cudaMemcpy(device_vector, randoms.data(), sizeof(decltype(randoms)::value_type) * randoms.size(), cudaMemcpyHostToDevice);
 
     kernel<<<1, 1>>>(device_vector, randoms.size(), device_sum);
-    cudaMemcpy(&copy, device_sum, sizeof copy, cudaMemcpyDeviceToHost);
-
     cudaDeviceSynchronize();
+
+    cudaMemcpy(&copy, device_sum, sizeof copy, cudaMemcpyDeviceToHost);
 
     cudaFree(device_vector);
     cudaFree(device_sum);
