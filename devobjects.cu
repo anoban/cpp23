@@ -1,4 +1,4 @@
-// nvcc .\devobjects.cu -O3 -std=c++20 --expt-relaxed-constexpr -o .\devobjects.exe     :)
+// nvcc .\devobjects.cu -O3 -std=c++20 --expt-relaxed-constexpr -o .\devobjects.exe
 
 #include <algorithm>
 #include <chrono>

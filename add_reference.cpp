@@ -104,7 +104,7 @@ namespace __type_constraints {
 
 namespace __arthur_o_dwyer__ {
 
-    template<class T, class SFINAE> struct impl {
+    template<class T, class SFINAE> struct impl { // base template for SFINAE failures
             using type = T;
     };
 
@@ -115,25 +115,37 @@ namespace __arthur_o_dwyer__ {
     // when T& is ill formed, the compiler will fall back to the base template
 
     template<typename T> using add_reference_t = typename impl<T, T>::type;
-    // the problem with using = typename impl<T, T>::type; is rvalue references
-    // when T is an rvalue reference, our partial specialization is going to attempt to form a T&&& in
-    // struct impl<T, std::remove_reference_t<T&>>, that is ill-formed
-    // the compiler will fall back to use the base template which we do not want
+    // the problem with using = typename impl<T, T>::type; is reference types
+    // when T is a reference, our result should always be T& (regardless of the type of reference T)
+    // with add_reference_t<T&&>, our partial specialization will map to impl<T&&, T&&>
+    // is the second type identical to the reference removed version of the first? (T&& == T) ? NO
+    // with add_reference_t<T&>, our partial specialization will map to impl<T&, T&>
+    // is the second type identical to the reference removed version of the first? (T& == T) ? NO
+    // hence the compiler will fall back to use the base template, and our result will be the type of the input (T&& and T&)
 
-    // we could actually test this
+    // refernce collapsing examples
     template<typename T, typename type = std::remove_reference<T&>::type> struct refer_it {
             using reference_type = T&;
     };
 
+    static_assert(std::is_same_v<refer_it<float>::reference_type,
+                                 float&>); // collapsed type is float&
+    static_assert(std::is_same_v<refer_it<float&>::reference_type, float&>);
     static_assert(std::is_same_v<refer_it<float&&>::reference_type, float&>);
+
+    // one workaround is
+    template<typename T> using __add_reference_t = typename impl<T, std::remove_reference_t<T>>::type;
 
     static_assert(std::is_same_v<add_reference_t<float>, float&>);
     static_assert(std::is_same_v<add_reference_t<const float>, const float&>);
     static_assert(std::is_same_v<add_reference_t<volatile float>, volatile float&>);
     static_assert(std::is_same_v<add_reference_t<const volatile float>, const volatile float&>);
     static_assert(std::is_same_v<add_reference_t<float*>, float*&>);
-    static_assert(std::is_same_v<add_reference_t<short&&>, short&&>);
-    static_assert(std::is_same_v<add_reference_t<short&>, short&>);
+    static_assert(std::is_same_v<add_reference_t<short&&>, short&>); // fall back
+    static_assert(std::is_same_v<add_reference_t<short&>, short&>);  // fall back
+
+    static_assert(std::is_same_v<__add_reference_t<short&&>, short&>); // okay :)
+    static_assert(std::is_same_v<__add_reference_t<short&>, short&>);  // okay :)
 
     // what will happen when T is void?
     static_assert(std::is_same_v<add_reference_t<void>, void>);                   // base template to the rescue
@@ -144,4 +156,42 @@ namespace __arthur_o_dwyer__ {
 
 } // namespace __arthur_o_dwyer__
 
-static_assert(std::is_same_v<std::add_lvalue_reference_t<short&&>, short&>);
+namespace punned_types {
+    // C++ has a new way to default a variadic type list to a single type
+    // FOR WHAT THOUGH?
+
+    template<typename...> using make_void = void; // our type of choice here is void
+
+    static_assert(std::is_same_v<make_void<float, const int, volatile double, unsigned short&, const volatile char>, void>); // ;)
+    // this will still not work with invalid types like void&
+
+    template<typename T, typename _ = make_void<T&>> struct impl { // base, fall back for void types
+            using type = T;
+    };
+
+    template<typename T> struct impl<T, void> {
+            using type = T&;
+    };
+
+    // now that we have a template that needs two arguments, we need an expansion template (make two template arguments from one)
+    template<typename T> struct add_lvalue_reference {
+            using reference_type = typename impl<T, T>::type;
+    };
+
+    template<typename T> using add_lvalue_reference_t = typename add_lvalue_reference<T>::reference_type;
+
+    static_assert(std::is_same_v<add_lvalue_reference_t<float>, float&>);
+    static_assert(std::is_same_v<add_lvalue_reference_t<const float>, const float&>);
+    static_assert(std::is_same_v<add_lvalue_reference_t<volatile float>, volatile float&>);
+    static_assert(std::is_same_v<add_lvalue_reference_t<const volatile float>, const volatile float&>);
+    static_assert(std::is_same_v<add_lvalue_reference_t<float*>, float*&>);
+    static_assert(std::is_same_v<add_lvalue_reference_t<short&&>, short&>);
+    static_assert(std::is_same_v<add_lvalue_reference_t<short&>, short&>);
+
+    static_assert(std::is_same_v<add_reference_t<void>, void>);                   // base template to the rescue
+    static_assert(std::is_same_v<add_reference_t<const void>, const void>);       // base template to the rescue
+    static_assert(std::is_same_v<add_reference_t<volatile void>, volatile void>); // base template to the rescue
+    static_assert(std::is_same_v<add_reference_t<const volatile void>,
+                                 const volatile void>); // base template to the rescue
+
+} // namespace punned_types
