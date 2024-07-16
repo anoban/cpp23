@@ -92,17 +92,16 @@ namespace __type_constraints {
         static_assert(std::is_same_v<add_reference_t<short&>, short&>);
 
         // what will happen when T is void?
-        static_assert(std::is_same_v<add_reference_t<void>, void>);                   // partial specialization to the rescue
-        static_assert(std::is_same_v<add_reference_t<const void>, const void>);       // partial specialization to the rescue
-        static_assert(std::is_same_v<add_reference_t<volatile void>, volatile void>); // partial specialization to the rescue
-        static_assert(std::is_same_v<add_reference_t<const volatile void>,
-                                     const volatile void>); // partial specialization to the rescue
+        static_assert(std::is_same_v<add_reference_t<void>, void>);                               // partial specialization to the rescue
+        static_assert(std::is_same_v<add_reference_t<const void>, const void>);                   // partial specialization to the rescue
+        static_assert(std::is_same_v<add_reference_t<volatile void>, volatile void>);             // partial specialization to the rescue
+        static_assert(std::is_same_v<add_reference_t<const volatile void>, const volatile void>); // partial specialization to the rescue
 
     } // namespace __conditional_template_predicate
 
 } // namespace __type_constraints
 
-namespace __arthur_o_dwyer__ {
+namespace __arthur_o_dwyer {
 
     template<class T, class SFINAE> struct impl { // base template for SFINAE failures
             using type = T;
@@ -146,17 +145,17 @@ namespace __arthur_o_dwyer__ {
 
     static_assert(std::is_same_v<__add_reference_t<short&&>, short&>); // okay :)
     static_assert(std::is_same_v<__add_reference_t<short&>, short&>);  // okay :)
+    static_assert(std::is_same_v<__add_reference_t<void>, void>);      // okay :)
 
     // what will happen when T is void?
-    static_assert(std::is_same_v<add_reference_t<void>, void>);                   // base template to the rescue
-    static_assert(std::is_same_v<add_reference_t<const void>, const void>);       // base template to the rescue
-    static_assert(std::is_same_v<add_reference_t<volatile void>, volatile void>); // base template to the rescue
-    static_assert(std::is_same_v<add_reference_t<const volatile void>,
-                                 const volatile void>); // base template to the rescue
+    static_assert(std::is_same_v<add_reference_t<void>, void>);                               // base template to the rescue
+    static_assert(std::is_same_v<add_reference_t<const void>, const void>);                   // base template to the rescue
+    static_assert(std::is_same_v<add_reference_t<volatile void>, volatile void>);             // base template to the rescue
+    static_assert(std::is_same_v<add_reference_t<const volatile void>, const volatile void>); // base template to the rescue
 
-} // namespace __arthur_o_dwyer__
+} // namespace __arthur_o_dwyer
 
-namespace punned_types {
+namespace __punned_types {
     // C++ has a new way to default a variadic type list to a single type
     // FOR WHAT THOUGH?
 
@@ -165,22 +164,22 @@ namespace punned_types {
     static_assert(std::is_same_v<make_void<float, const int, volatile double, unsigned short&, const volatile char>, void>); // ;)
     // this will still not work with invalid types like void&
 
-    template<typename T, typename _ = make_void<T&>> struct impl { // base, fall back for void types
+    template<typename T, typename SFINAE> struct impl { // base template, fall back for void types
             using type = T;
     };
 
-    template<typename T> struct impl<T, void> {
+    template<typename T> struct impl<T, make_void<T&>> {
             using type = T&;
     };
 
     // now that we have a template that needs two arguments, we need an expansion template (make two template arguments from one)
     template<typename T> struct add_lvalue_reference {
-            using reference_type = typename impl<T, T>::type;
+            using reference_type = typename impl<T, void>::type;
     };
 
     template<typename T> using add_lvalue_reference_t = typename add_lvalue_reference<T>::reference_type;
 
-    static_assert(std::is_same_v<add_lvalue_reference_t<float>, float&>);
+    static_assert(std::is_same_v<add_lvalue_reference_t<long>, long&>);
     static_assert(std::is_same_v<add_lvalue_reference_t<const float>, const float&>);
     static_assert(std::is_same_v<add_lvalue_reference_t<volatile float>, volatile float&>);
     static_assert(std::is_same_v<add_lvalue_reference_t<const volatile float>, const volatile float&>);
@@ -188,10 +187,67 @@ namespace punned_types {
     static_assert(std::is_same_v<add_lvalue_reference_t<short&&>, short&>);
     static_assert(std::is_same_v<add_lvalue_reference_t<short&>, short&>);
 
-    static_assert(std::is_same_v<add_reference_t<void>, void>);                   // base template to the rescue
-    static_assert(std::is_same_v<add_reference_t<const void>, const void>);       // base template to the rescue
-    static_assert(std::is_same_v<add_reference_t<volatile void>, volatile void>); // base template to the rescue
-    static_assert(std::is_same_v<add_reference_t<const volatile void>,
-                                 const volatile void>); // base template to the rescue
+    static_assert(std::is_same_v<add_lvalue_reference_t<void>, void>);                               // base template to the rescue
+    static_assert(std::is_same_v<add_lvalue_reference_t<const void>, const void>);                   // base template to the rescue
+    static_assert(std::is_same_v<add_lvalue_reference_t<volatile void>, volatile void>);             // base template to the rescue
+    static_assert(std::is_same_v<add_lvalue_reference_t<const volatile void>, const volatile void>); // base template to the rescue
 
-} // namespace punned_types
+} // namespace __punned_types
+
+namespace __experimenting_with_make_void {
+    template<typename...> using make_void = void;
+
+    template<typename T, typename SFINAE> struct impl {
+            using reference_type = T;
+    };
+
+    template<typename T> struct impl<T, make_void<T&>> {
+            using reference_type = T&&;
+    };
+
+    template<typename T> using add_rvalue_reference_t = typename impl<T, void>::reference_type;
+
+    static_assert(std::is_same_v<add_rvalue_reference_t<long>, long&&>);
+    static_assert(std::is_same_v<add_rvalue_reference_t<const float>, const float&&>);
+    static_assert(std::is_same_v<add_rvalue_reference_t<volatile float>, volatile float&&>);
+    static_assert(std::is_same_v<add_rvalue_reference_t<const volatile float>, const volatile float&&>);
+    static_assert(std::is_same_v<add_rvalue_reference_t<float*>, float*&&>);
+    static_assert(std::is_same_v<add_rvalue_reference_t<short&&>, short&&>);
+    static_assert(std::is_same_v<add_rvalue_reference_t<short&>, short&>);
+
+    static_assert(std::is_same_v<add_rvalue_reference_t<void>, void>);
+    static_assert(std::is_same_v<add_rvalue_reference_t<const void>, const void>);
+    static_assert(std::is_same_v<add_rvalue_reference_t<volatile void>, volatile void>);
+    static_assert(std::is_same_v<add_rvalue_reference_t<const volatile void>, const volatile void>);
+
+    template<typename T, typename SFINAE> struct point_to {
+            using pointer_type = T;
+    };
+
+    template<typename T> struct point_to<T, make_void<T*>> {
+            using pointer_type = T*;
+    };
+
+    template<typename T> struct add_pointer {
+            using type = typename point_to<T, void>::pointer_type;
+    };
+
+    template<typename T> using add_pointer_t = typename add_pointer<T>::type;
+
+    static_assert(std::is_same_v<add_pointer_t<long>, long*>);
+    static_assert(std::is_same_v<add_pointer_t<const float>, const float*>);
+    static_assert(std::is_same_v<add_pointer_t<volatile float>, volatile float*>);
+    static_assert(std::is_same_v<add_pointer_t<const volatile float>, const volatile float*>);
+    static_assert(std::is_same_v<add_pointer_t<float*>, float**>);
+    static_assert(std::is_same_v<add_pointer_t<void>, void*>);
+    static_assert(std::is_same_v<add_pointer_t<const void>, const void*>);
+    static_assert(std::is_same_v<add_pointer_t<volatile void>, volatile void*>);
+    static_assert(std::is_same_v<add_pointer_t<const volatile void>, const volatile void*>);
+
+    static_assert(std::is_same_v<add_pointer_t<short&>, short&>);
+    static_assert(std::is_same_v<add_pointer_t<short&&>, short&&>);
+    static_assert(std::is_same_v<add_pointer_t<const double&&>, const double&&>);
+    static_assert(std::is_same_v<add_pointer_t<volatile float&>, volatile float&>);
+    static_assert(std::is_same_v<add_pointer_t<const volatile int&>, const volatile int&>);
+
+} // namespace __experimenting_with_make_void
