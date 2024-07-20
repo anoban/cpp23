@@ -2,8 +2,8 @@
 // cl.exe /std:c++20 /d1reportAllClassLayout
 // clang -emit-llvm -std=c++20 -Xclang -fdump-record-layouts -Xclang -fdump-vtable-layouts -c
 
-// for MSVC existence of class definition is enough to dump the layouts
-// for clang, the class must at least be used once in the programme
+// for MSVC, existence of class definition is enough to dump the layouts
+// for LLVM, the class must at least be instantiated once in the programme
 
 #include <cstdio>
 #include <cstdlib>

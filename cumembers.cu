@@ -3,12 +3,12 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <numbers>
 #include <numeric>
 #include <random>
 #include <vector>
 
 #include <cuda_runtime.h>
-#include <curand.h>
 #include <curand_kernel.h>
 
 template<typename T> concept arithmetic                = std::integral<T> || std::floating_point<T>;
@@ -24,7 +24,7 @@ template<typename T> requires ::arithmetic<T> class wrapper {
 
         constexpr __host__ __device__ wrapper() noexcept : _value {} { }
 
-        constexpr __host__ __device__ wrapper(T&& _init) noexcept : _value { _init } { } // NOLINT(google-explicit-constructor)
+        constexpr __host__ __device__ wrapper(const T& _init) noexcept : _value { _init } { } // NOLINT(google-explicit-constructor)
 
         constexpr __host__ __device__ wrapper(const wrapper& other) noexcept : _value { other._value } { }
 
@@ -103,9 +103,9 @@ template<typename T> requires ::arithmetic<T> class wrapper {
         }
 };
 
-static constexpr unsigned MAXX_SIZE { 12'000 };
-static constexpr unsigned N_THREADS { 12 };
-static constexpr unsigned N_OPERATIONS { 1'000 };
+static constexpr unsigned N_THREADS { 240 };
+static constexpr unsigned N_OPERATIONS { 10'000 };
+static constexpr unsigned MAXX_SIZE { N_THREADS * N_OPERATIONS }; // requisite for the semantics of kernel and reduce functions
 
 template<typename T> __global__ void kernel(T* const _rsrc_ptr, const unsigned _rsrc_count) {
     const auto index { threadIdx.x + threadIdx.y + threadIdx.z };
@@ -127,14 +127,14 @@ auto wmain() -> int {
     std::random_device seeder {};
     std::mt19937_64    engine { seeder() };
 
-    wrapper<int> fmax { std::numeric_limits<unsigned char>::max() };
+    wrapper<double> fmax { std::numbers::pi_v<double> };
     std::wcout << fmax;
     fmax += fmax;
     std::wcout << fmax;
 
     std::vector<wrapper<float>> collection {};
     collection.reserve(MAXX_SIZE);
-    std::uniform_real_distribution<decltype(collection)::value_type::value_type> dist { 0.0, 100.0 }; // min = 0.0, max = 100.0
+    std::uniform_real_distribution<decltype(collection)::value_type::value_type> dist { 10.0, 20.0 }; // min, max
 
     for (unsigned i {}; i < MAXX_SIZE; ++i) collection.emplace_back(dist(engine));
     const auto sum { std::accumulate(collection.cbegin(), collection.cend(), decltype(collection)::value_type {}) };
@@ -179,6 +179,8 @@ auto wmain() -> int {
 
     std::wcout << sum.unwrapped() << L" @ line " << __LINE__ << L'\n';
     std::wcout << device_sum.unwrapped() << L" @ line " << __LINE__ << L'\n';
+
+    // there is a tiny variation between the device sum and the host sum
 
     ::cudaFree(device_array);
     return EXIT_SUCCESS;
