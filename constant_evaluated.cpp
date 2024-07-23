@@ -17,8 +17,8 @@ template<typename T> [[nodiscard]] static consteval typename std::enable_if_t<st
 
 template<typename T> [[nodiscard]] static constexpr typename std::enable_if_t<std::is_arithmetic_v<T>, T> function() noexcept {
     if (std::is_constant_evaluated()) return T(11);
-    return T(22); // should always return 11 because this function can only be evaluated at compile time
-} 
+    return T(22);
+}
 
 // not a constexpr function
 static inline double getpi() noexcept { return std::is_constant_evaluated() ? M_PI : 0.000; }
