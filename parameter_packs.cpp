@@ -1,25 +1,6 @@
 #include <cassert>
 #include <cstdlib>
 
-enum class month { January, February, March, April, May, June, July, August, September, October, November, December };
-
-constexpr month& operator++(month& now) noexcept {
-    if (now == month::December)
-        now = month::January;
-    else
-        now = static_cast<month>(static_cast<int>(now) + 1);
-    return now;
-}
-
-constexpr month operator++(month& now, int) noexcept {
-    const auto temp { now };
-    if (now == month::December)
-        now = month::January;
-    else
-        now = static_cast<month>(static_cast<int>(now) + 1);
-    return temp;
-}
-
 template<size_t n> struct factorial {
         static constexpr size_t value { n * factorial<n - 1>::value };
 };
@@ -40,65 +21,69 @@ user<unsigned, char, wchar_t, unsigned long, const float, const volatile double>
 
 user<> empty {}; // okay to instantiate a class type template with an empty template argument list
 
-template<class... TList> static constexpr unsigned func(const TList&... arg_pack); // just the declaration
+template<class... TList> static constexpr unsigned func(const TList&... arg_pack) noexcept; // just the declaration
 
-func<>(); // won't work because to deduce TList the compiler needs an argument pack or an explicit type list
+// func<>(); // won't work because to deduce TList the compiler needs an argument pack or an explicit type list
 // since none of that are here, this will not be interpreted as a template instantiation at all
 // clang sees this as an attempt to define a template specialization with the template<> part missing in the front
 
 template<class... TList_0, class... TList_1> constexpr void function() noexcept { }
 
-func<unsigned, const float&, volatile double&&>();
+// func<unsigned, const float&, volatile double&&>();
 
-template<typename... TList> [[nodiscard]] consteval double sum(const TList&... args) noexcept { return (args + ... + 0); }
+const auto result { func() };
+const auto _result { func(47, 5.012, 0.765743f) };
 
-template<typename... TList> [[nodiscard]] consteval double mul(const TList&... args) noexcept { return (... * args); }
+namespace using_fold_expressions {
+    template<typename... TList> [[nodiscard]] consteval double sum(const TList&... args) noexcept {
+        return (args + ... + 0); // NOLINT(cppcoreguidelines-narrowing-conversions)
+    }
+
+    template<typename... TList> [[nodiscard]] consteval double mul(const TList&... args) noexcept {
+        return (... * args); // NOLINT(cppcoreguidelines-narrowing-conversions)
+    }
+} // namespace using_fold_expressions
 
 namespace using_overloads {
 
+    // the order of the declaration of these two template overloads matter
+    // the overload taking a single scalar must precede the overload with the argument pack
+    template<class T> [[nodiscard]] consteval double sum(const T& val) throw() { return val; }
+
     template<class T, class... TList> [[nodiscard]] consteval double sum(const T& start, const TList&... rest) throw() {
-        return start + sum(rest...);
+        return start + using_overloads::sum(rest...); // NOLINT(cppcoreguidelines-narrowing-conversions)
     }
 
-    template<class T> [[nodiscard]] consteval double sum(const T& end) throw() { return end; }
+    template<class T> [[nodiscard]] consteval double mul(const T& val) throw() { return val; }
 
-    template<class T, class... TList> [[nodiscard]] consteval double mul(const T& start, const TList&... rest) throw() {
-        return start + mul(rest...);
+    template<class T, class... TList> [[nodiscard]] consteval double mul(const T& head, const TList&... rest) throw() {
+        return head * using_overloads::mul(rest...); // NOLINT(cppcoreguidelines-narrowing-conversions)
     }
 
-    template<class T> [[nodiscard]] consteval double mul(const T& end) throw() { return end; }
 } // namespace using_overloads
 
 namespace using_constexpr_if {
-    template<class T, class... TList> [[nodiscard]] consteval double sum(const T& start, const TList&... rest) throw() {
-        if constexpr (sizeof...(TList) == 1) return rest;
-        return start + sum(rest...);
+    template<class T, class... TList> [[nodiscard]] consteval double sum(const T& head, const TList&... pack) throw() {
+        if (sizeof...(TList) == 2) return head + pack;  // if the type pack contains only two elements
+        return head + using_constexpr_if::sum(pack...); // NOLINT(cppcoreguidelines-narrowing-conversions)
     }
 
-    template<class T, class... TList> [[nodiscard]] consteval double mul(const T& start, const TList&... rest) throw() {
-        if constexpr (sizeof...(TList) == 0) return start;
-        return start * mul(rest...);
+    template<class T, class... TList> [[nodiscard]] consteval double mul(const T& head, const TList&... pack) throw() {
+        if (sizeof...(TList) == 2) return head;
+        return pack * using_constexpr_if::mul(pack...);
     }
 } // namespace using_constexpr_if
 
-static_assert(::sum(1, 2.0, 3.00L, 4u, 5l, 6ll) == 21);
-static_assert(::mul(1.00f, 2llu, 3zu, 4ui16, 5i8, 6i16) == 720);
-static_assert(::mul(0, 1, 2, 3, 4, 5, 6) == 0);
+static_assert(using_fold_expressions::sum(1, 2.0, 3.00L, 4u, 5l, 6ll, '\n') == 31);
+static_assert(using_fold_expressions::mul(1.00f, 2llu, 3ll, 4ui16, 5i8, 6i16) == 720);
+static_assert(using_fold_expressions::mul(0, 1, 2, 3, 4, 5, 6) == 0);
 
 static_assert(using_constexpr_if::sum(1, 2.0, 3.00L, 4u, 5l, 6ll) == 21);
-static_assert(using_constexpr_if::mul(1.00f, 2llu, 3zu, 4ui16, 5i8, 6i16) == 720);
+static_assert(using_constexpr_if::mul(1.00f, 2llu, 3ll, 4ui16, 5i8, 6i16) == 720);
 static_assert(using_constexpr_if::mul(0, 1, 2, 3, 4, 5, 6) == 0);
 
-static void constexpr test_month_increment_operators() throw() {
-    auto today { month::July };
-    for (unsigned i = static_cast<unsigned>(today); i < 100; i = ++i % 12) {
-        // assert(static_cast<unsigned>(today++) == i - 1);
+static_assert(using_overloads::sum(1, 2.0, 3.00L, 4u, 5l, 6ll, '\t') == 30);
+static_assert(using_overloads::mul(1.00f, 2llu, 3ll, 4ui16, 5i8, 6i16) == 720);
+static_assert(using_overloads::mul(0, 1, 2, 3, 4, 5, 6) == 0);
 
-        assert(static_cast<unsigned>(++today) == i);
-    }
-}
-
-auto wmain() -> int {
-    test_month_increment_operators();
-    return EXIT_SUCCESS;
-}
+auto wmain() -> int { return EXIT_SUCCESS; }
