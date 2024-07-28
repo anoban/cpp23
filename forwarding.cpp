@@ -44,7 +44,7 @@ class nomoves {
 int wmain() {
     // C++ did not have move semantics prior to C++11
     std::vector<nomoves> collection; // copy only in C++03
-    collection.reserve(20);          // avoid reallocations
+    collection.reserve(20);          // to avoid reallocations
 
     nomoves       one(12);
     const nomoves two(45);

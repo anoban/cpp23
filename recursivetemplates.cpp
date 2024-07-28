@@ -14,10 +14,10 @@
 // that's why the conditional for LLVM must precede that of MSVC
 // LLVM and GNU compilers' version macro are strings, so we do not need to stringify them by hand!
 
-#if (defined(__clang__) && defined(__llvm__))
+#if defined(__clang__) && defined(__llvm__)
     #pragma message("Compiling " __FILE__ " using LLVM " __clang_version__)
     #define FUNCTION_SIGNATURE __PRETTY_FUNCTION__
-#elif (defined(__GNUC__) && defined(__GNUG__))
+#elif defined(__GNUC__) && defined(__GNUG__)
     #pragma message("Compiling " __FILE__ " using g++ " __VERSION__)
     #define FUNCTION_SIGNATURE __PRETTY_FUNCTION__
 #elif defined(_MSC_VER) && defined(_MSC_FULL_VER)
@@ -27,17 +27,30 @@
     #error Please find a compiler that provides an extension macro for function signatures!
 #endif
 
-template<class T> [[nodiscard]] static constexpr long double sum(const T& tail) throw() {
+template<class T> [[nodiscard]] static constexpr long double sum(const T& tail) noexcept {
     ::puts(FUNCTION_SIGNATURE);
     return tail;
 }
 
-template<class T, class... TList> [[nodiscard]] static constexpr long double sum(const T& head, const TList&... pack) throw() {
+template<class T, class... TList> [[nodiscard]] static constexpr long double sum(const T& head, const TList&... pack) noexcept {
     ::puts(FUNCTION_SIGNATURE);
     return head + ::sum(pack...);
 }
 
+// fold expressions are not recursive!
+template<class... TList> [[nodiscard]] static constexpr long double sum_rightfold(const TList&... pack) noexcept {
+    ::puts(FUNCTION_SIGNATURE);
+    return (pack + ...); // right folding
+}
+
+template<class... TList> [[nodiscard]] static constexpr long double sum_leftfold(const TList&... pack) noexcept {
+    ::puts(FUNCTION_SIGNATURE);
+    return (... + pack); // left folding
+}
+
 auto wmain() -> int {
-    [[maybe_unused]] const auto total = ::sum(12.98f, 87, 873L, 0b1101101010, 763U, 'X', L'A');
+    [[maybe_unused]] const auto total    = ::sum(12.98f, 87, 873L, 0b1101101010, 763U, 'X', L'A');
+    [[maybe_unused]] const auto total_rf = ::sum_rightfold(12.98f, 87, 873L, 0b1101101010, 763U, 'X', L'A');
+    [[maybe_unused]] const auto total_lf = ::sum_leftfold(12.98f, 87, 873L, 0b1101101010, 763U, 'X', L'A');
     return EXIT_SUCCESS;
 }
