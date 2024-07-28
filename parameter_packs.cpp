@@ -63,26 +63,37 @@ namespace using_overloads {
 } // namespace using_overloads
 
 namespace using_constexpr_if {
+
+    // with a consteval function, we know for a fact that the function will be evaluated at compile time
+    // but if statements must still be explicitly constexpered if we want them to be evaluated @ compiletime
+
     template<class T, class... TList> [[nodiscard]] consteval double sum(const T& head, const TList&... pack) throw() {
-        if (sizeof...(TList) == 2) return head + pack;  // if the type pack contains only two elements
-        return head + using_constexpr_if::sum(pack...); // NOLINT(cppcoreguidelines-narrowing-conversions)
+        if constexpr (sizeof...(TList) == 0)
+            return head; // NOLINT(cppcoreguidelines-narrowing-conversions)
+        else
+            return head + using_constexpr_if::sum(pack...); // NOLINT(cppcoreguidelines-narrowing-conversions)
     }
 
     template<class T, class... TList> [[nodiscard]] consteval double mul(const T& head, const TList&... pack) throw() {
-        if (sizeof...(TList) == 2) return head;
-        return pack * using_constexpr_if::mul(pack...);
+        if constexpr (sizeof...(TList) == 0)
+            return head;
+        else
+            return head * using_constexpr_if::mul(pack...); // NOLINT(cppcoreguidelines-narrowing-conversions)
     }
 } // namespace using_constexpr_if
 
 static_assert(using_fold_expressions::sum(1, 2.0, 3.00L, 4u, 5l, 6ll, '\n') == 31);
+static_assert(using_fold_expressions::sum('A', 1, 2.0, 3.00L, 4u, 5l, 6ll, '\n') == 96);
 static_assert(using_fold_expressions::mul(1.00f, 2llu, 3ll, 4ui16, 5i8, 6i16) == 720);
 static_assert(using_fold_expressions::mul(0, 1, 2, 3, 4, 5, 6) == 0);
 
 static_assert(using_constexpr_if::sum(1, 2.0, 3.00L, 4u, 5l, 6ll) == 21);
+static_assert(using_constexpr_if::sum('A', 1, 2.0, 3.00L, 4u, 5l, 6ll, '\n') == 96);
 static_assert(using_constexpr_if::mul(1.00f, 2llu, 3ll, 4ui16, 5i8, 6i16) == 720);
 static_assert(using_constexpr_if::mul(0, 1, 2, 3, 4, 5, 6) == 0);
 
 static_assert(using_overloads::sum(1, 2.0, 3.00L, 4u, 5l, 6ll, '\t') == 30);
+static_assert(using_overloads::sum('A', 1, 2.0, 3.00L, 4u, 5l, 6ll, '\n') == 96);
 static_assert(using_overloads::mul(1.00f, 2llu, 3ll, 4ui16, 5i8, 6i16) == 720);
 static_assert(using_overloads::mul(0, 1, 2, 3, 4, 5, 6) == 0);
 
