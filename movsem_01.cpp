@@ -5,11 +5,9 @@
 #include <cmath>
 #include <vector>
 
-using std::vector;
-
 class f64
 #if (__cplusplus >= 201103L)
-    final // final keyword only available with C++11 and later
+    final // final keyword is only available with C++11 and later
 #endif
 {
 
@@ -54,22 +52,26 @@ class f64
         long double unwrap() const throw() { return _value; }
 };
 
-static inline vector<f64> test() throw() {
-    vector<f64> container;
+static inline std::vector<f64> test() throw() {
+    std::vector<f64> container;
     container.reserve(4); // reserve storage for 4 f64 skeletons on heap
     // 1 extra ;p
     f64 pi(M_PI);
     container.push_back(pi);      // copy
     container.push_back(pi + pi); // create a temporary and copy in C++03 create a temporary and move in C++11 and later
     container.push_back(pi);      // copy
-
-    return container;
+    ::_putws(L"\n");
+    return container; // NRVO - Named Return Value Optimization
 }
 
 int wmain() {
-    const vector<f64> result = test();
+    std::vector<f64> result; // default construction of an empty std::vector skeleton on stack
+    if (!result.data()) ::_putws(L"yup, result.data() is NULL!\n");
+
+    result = ::test(); // copy assignment in C++03, move assignment in C++11 and later
+    // since move assignment basically swaps the std::vector's buffer, there won't be any copy construction of its elements
     // no .cbegin() & .cend() members in C++03
-    for (vector<f64>::const_iterator begin = result.begin(), end = result.end(); begin != end; ++begin)
+    for (std::vector<f64>::iterator begin = result.begin(), end = result.end(); begin != end; ++begin)
 #ifdef __GNUG__                                  // wprintf_s prints 0.0000 for long doubles with g++
         ::wprintf(L"%4.5Lf\n", begin->unwrap()); // NOLINT(cppcoreguidelines-pro-type-vararg)
 #else
