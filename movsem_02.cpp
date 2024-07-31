@@ -20,6 +20,11 @@ class string {
         char*    _resource;
 
     public:
+        typedef char*       pointer;
+        typedef const char* const_pointer;
+        typedef char*       iterator;
+        typedef const char* const_iterator;
+
         inline string() NOEXCEPT : _size(0), _capacity(0), _resource(NULL) { }
 
         inline explicit string(const unsigned& size) NOEXCEPT :
@@ -39,9 +44,11 @@ class string {
             if (!_resource) { // has the allocation failed,
                 _capacity = _size = 0;
                 ::fputws(L"allocation failure!\n", stderr);
+                return;
             }
-            ::memset(_resource, ch, _capacity);
-            _resource[_size] = 0;
+
+            ::memset(_resource, ch, repeats);
+            ::memset(_resource + repeats, 0U, _capacity - _size);
         }
 
         inline explicit string(const char* str) NOEXCEPT : // not a converting constructor
@@ -51,7 +58,7 @@ class string {
                 ::fputws(L"allocation failure!\n", stderr);
             }
             ::memset(_resource, 0U, _capacity);
-            strcpy_s(_resource, _capacity, str);
+            ::strcpy_s(_resource, _capacity, str);
         }
 
         inline string(const string& other) NOEXCEPT :
@@ -131,6 +138,10 @@ class string {
         inline char* c_str() NOEXCEPT { return _resource; }
 
         inline const char* c_str() const NOEXCEPT { return _resource; }
+
+        string operator+(const string& other) const NOEXCEPT { }
+
+        string operator+=(const string& other) const NOEXCEPT { }
 };
 
 static inline ::string skyfall() NOEXCEPT {
