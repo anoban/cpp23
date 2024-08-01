@@ -6,15 +6,18 @@
     #define _AMD64_ // architecture
     #define WIN32_LEAN_AND_MEAN
     #define WIN32_EXTRA_MEAN
-    #include <windef.h>
+    #include <WinDef.h>
     #include <WinBase.h>
     #include <errhandlingapi.h>
     #include <fileapi.h>
     #include <handleapi.h>
 // clang-format on
 
+    #include <algorithm>
     #include <cstdio>
+    #include <ranges>
     #include <string>
+    #include <string_view>
     #include <type_traits>
 
     #include <cuda_runtime.h>
@@ -71,9 +74,9 @@ static inline std::string __cdecl open(
     *rbytes = 0;
 
     std::string    buffer {};
-    unsigned long  nbytes {};
     LARGE_INTEGER  filesize {};
-    const HANDLE64 hFile = ::CreateFileW(filename, GENERIC_READ, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_READONLY, nullptr);
+    const HANDLE64 hFile =
+        ::CreateFileW(filename, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_READONLY, nullptr);
 
     if (hFile == INVALID_HANDLE_VALUE) {
         fprintf_s(stderr, "Error %lu in CreateFileW\n", ::GetLastError());

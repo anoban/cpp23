@@ -1,21 +1,22 @@
-﻿#include <ranges>
-#include <string_view>
-
-#include <parser.hpp>
+﻿#include <parser.hpp>
 
 auto main() -> int {
-    unsigned long fsize {};
-
-    char current_working_directory[MAX_PATH] {};
+    static char current_working_directory[MAX_PATH] {};
     ::GetCurrentDirectoryA(MAX_PATH, current_working_directory);
     ::puts(current_working_directory);
 
-    auto                       beans { ::open(L"dry_beans.csv", &fsize) };
-    const std::string_view     beans_view { beans };
-    constexpr std::string_view CRLF { "\r\n" };
-    constexpr std::string_view delimiter { "," };
+    unsigned long          fsize {};
+    auto                   beans { ::open(LR"(dry_beans.csv)", &fsize) };
+    const std::string_view beans_view { beans };
 
-    const auto lines = std::ranges::split_view(beans_view, CRLF);
-    for (const auto line : lines);
+    const auto nlines { std::ranges::count(beans, '\n') }; // 13,612
+    ::printf_s("%lld lines\n", nlines);
+
+    constexpr auto CRLF { '\n' };
+    constexpr auto COMMA { ',' };
+
+    const auto lines = std::ranges::views::split(beans_view, CRLF);
+    for (const auto line : lines) ::puts(line);
+
     return EXIT_SUCCESS;
 }

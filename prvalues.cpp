@@ -92,6 +92,6 @@ static void function() noexcept(false) {
     const auto* const lvptr = &L"I've beeeeen here beforeeeeeeeeeeee!";                      // okay, reference to an lvalue
     auto&             isit  = std::wstring { L"I feel like a storm is coming!" };            // mhm, cannot take a reference to a prvalue
     const auto&       may = std::wstring { L"because the writing's on the waaaaallllllll" }; // prvalues can bind to const lvalue references
-
-    const float& willit   = std::numbers::pi_v<float>;
+    auto&&            prvalue { std::wstring { L"Where you go, I go, what you see, I seeeee!" } };
+    const float&      willit = std::numbers::pi_v<float>;
 }
