@@ -1,4 +1,4 @@
-#include <ostream>
+#include <iostream>
 #include <type_traits>
 
 template<class T> struct is_std_ostream_compatible final {
@@ -49,5 +49,3 @@ template<
 
 static_assert(::all_of_v<::is_std_ostream_compatible, char, wchar_t>());
 static_assert(!::all_of_v<::is_std_ostream_compatible, char, wchar_t, unsigned>());
-
-template<class T, class U> concept is_std_ostream_printable = requires { std::basic_ostream<T> << U {}; }
