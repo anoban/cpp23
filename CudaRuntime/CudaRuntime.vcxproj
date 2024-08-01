@@ -77,7 +77,7 @@
       <TypeInfo>false</TypeInfo>
       <Warning>Wall</Warning>
       <AdditionalOptions>-std=c++20 %(AdditionalOptions)</AdditionalOptions>
-      <CompileOut>$(SolutionDir)bin\$(Configuration)\</CompileOut>
+      <CompileOut>$(SolutionDir)$(CudaIntDir)\$(ProjectName)</CompileOut>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -102,7 +102,7 @@
       <TypeInfo>false</TypeInfo>
       <Warning>Wall</Warning>
       <AdditionalOptions>-std=c++20 %(AdditionalOptions)</AdditionalOptions>
-      <CompileOut>$(SolutionDir)bin\$(Configuration)\</CompileOut>
+      <CompileOut>$(SolutionDir)$(CudaIntDir)\$(ProjectName)</CompileOut>
     </CudaCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

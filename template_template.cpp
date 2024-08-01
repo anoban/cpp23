@@ -49,3 +49,12 @@ template<
 
 static_assert(::all_of_v<::is_std_ostream_compatible, char, wchar_t>());
 static_assert(!::all_of_v<::is_std_ostream_compatible, char, wchar_t, unsigned>());
+
+template<class __arg0_type, class __arg1_type, class __rtrn_type> struct multiply final {
+        using first_argument_type  = __arg0_type;
+        using second_argument_type = __arg1_type;
+        using result_type          = __rtrn_type;
+
+        constexpr result_type operator()(const __arg0_type& arg_0, const __arg1_type& arg_1) const noexcept { return arg_0 * arg_1; }
+};
+
