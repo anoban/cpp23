@@ -1,21 +1,12 @@
-﻿#include <cstdio>
-#include <cstdlib>
-#include <vector>
+﻿#include <parser.hpp>
 
-#include <cuda_runtime.h>
-#include <curand.h>
-#include <device_launch_parameters.h>
+auto main() -> int {
+    unsigned long fsize {};
 
-static constexpr size_t NELEMENTS { 1024 * 1024 * 1024 }; // 1 GiB
+    char cwd[MAX_PATH] {};
+    ::GetCurrentDirectoryA(MAX_PATH, cwd);
+    ::puts(cwd);
 
-template<typename scalar_t, typename generator_t> __global__ static void fill_randoms(scalar_t* const device_array, const unsigned size) {
-    //
-}
-
-auto wmain() -> int {
-    //
-
-    ::cudaMalloc();
-
+    ::puts(::open(L".\dry_beans.csv", &fsize).c_str());
     return EXIT_SUCCESS;
 }

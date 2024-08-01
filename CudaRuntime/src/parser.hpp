@@ -2,9 +2,23 @@
 #ifndef __DRY_BEANS_HPP__
     #define __DRY_BEANS_HPP__
 
+// clang-format off
+    #define _AMD64_ // architecture
+    #define WIN32_LEAN_AND_MEAN
+    #define WIN32_EXTRA_MEAN
+    #include <windef.h>
+    #include <WinBase.h>
+    #include <errhandlingapi.h>
+    #include <fileapi.h>
+    #include <handleapi.h>
+// clang-format on
+
     #include <cstdio>
     #include <string>
     #include <type_traits>
+
+    #include <cuda_runtime.h>
+    #include <device_launch_parameters.h>
 
 template<template<class> class _TypeTrait, class... _TList> static consteval bool all_of_trait_v() noexcept {
     return (_TypeTrait<_TList>::value && ...); // using fold expressions
@@ -27,15 +41,9 @@ static_assert(!::any_of_trait_v<std::is_floating_point, float*, const double&, v
 static_assert(!::any_of_trait_v<std::is_floating_point, char&, short*, int, long&&, unsigned, long long>());
 static_assert(::any_of_trait_v<std::is_integral, char, short, long, unsigned, long long, std::string, float, const double&&>());
 static_assert(!::any_of_trait_v<std::is_integral, float, double, long double>());
+static_assert(::any_of_trait_v<std::is_arithmetic, float, double, long double, char, short, int, long, unsigned long long>());
 
 // yeeehawww :)
-
-    #define _AMD64_
-    #define WIN32_LEAN_AND_MEAN
-    #define WIN32_EXTRA_MEAN
-    #include <errhandlingapi.h>
-    #include <fileapi.h>
-    #include <handleapi.h>
 
 template<typename T, typename = std::enable_if<std::is_floating_point<T>::value, T>::type> struct record final {
         T           Area;
@@ -57,8 +65,6 @@ template<typename T, typename = std::enable_if<std::is_floating_point<T>::value,
         std::string Class;
 };
 
-static_assert(std::is_standard_layout<record<long double>>::value);
-
 static inline std::string __cdecl open(
     _In_ const wchar_t* const filename, _Inout_ unsigned long* rbytes
 ) noexcept(std::is_nothrow_constructible_v<std::string>) {
@@ -71,25 +77,27 @@ static inline std::string __cdecl open(
 
     if (hFile == INVALID_HANDLE_VALUE) {
         fprintf_s(stderr, "Error %lu in CreateFileW\n", ::GetLastError());
-        return buffer; // empty string
+        return std::string {};
     }
 
     if (!::GetFileSizeEx(hFile, &filesize)) {
         ::fprintf_s(stderr, "Error %lu in GetFileSizeEx\n", ::GetLastError());
-        return buffer; // empty string
+        goto ERROR_EXIT;
     }
 
-    buffer.resize(filesize.QuadPart + 1); // for the null terminator
+    buffer.resize(filesize.QuadPart + 1); // +1 for the null terminator
 
     if (!ReadFile(hFile, buffer.data(), filesize.QuadPart, rbytes, nullptr)) {
         ::fprintf_s(stderr, "Error %lu in ReadFile\n", ::GetLastError());
-        ::CloseHandle(hFile);
-        buffer.~basic_string();
-        return buffer;
+        goto ERROR_EXIT;
     }
 
-    ::fputs("Memory allocation error: malloc returned nullptr", stderr);
     ::CloseHandle(hFile);
+    return buffer;
+
+ERROR_EXIT:
+    ::CloseHandle(hFile);
+    return std::string {}; // buffer will be destroyed
 }
 
 #endif // __DRY_BEANS_HPP__
