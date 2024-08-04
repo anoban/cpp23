@@ -14,11 +14,12 @@
 // clang-format on
 
     #include <algorithm>
+    #include <cassert>
     #include <cstdio>
     #include <ranges>
     #include <string>
-    #include <string_view>
     #include <type_traits>
+    #include <vector>
 
     #include <cuda_runtime.h>
     #include <device_launch_parameters.h>
@@ -48,27 +49,29 @@ static_assert(::any_of_trait_v<std::is_arithmetic, float, double, long double, c
 
 // yeeehawww :)
 
-template<typename T, typename = std::enable_if<std::is_floating_point<T>::value, T>::type> struct record final {
-        T           Area;
-        T           Perimeter;
-        T           MajorAxisLength;
-        T           MinorAxisLength;
-        T           AspectRation;
-        T           Eccentricity;
-        T           ConvexArea;
-        T           EquivDiameter;
-        T           Extent;
-        T           Solidity;
-        T           roundness;
-        T           Compactness;
-        T           ShapeFactor1;
-        T           ShapeFactor2;
-        T           ShapeFactor3;
-        T           ShapeFactor4;
-        std::string Class;
+template<typename T> struct record final {
+        T    area;
+        T    perimeter;
+        T    major_axis_length;
+        T    minor_axis_length;
+        T    aspect_ratio;
+        T    eccentricity;
+        T    convex_area;
+        T    equiv_diameter;
+        T    extent;
+        T    solidity;
+        T    roundness;
+        T    compactness;
+        T    shape_factor_1;
+        T    shape_factor_2;
+        T    shape_factor_3;
+        T    shape_factor_4;
+        char variety[10]; // max is 9 so :)
 };
 
-static inline std::string __cdecl open(
+static_assert(::all_of_trait_v<std::is_standard_layout, record<float>, record<double>, record<long double>>()); // ;)
+
+[[nodiscard]] static inline std::string __cdecl open(
     _In_ const wchar_t* const filename, _Inout_ unsigned long* rbytes
 ) noexcept(std::is_nothrow_constructible_v<std::string>) {
     *rbytes = 0;
@@ -79,19 +82,19 @@ static inline std::string __cdecl open(
         ::CreateFileW(filename, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_READONLY, nullptr);
 
     if (hFile == INVALID_HANDLE_VALUE) {
-        fprintf_s(stderr, "Error %lu in CreateFileW\n", ::GetLastError());
+        ::fprintf_s(stderr, "Error %lu in CreateFileW\n", ::GetLastError()); // NOLINT(cppcoreguidelines-pro-type-vararg)
         return std::string {};
     }
 
     if (!::GetFileSizeEx(hFile, &filesize)) {
-        ::fprintf_s(stderr, "Error %lu in GetFileSizeEx\n", ::GetLastError());
+        ::fprintf_s(stderr, "Error %lu in GetFileSizeEx\n", ::GetLastError()); // NOLINT(cppcoreguidelines-pro-type-vararg)
         goto ERROR_EXIT;
     }
 
     buffer.resize(filesize.QuadPart + 1); // +1 for the null terminator
 
-    if (!ReadFile(hFile, buffer.data(), filesize.QuadPart, rbytes, nullptr)) {
-        ::fprintf_s(stderr, "Error %lu in ReadFile\n", ::GetLastError());
+    if (!::ReadFile(hFile, buffer.data(), filesize.QuadPart, rbytes, nullptr)) {
+        ::fprintf_s(stderr, "Error %lu in ReadFile\n", ::GetLastError()); // NOLINT(cppcoreguidelines-pro-type-vararg)
         goto ERROR_EXIT;
     }
 

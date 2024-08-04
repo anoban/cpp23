@@ -33,5 +33,5 @@ auto wmain() -> int {
     };
 
     // slicing
-    const user sliced_user { natalie }; // slicing object from type 'privileged_user' to 'user' discards 8 bytes of state
+    [[maybe_unused]] const user sliced_user { natalie }; // slicing object from type 'privileged_user' to 'user' discards 8 bytes of state
 }

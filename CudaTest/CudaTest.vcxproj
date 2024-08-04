@@ -17,8 +17,8 @@
     <ClInclude Include="src\parser.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{EB346F72-CC8A-4786-ADD8-DF83035AF9F4}</ProjectGuid>
-    <RootNamespace>CudaRuntime</RootNamespace>
+    <ProjectGuid>{C381221F-2EB6-42B9-AAD5-98D2B6899466}</ProjectGuid>
+    <RootNamespace>CudaTest</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -37,7 +37,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 12.5.props" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 12.6.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -48,16 +48,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)\src\;$(IncludePath)</IncludePath>
-    <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)bin\$(Configuration)\</IntDir>
-    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <IncludePath>$(SolutionDir)src\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)\src\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)src\;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)bin\$(Configuration)\</IntDir>
-    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -74,16 +70,15 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <TypeInfo>true</TypeInfo>
-      <Warning>Wall</Warning>
-      <AdditionalOptions>-std=c++23  -Xcompiler "/wd4514 /wd4668" %(AdditionalOptions)</AdditionalOptions>
-      <CompileOut>$(SolutionDir)$(CudaIntDir)\$(ProjectName)</CompileOut>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalOptions>-std=c++20 %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Od</Optimization>
       <Runtime>MTd</Runtime>
       <RuntimeChecks>RTC1</RuntimeChecks>
-      <GenerateLineInfo>false</GenerateLineInfo>
-      <EnableVirtualArchInFatbin>false</EnableVirtualArchInFatbin>
+      <TypeInfo>true</TypeInfo>
+      <Warning>Wall</Warning>
+      <AdditionalCompilerOptions>/wd4514 /wd4668</AdditionalCompilerOptions>
+      <CompileOut>$(SolutionDir)bin\$(Configuration)\%(Filename)%(Extension).obj</CompileOut>
+      <KeepDir />
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -105,21 +100,21 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
+      <AdditionalOptions>-std=c++20 %(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>O2</Optimization>
+      <Runtime>MT</Runtime>
       <TypeInfo>false</TypeInfo>
       <Warning>Wall</Warning>
-      <AdditionalOptions>-std=c++23  -Xcompiler "/wd4514 /wd4668" %(AdditionalOptions)</AdditionalOptions>
-      <CompileOut>$(SolutionDir)$(CudaIntDir)\$(ProjectName)</CompileOut>
-      <Optimization>O3</Optimization>
-      <Runtime>MT</Runtime>
+      <AdditionalCompilerOptions>/wd4514 /wd4668</AdditionalCompilerOptions>
       <FastMath>true</FastMath>
-      <EnableVirtualArchInFatbin>false</EnableVirtualArchInFatbin>
-      <HostDebugInfo>true</HostDebugInfo>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <GenerateLineInfo>true</GenerateLineInfo>
+      <RuntimeChecks>Default</RuntimeChecks>
+      <CompileOut>$(SolutionDir)bin\$(Configuration)\%(Filename)%(Extension).obj</CompileOut>
+      <KeepDir />
     </CudaCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 12.5.targets" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 12.6.targets" />
   </ImportGroup>
 </Project>
