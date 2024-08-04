@@ -57,4 +57,3 @@ template<class __arg0_type, class __arg1_type, class __rtrn_type> struct multipl
 
         constexpr result_type operator()(const __arg0_type& arg_0, const __arg1_type& arg_1) const noexcept { return arg_0 * arg_1; }
 };
-

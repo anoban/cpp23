@@ -3,8 +3,8 @@
 #include <string>
 
 // values returned by functions are prvalues even if they are of class types
-[[nodiscard]] std::wstring static inline helloooooooooooo_from_the_other_sideeeeeeeeeeeeeee(
-) noexcept(std::is_nothrow_constructible_v<std::wstring>) {
+[[nodiscard]] std::wstring static inline helloooooooooooo_from_the_other_sideeeeeeeeeeeeeee()
+    noexcept(std::is_nothrow_constructible_v<std::wstring>) {
     return L"I might have called a thousand tiiiiiiiiiiiiimessssssssssssss!";
 }
 // the wstring object returned by helloooooooooooo_from_the_other_sideeeeeeeeeeeeeee is a prvalue NOT AN XVALUE

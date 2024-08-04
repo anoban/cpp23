@@ -46,5 +46,3 @@ auto wmain() -> int {
     T&&             &&              T&&
 
 */
-
-

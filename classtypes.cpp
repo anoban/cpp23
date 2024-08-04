@@ -20,6 +20,6 @@ auto wmain() -> int {
     decltype(object)::value_type x {}; // x is just duble not const double!
 
     object._value = 10.00;
-    
+
     return EXIT_SUCCESS;
 }

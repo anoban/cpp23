@@ -5,7 +5,8 @@
 #include <cstring>
 #include <new>
 
-// <cstdint> requires C++11 and later with g++ hence won't compile with -std=c++03
+// <cstdint> requires C++11 and later with g++ hence won't compile with
+// -std=c++03
 
 #if (__cplusplus >= 201103L)
     #define NOEXCEPT noexcept
@@ -16,7 +17,8 @@
 class string {
     private:
         unsigned _size;
-        unsigned _capacity; // at construction, capacity will be wtice the size of the string (including the null terminator)
+        unsigned _capacity; // at construction, capacity will be wtice the size of the
+                            // string (including the null terminator)
         char*    _resource;
 
     public:
@@ -51,8 +53,11 @@ class string {
             ::memset(_resource + repeats, 0U, _capacity - _size);
         }
 
-        inline explicit string(const char* str) NOEXCEPT : // not a converting constructor
-            _size(::strlen(str)), _capacity(_size * 2 + 1), _resource(new (std::nothrow) char[_capacity]) {
+        inline explicit string(const char *str) NOEXCEPT
+      : // not a converting constructor
+        _size(::strlen(str)),
+        _capacity(_size * 2 + 1),
+        _resource(new(std::nothrow) char[_capacity]) {
             if (!_resource) { // has the allocation failed,
                 _capacity = _size = 0;
                 ::fputws(L"allocation failure!\n", stderr);
@@ -62,7 +67,8 @@ class string {
         }
 
         inline string(const string& other) NOEXCEPT :
-            // copied from buffer may have trailing junk bytes, we do not want them here, hence using ._size instead of _capacity
+            // copied from buffer may have trailing junk bytes, we do not want them
+            // here, hence using ._size instead of _capacity
             _size(other._size),
             _capacity(other._size * 2 + 1),
             _resource(new (std::nothrow) char[_capacity]) {
@@ -85,8 +91,9 @@ class string {
                 return *this;
             }
 
-            if (_capacity > other._size) {          // no need for new allocations
-                ::memset(_resource, 0U, _capacity); // since we'll have trailing garbage bytes
+            if (_capacity > other._size) { // no need for new allocations
+                ::memset(_resource, 0U,
+                         _capacity); // since we'll have trailing garbage bytes
                 ::memcpy_s(_resource, _size, other._resource, other._size);
                 _size = other._size; // don't bother the _capacity
                 return *this;
@@ -107,7 +114,7 @@ class string {
             return *this;
         }
 
-#if (__cplusplus >= 201103L) // implement move semantics
+#if (__cplusplus >= 201'103L) // implement move semantics
 
         inline string(string&& other) NOEXCEPT : _size(other._size), _capacity(other._capacity), _resource(other._resource) {
             other._resource = nullptr;
@@ -152,16 +159,18 @@ static inline ::string skyfall() NOEXCEPT {
                     "But you'll never have my heart\n");
 }
 
-static const size_t MiB = 1024 * 1024;
+static const size_t MiB = 1'024 * 1'024;
 
 int main() {
     const ::string empty; // default construction
     ::string       onemib(7 * MiB);
-    const ::string jbond("I've drowned and dreamt this moment.... so overdue I owe them................");
+    const ::string jbond("I've drowned and dreamt this moment.... so overdue I "
+                         "owe them................");
     ::puts(jbond.c_str());
 
     string adele;        // default construction
-    adele = ::skyfall(); // copy assignment in C++03, move assignment in C++11 and later
+    adele = ::skyfall(); // copy assignment in C++03, move assignment in C++11 and
+                         // later
 
     ::puts(adele.c_str());
 

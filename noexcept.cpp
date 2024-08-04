@@ -2,8 +2,8 @@
 #include <type_traits>
 
 template<typename T>
-static constexpr typename std::enable_if<std::is_scalar<T>::value, T>::type square(const T x
-) noexcept(std::is_nothrow_default_constructible<T>::value) {
+static constexpr typename std::enable_if<std::is_scalar<T>::value, T>::type square(const T x)
+    noexcept(std::is_nothrow_default_constructible<T>::value) {
     return x * x;
 }
 

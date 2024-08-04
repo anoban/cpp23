@@ -11,8 +11,8 @@ struct object {
         std::array<float, 3> values;
 };
 
-[[nodiscard]] static constexpr object __cdecl func(
-) noexcept(std::is_nothrow_constructible<std::wstring>::value && std::is_nothrow_constructible<std::array<float, 3>>::value) {
+[[nodiscard]] static constexpr object __cdecl func()
+    noexcept(std::is_nothrow_constructible<std::wstring>::value && std::is_nothrow_constructible<std::array<float, 3>>::value) {
     return {
         L"Anoban", { std::numbers::pi_v<float>, std::numbers::e_v<float>, std::numbers::sqrt2_v<float> }
     };
