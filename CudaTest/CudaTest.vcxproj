@@ -14,7 +14,7 @@
     <CudaCompile Include="src\kernel.cu" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\parser.hpp" />
+    <ClInclude Include="src\parser.cuh" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C381221F-2EB6-42B9-AAD5-98D2B6899466}</ProjectGuid>

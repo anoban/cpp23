@@ -33,7 +33,7 @@ class string {
             _size(size),
             _capacity(size * 2),
             _resource(new (std::nothrow) char[size * 2]) {
-            if (!_resource) { // has the allocation failed,
+            if (_resource == nullptr) { // has the allocation failed,
                 _capacity = _size = 0;
                 ::fputws(L"allocation failure!\n", stderr);
             }
@@ -43,7 +43,7 @@ class string {
             _size(repeats),
             _capacity(repeats * 2),
             _resource(new (std::nothrow) char[_capacity]) {
-            if (!_resource) { // has the allocation failed,
+            if (_resource == nullptr) { // has the allocation failed,
                 _capacity = _size = 0;
                 ::fputws(L"allocation failure!\n", stderr);
                 return;
@@ -58,7 +58,7 @@ class string {
         _size(::strlen(str)),
         _capacity(_size * 2 + 1),
         _resource(new(std::nothrow) char[_capacity]) {
-            if (!_resource) { // has the allocation failed,
+            if (_resource == nullptr) { // has the allocation failed,
                 _capacity = _size = 0;
                 ::fputws(L"allocation failure!\n", stderr);
             }
@@ -72,7 +72,7 @@ class string {
             _size(other._size),
             _capacity(other._size * 2 + 1),
             _resource(new (std::nothrow) char[_capacity]) {
-            if (!_resource) { // has the allocation failed,
+            if (_resource == nullptr) { // has the allocation failed,
                 _capacity = _size = 0;
                 ::fputws(L"allocation failure!\n", stderr);
                 return;
@@ -102,7 +102,7 @@ class string {
             delete[] _resource;                               // give up the old buffer
             _resource = new (std::nothrow) char[other._size]; // allocate a new buffer
 
-            if (!_resource) { // has the allocation failed,
+            if (_resource == nullptr) { // has the allocation failed,
                 _size = _capacity = 0;
                 ::fputws(L"allocation failure!\n", stderr);
                 return *this;

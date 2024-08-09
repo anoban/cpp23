@@ -1,4 +1,4 @@
-﻿#include <parser.hpp>
+﻿#include <parser.cuh>
 
 template<typename T>
 [[nodiscard]] static std::enable_if<std::is_floating_point<T>::value, std::vector<::record<T>>>::type parse_beans_records(
