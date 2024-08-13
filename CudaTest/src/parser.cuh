@@ -15,11 +15,13 @@
 
     #include <algorithm>
     #include <cassert>
+    #include <charconv>
     #include <concepts>
     #include <cstdio>
     #include <cstring>
     #include <ranges>
     #include <string>
+    #include <string_view>
     #include <type_traits>
     #include <vector>
 
@@ -55,7 +57,6 @@ template<typename T> class record final {
     public:
         using value_type = T;
 
-    private:
         T    area;
         T    perimeter;
         T    major_axis_length;
@@ -74,7 +75,6 @@ template<typename T> class record final {
         T    shape_factor_4;
         char variety[10]; // max is 9 so :)
 
-    public:
         template<std::floating_point U> __host__ __device__ bool operator==(const record<U>& other) noexcept {
             return !::memcmp(variety, other.variety, __crt_countof(variety));
         }

@@ -19,6 +19,14 @@ template<typename T>
     return collection;
 }
 
+template<std::floating_point T> static constexpr record<T> parse_line(const std::string_view& line) noexcept {
+    // a typical row will be in the format of,
+    // 28395,610.291,208.178116708527,173.888747041636,1.19719142411602,0.549812187138347,28715,190.141097274511,0.763922518159806,0.988855998607,0.958027126250128,0.913357754795763,0.00733150613518321,0.00314728916733569,0.834222388245556,0.998723889013168,SEKER
+    record<T> temp {};
+    size_t    caret {};
+    std::from_chars(line.substr(0, caret = line.find(',') - 1), temp.area);
+}
+
 auto main() -> int {
     static char current_working_directory[MAX_PATH] {};
     ::GetCurrentDirectoryA(MAX_PATH, current_working_directory);
