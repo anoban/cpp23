@@ -3,7 +3,7 @@
 #include <cstring>
 #include <new>
 
-#include <sal.h>
+#include <sal.h> // to pease g++
 
 #define __TO_WSTR__(expression) L##expression           // helper that actually does the job
 #define TO_WSTR(expression)     __TO_WSTR__(expression) // client facing macro
@@ -17,7 +17,7 @@
 #endif
 
 #if (defined(__GNUG__) && defined(__GNUC__)) || (defined(__llvm__) && defined(__clang__))
-    #define FUNCTIONW TO_WSTR(__PRETTY_FUNCTION__)
+    #define FUNCTIONW L##__PRETTY_FUNCTION__
 #elif defined(_MSC_VER) && defined(_MSC_FULL_VER) // LLVM also uses MSVC's STL headers, hence the #elif block
     #define FUNCTIONW TO_WSTR(__FUNCSIG__)
 #endif
@@ -30,7 +30,9 @@ class sstring {
         char*    _resource; // string buffer
 
     public:
-        inline sstring() __noexcept__ : _size(0), _capacity(0), _resource(NULL) { } // default ctor
+        inline sstring() __noexcept__ : _size(0), _capacity(0), _resource(NULL) { // default ctor
+            ::_putws(FUNCTIONW);
+        }
 
         inline sstring(_In_ const char& ch, _In_ const unsigned long& repeats) __noexcept__ :
             _size(repeats),

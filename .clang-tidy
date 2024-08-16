@@ -313,7 +313,7 @@ ExtraArgs: ['-Wall', '-Wextra', '--std=c++23', '-c', '-O0', '--pedantic', '-DDEB
 FormatStyle: file
 # format the source file using the specs in the .clang-format file.
 
-HeaderFileExtensions:         ['hpp', 'cuh']
+HeaderFileExtensions:         ['hpp', 'cuh', '']
 
 HeaderFilterRegex:   ''
 # ignore diagnostics from c++ STL headers.
