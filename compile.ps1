@@ -27,6 +27,7 @@ $cflags = @(
     "/fpcvt:IA",
     "/GL",
     "/Gw",
+    "/I./",
     "/jumptablerdata",
     "/MP",
     "/MT", # statically link the multithreaded version of Windows libs
