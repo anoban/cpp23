@@ -17,15 +17,14 @@
     #define __LPREFIX(expression) L"" expression // relies on automatic concatenation of adjacent string literals
 #endif
 
-static constexpr auto fname { __LPREFIX(__FILE__) };
-static constexpr auto filename { TO_WSTR(__FILE__) }; // both do the job fine :)
-
 #if __cplusplus < 201103L // standards prior to C++11
     #define __noexcept__ throw()
-#elif __cplusplus >= 201103L // C++11 or later
+typedef unsigned long size_type; // C++98 did not support long long types
+#elif __cplusplus >= 201103L     // C++11 or later
     #define __noexcept__ noexcept
     #undef NULL
     #define NULL nullptr // replace NULL with nullptr
+using size_type = unsigned long long;
 #endif
 
 // with g++/clang++/icx
@@ -43,16 +42,16 @@ static constexpr auto filename { TO_WSTR(__FILE__) }; // both do the job fine :)
 // a super trivial string class with no non-trivial optimizations whatsoever
 class sstring {
     private:
-        unsigned _size;     // does not count the null terminator
-        unsigned _capacity; // at construction, capacity will usually be twice the size of the string
-        char*    _resource; // string buffer
+        size_type _size;     // does not count the null terminator
+        size_type _capacity; // at construction, capacity will usually be twice the size of the string
+        char*     _resource; // string buffer
 
     public:
         inline __cdecl sstring() __noexcept__ : _size(0), _capacity(0), _resource(NULL) { // default ctor
             ::_putws(FUNC_FULL_NAME);
         }
 
-        inline __cdecl sstring(_In_ const char& ch, _In_ const unsigned long& repeats) __noexcept__ :
+        inline __cdecl sstring(_In_ const char& ch, _In_ const size_type& repeats) __noexcept__ :
             _size(repeats),
             _capacity(repeats * 2),
             _resource(new (std::nothrow) char[_capacity]) {
@@ -150,7 +149,7 @@ class sstring {
             _size = _capacity = 0;
         }
 
-        static inline sstring __cdecl with_capacity(_In_ const unsigned long& size) __noexcept__ { // a Rust style static ctor
+        static inline sstring __cdecl with_capacity(_In_ const size_type& size) __noexcept__ { // a Rust style static ctor
             ::_putws(FUNC_FULL_NAME);
             sstring temporary;
             temporary._resource = new (std::nothrow) char[size];
@@ -163,9 +162,9 @@ class sstring {
             return temporary;
         }
 
-        inline size_t __stdcall length() const __noexcept__ { return _size; }
+        inline size_type __stdcall length() const __noexcept__ { return _size; }
 
-        inline size_t __stdcall capacity() const __noexcept__ { return _capacity; }
+        inline size_type __stdcall capacity() const __noexcept__ { return _capacity; }
 
         inline char* __cdecl c_str() __noexcept__ { return _resource; }
 
