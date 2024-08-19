@@ -17,6 +17,8 @@
                 "/fsanitize=address",
                 "/guard:cf",
                 "/Gw",
+                "/I./",
+                "/I./include/",
                 "/jumptablerdata",
                 "/MP",
                 "/MTd",

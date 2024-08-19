@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include <new>
 
 #include <sal.h> // to please g++
@@ -47,11 +48,11 @@ class sstring {
         char*    _resource; // string buffer
 
     public:
-        inline sstring() __noexcept__ : _size(0), _capacity(0), _resource(NULL) { // default ctor
+        inline __cdecl sstring() __noexcept__ : _size(0), _capacity(0), _resource(NULL) { // default ctor
             ::_putws(FUNC_FULL_NAME);
         }
 
-        inline sstring(_In_ const char& ch, _In_ const unsigned long& repeats) __noexcept__ :
+        inline __cdecl sstring(_In_ const char& ch, _In_ const unsigned long& repeats) __noexcept__ :
             _size(repeats),
             _capacity(repeats * 2),
             _resource(new (std::nothrow) char[_capacity]) {
@@ -66,8 +67,9 @@ class sstring {
             ::memset(_resource, ch, repeats);
         }
 
-        inline sstring(_In_ const char* const str) __noexcept__ : // NOLINT(google-explicit-constructor) - a converting constructor
-            _size(::strlen(str)), _capacity(_size * 2 + 1), _resource(new (std::nothrow) char[_capacity]) {
+        inline __cdecl sstring(_In_ const char* const str) __noexcept__ : // NOLINT(google-explicit-constructor) - a converting constructor
+            _size(::strlen(str) + 1 /* +1 for the null terminator */), _capacity(_size * 2 + 1), _resource(new (std::nothrow) char[_capacity]) {
+            // using ::strlen(str) here and using _size + 1 in strcpy_s will bite us in the ass when trying to copy or move
             ::_putws(FUNC_FULL_NAME);
             if (!_resource) { // has the allocation failed,
                 _capacity = _size = 0;
@@ -79,7 +81,7 @@ class sstring {
             ::strcpy_s(_resource, _size, str);
         }
 
-        inline sstring(_In_ const sstring& other) __noexcept__ : // not exactly a trivial copy constructor
+        inline __cdecl sstring(_In_ const sstring& other) __noexcept__ : // not exactly a trivial copy constructor
             _size(other._size), _capacity(other._size * 2 + 1/* choosing not to simply use the other string's capacity */), _resource(new (std::nothrow) char[_capacity]) {
             ::_putws(FUNC_FULL_NAME);
             if (!_resource) { // has the allocation failed,
@@ -93,7 +95,7 @@ class sstring {
         }
 
         // optimizations like buffer reuse are deliberately ignored :(
-        inline sstring& operator=(_In_ const sstring& other) __noexcept__ {
+        inline sstring& __cdecl operator=(_In_ const sstring& other) __noexcept__ {
             ::_putws(FUNC_FULL_NAME);
             if (this == &other) return *this;
 
@@ -116,14 +118,15 @@ class sstring {
 #if (__cplusplus >= 201103L) // implement move semantics
 
         // move ctor
-        inline sstring(_Inout_ sstring&& other) noexcept : _size(other._size), _capacity(other._capacity), _resource(other._resource) {
+        inline __cdecl sstring(_Inout_ sstring&& other) noexcept :
+            _size(other._size), _capacity(other._capacity), _resource(other._resource) {
             ::_putws(FUNC_FULL_NAME);
             other._resource = nullptr;
             other._size = other._capacity = 0;
         }
 
         // move assignment operator
-        inline sstring& operator=(_Inout_ sstring&& other) noexcept {
+        inline sstring& __cdecl operator=(_Inout_ sstring&& other) noexcept {
             ::_putws(FUNC_FULL_NAME);
             if (this == &other) return *this;
 
@@ -140,14 +143,14 @@ class sstring {
 
 #endif
 
-        inline ~sstring() __noexcept__ {
+        inline __cdecl ~sstring() __noexcept__ {
             ::_putws(FUNC_FULL_NAME);
             delete[] _resource;
             _resource = NULL;
             _size = _capacity = 0;
         }
 
-        static inline sstring with_capacity(_In_ const unsigned long& size) __noexcept__ { // a Rust style static ctor
+        static inline sstring __cdecl with_capacity(_In_ const unsigned long& size) __noexcept__ { // a Rust style static ctor
             ::_putws(FUNC_FULL_NAME);
             sstring temporary;
             temporary._resource = new (std::nothrow) char[size];
@@ -160,15 +163,20 @@ class sstring {
             return temporary;
         }
 
-        inline size_t length() const __noexcept__ { return _size; }
+        inline size_t __stdcall length() const __noexcept__ { return _size; }
 
-        inline size_t capacity() const __noexcept__ { return _capacity; }
+        inline size_t __stdcall capacity() const __noexcept__ { return _capacity; }
 
-        inline char* c_str() __noexcept__ { return _resource; }
+        inline char* __cdecl c_str() __noexcept__ { return _resource; }
 
-        inline const char* c_str() const __noexcept__ { return _resource; }
+        inline const char* __cdecl c_str() const __noexcept__ { return _resource; }
 
-        sstring operator+(_In_ const sstring& other) const __noexcept__ { }
+        sstring __cdecl operator+(_In_ const sstring& other) const __noexcept__ { }
 
-        sstring operator+=(_In_ const sstring& other) const __noexcept__ { }
+        sstring& __cdecl operator+=(_In_ const sstring& other) & __noexcept__ { }
+
+        friend inline std::ostream& __cdecl operator<<(std::ostream& ostream, const sstring& string) __noexcept__ {
+            ostream << string.c_str();
+            return ostream;
+        }
 };

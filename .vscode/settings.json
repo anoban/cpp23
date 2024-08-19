@@ -99,6 +99,7 @@
         "source_location": "cpp",
         "execution": "cpp",
         "queue": "cpp",
-        "typeindex": "cpp"
+        "typeindex": "cpp",
+        "sstring": "cpp"
     }
 }
