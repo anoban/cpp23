@@ -39,7 +39,7 @@ using size_type = unsigned long long;
     #define FUNC_FULL_NAME TO_WSTR(__FUNCSIG__)
 #endif
 
-// a super trivial string class with no non-trivial optimizations whatsoever
+// a super trivial string class with NO NON-TRIVIAL OPTIMIZATIONS whatsoever
 class sstring {
     private:
         size_type _size;     // does not count the null terminator
@@ -170,8 +170,27 @@ class sstring {
 
         inline const char* __cdecl c_str() const __noexcept__ { return _resource; }
 
-        sstring __cdecl operator+(_In_ const sstring& other) const __noexcept__ { }
+        // operator usable for lvalues and rvalues for operands
+        sstring __cdecl operator+(_In_ const sstring& other) const __noexcept__ {
+            sstring temporary;
+            temporary._resource = new (std::nothrow) char[(_size + other._size) * 2]; // has space for 2 null terminators
+            if (!temporary._resource) {                                               // has the allocation failed,
+                ::fputws(L"allocation failure!\n", stderr);
+                return temporary;
+            }
 
+            temporary._size     = _size + other._size - 1; // remove the null terminator of the first string
+            temporary._capacity = (_size + other._size) * 2;
+
+            ::memset(temporary._resource, 0U, temporary._capacity);
+            ::strcpy_s(temporary._resource, _size, _resource); // copy this buffer
+            ::strcpy_s(
+                temporary._resource + _size - 1 /* start @ the null terminator of the first string */, other._size, other._resource
+            ); // copy other's buffer
+            return temporary;
+        }
+
+        // operator usable only with lvalue left operand
         sstring& __cdecl operator+=(_In_ const sstring& other) & __noexcept__ { }
 
         friend inline std::ostream& __cdecl operator<<(std::ostream& ostream, const sstring& string) __noexcept__ {
