@@ -22,6 +22,7 @@
                 "/jumptablerdata",
                 "/MP",
                 "/MTd",
+                "/Zc:__cplusplus",
                 "/Zc:preprocessor",
                 "/Zi",
                 "/EHsc",
