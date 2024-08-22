@@ -3,7 +3,7 @@
 
 #include <sstring>
 
-static inline ::sstring skyfall() __noexcept__ {
+static inline ::sstring skyfall() noexcept {
     // NOLINTNEXTLINE(modernize-return-braced-init-list)
     return ::sstring("Skyfall is where we start, a thousand miles and poles apart, where worlds collide and days are dark!");
 }
