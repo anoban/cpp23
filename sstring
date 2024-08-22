@@ -33,8 +33,8 @@ using size_type = unsigned long long;
     #define FUNC_FULL_NAME __LPREFIX(__PRETTY_FUNCTION__)
 #elif defined(__llvm__) && defined(__clang__)
     #pragma message("compiling using clang++")
-    #define FUNC_FULL_NAME __LPREFIX(__PRETTY_FUNCTION__)
-#elif defined(_MSC_VER) && defined(_MSC_FULL_VER) // LLVM also uses MSVC's STL headers, hence the nesting inside #elif block
+    #define FUNC_FULL_NAME L"" __PRETTY_FUNCTION__ // WTF???
+#elif defined(_MSC_VER) && defined(_MSC_FULL_VER)  // LLVM also uses MSVC's STL headers, hence the nesting inside #elif block
     #pragma message("compiling using MSVC++")
     #define FUNC_FULL_NAME TO_WSTR(__FUNCSIG__)
 #endif
