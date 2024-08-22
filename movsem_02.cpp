@@ -28,5 +28,7 @@ int main() {
     const ::sstring concatenated = skyfall() + jbond;
     std::cout << concatenated << '\n';
 
+    ::sstring skyfall = ::skyfall(); // move construction in C++11 and later, copy construction in in C++03 and before
+
     return EXIT_SUCCESS;
 }

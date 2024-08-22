@@ -34,7 +34,7 @@ using size_type = unsigned long long;
 namespace __sstring_internals {
 
     // resorting to runtime conversion :(
-    static inline const wchar_t* __wsignimpl(_In_ const char* _cxx_signature) noexcept {
+    static inline const wchar_t* wsignature(_In_ const char* _cxx_signature) noexcept {
         static const unsigned _signature_length = 512;
         static wchar_t        _signature[_signature_length]; // NOLINT(modernize-avoid-c-arrays)
 
@@ -57,12 +57,12 @@ class sstring {
 
     public:
         inline __cdecl sstring() noexcept : _size(0), _capacity(0), _resource(nullptr) { // default ctor
-            ::_putws(__sstring_internals::__wsignimpl(__PRETTY_FUNCTION__));
+            ::_putws(__sstring_internals::wsignature(__PRETTY_FUNCTION__));
         }
 
         inline __cdecl sstring(_In_ const char& ch, _In_ const size_type& repeats) noexcept :
             _size(repeats), _capacity(repeats * 2), _resource(new (std::nothrow) char[_capacity]) {
-            ::_putws(__sstring_internals::__wsignimpl(__PRETTY_FUNCTION__));
+            ::_putws(__sstring_internals::wsignature(__PRETTY_FUNCTION__));
             if (!_resource) { // has the allocation failed,
                 _capacity = _size = 0;
                 ::fputws(L"allocation failure!\n", stderr);
@@ -78,7 +78,7 @@ class sstring {
             _capacity(_size * 2 + 1),
             _resource(new (std::nothrow) char[_capacity]) {
             // using ::strlen(str) here and using _size + 1 in strcpy_s will bite us in the ass when trying to copy or move
-            ::_putws(__sstring_internals::__wsignimpl(__PRETTY_FUNCTION__));
+            ::_putws(__sstring_internals::wsignature(__PRETTY_FUNCTION__));
             if (!_resource) { // has the allocation failed,
                 _capacity = _size = 0;
                 ::fputws(L"allocation failure!\n", stderr);
@@ -93,7 +93,7 @@ class sstring {
             _size(other._size),
             _capacity(other._size * 2 + 1 /* choosing not to simply use the other string's capacity */),
             _resource(new (std::nothrow) char[_capacity]) {
-            ::_putws(__sstring_internals::__wsignimpl(__PRETTY_FUNCTION__));
+            ::_putws(__sstring_internals::wsignature(__PRETTY_FUNCTION__));
             if (!_resource) { // has the allocation failed,
                 _capacity = _size = 0;
                 ::fputws(L"allocation failure!\n", stderr);
@@ -106,7 +106,7 @@ class sstring {
 
         // optimizations like buffer reuse are deliberately ignored :(
         inline sstring& __cdecl operator=(_In_ const sstring& other) noexcept {
-            ::_putws(__sstring_internals::__wsignimpl(__PRETTY_FUNCTION__));
+            ::_putws(__sstring_internals::wsignature(__PRETTY_FUNCTION__));
             if (this == &other) return *this;
 
             delete[] _resource; // give up the old buffer
@@ -130,14 +130,14 @@ class sstring {
         // move ctor
         inline __cdecl sstring(_Inout_ sstring&& other) noexcept :
             _size(other._size), _capacity(other._capacity), _resource(other._resource) {
-            ::_putws(__sstring_internals::__wsignimpl(__PRETTY_FUNCTION__));
+            ::_putws(__sstring_internals::wsignature(__PRETTY_FUNCTION__));
             other._resource = nullptr;
             other._size = other._capacity = 0;
         }
 
         // move assignment operator
         inline sstring& __cdecl operator=(_Inout_ sstring&& other) noexcept {
-            ::_putws(__sstring_internals::__wsignimpl(__PRETTY_FUNCTION__));
+            ::_putws(__sstring_internals::wsignature(__PRETTY_FUNCTION__));
             if (this == &other) return *this;
 
             delete[] _resource; // give up the old buffer
@@ -154,14 +154,14 @@ class sstring {
 #endif
 
         inline __cdecl ~sstring() noexcept {
-            ::_putws(__sstring_internals::__wsignimpl(__PRETTY_FUNCTION__));
+            ::_putws(__sstring_internals::wsignature(__PRETTY_FUNCTION__));
             delete[] _resource;
             _resource = nullptr;
             _size = _capacity = 0;
         }
 
         static inline sstring __cdecl with_capacity(_In_ const size_type& size) noexcept { // a Rust style static ctor
-            ::_putws(__sstring_internals::__wsignimpl(__PRETTY_FUNCTION__));
+            ::_putws(__sstring_internals::wsignature(__PRETTY_FUNCTION__));
             sstring temporary;
             temporary._resource = new (std::nothrow) char[size];
             if (!temporary._resource) { // has the allocation failed,
