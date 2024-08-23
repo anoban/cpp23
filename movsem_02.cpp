@@ -8,13 +8,15 @@ static inline ::sstring skyfall() noexcept {
     return ::sstring("Skyfall is where we start, a thousand miles and poles apart, where worlds collide and days are dark!");
 }
 
+static __declspec(noinline) ::sstring no_time_to_die() noexcept { return "That I've fallen for a lie.... you were never on my side...."; }
+
 static const size_t MiB = 1024 * 1024;
 
-int main() {
+int main() {               // NOLINT(bugprone-exception-escape)
     const ::sstring empty; // default construction
-    ::sstring       rust_style = ::sstring::with_capacity(7 * MiB);
+    ::sstring       crab_style = ::sstring::with_capacity(7 * MiB);
 
-    const ::sstring jbond(" I've drowned and dreamt this moment.... so overdue I owe them................");
+    const ::sstring jbond("I've drowned and dreamt this moment.... so overdue I owe them................");
     std::cout << jbond << '\n';
 
     sstring adele;       // default construction
@@ -25,10 +27,10 @@ int main() {
     const sstring aaaaa('A', 50);
     std::cout << aaaaa << '\n';
 
-    const ::sstring concatenated = skyfall() + jbond;
+    const ::sstring concatenated = skyfall() + " " + jbond; // boy look at that :)
     std::cout << concatenated << '\n';
 
-    ::sstring skyfall = ::skyfall(); // move construction in C++11 and later, copy construction in in C++03 and before
-
+    const ::sstring no_time_to_die = ::no_time_to_die(); // move construction in C++11 and later, copy construction in in C++03 and before
+    ::puts(no_time_to_die.c_str());
     return EXIT_SUCCESS;
 }
