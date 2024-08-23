@@ -25,11 +25,9 @@ typedef unsigned long size_type; // C++98 did not support long long types
 using size_type = unsigned long long;
 #endif
 
-// with g++/clang++/icx fall back to using the variable __PRETTY_FUNCTION__
-#if (defined(__GNUG__) && defined(__GNUC__))
-#elif (defined(__llvm__) && defined(__clang__))
-#elif defined(_MSC_VER) && defined(_MSC_FULL_VER) // LLVM also uses MSVC's STL headers, hence the #elif block
+#if defined(_MSC_VER) && defined(_MSC_FULL_VER) && !defined(__GNUG__) && !defined(__GNUC__) && !defined(__llvm__) && !defined(__clang__)
     #define __PRETTY_FUNCTION__ __FUNCSIG__
+    // with g++/clang++/icx fall back to using the variable __PRETTY_FUNCTION__
 #endif
 
 namespace __cxx_imp_sstring_internals {
@@ -205,7 +203,7 @@ class sstring {
         // operator usable only with lvalue left operand
         sstring& __cdecl operator+=(_In_ const sstring& other) noexcept { }
 
-        friend inline std::ostream& __cdecl operator<<(std::ostream& ostream, const sstring& string) noexcept {
+        friend inline std::ostream& __cdecl operator<<(_Inout_ std::ostream& ostream, _In_ const sstring& string) noexcept {
             ostream << string.c_str();
             return ostream;
         }
