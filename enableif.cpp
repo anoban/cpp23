@@ -2,6 +2,7 @@
 
 #include <concepts>
 #include <cstdio>
+#include <cstdlib>
 #include <type_traits>
 
 // templated function without any explicit type constraints
@@ -96,6 +97,16 @@ template<typename T>
     return x * y;
 }
 
+// hand rolled enable_if
+template<bool predicate, class T> struct enable_if final { };
+
+template<class T> struct enable_if<true, T> final {
+        static constexpr bool value = true;
+        using type                  = T;
+};
+
+template<bool predicate, class T> using enable_if_t = typename ::enable_if<predicate, T>::type;
+
 auto main() -> int {
     constexpr float one { 634.8567623 }, two { 6.046654 };
     constexpr short shirt { 54 }, tshirt { 84 };
@@ -105,7 +116,10 @@ auto main() -> int {
     ::imul(one, one); // called with float arguments
     ::imul(shirt, tshirt);
 
-    return 0;
+    constexpr ::enable_if_t<std::is_arithmetic<unsigned>::value, bool> yes { false };
+    constexpr ::enable_if_t<!std::is_arithmetic<double>::value, bool>  nope { false }; // error
+
+    return EXIT_SUCCESS;
 }
 
 // starting to like C++ :))
