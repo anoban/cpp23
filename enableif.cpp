@@ -110,10 +110,10 @@ template<bool predicate, class T> using enable_if_t = typename ::enable_if<predi
 auto main() -> int {
     constexpr float one { 634.8567623 }, two { 6.046654 };
     constexpr short shirt { 54 }, tshirt { 84 };
-    ::isum(one, two);
+    ::isum(one, two); // invoked with float arguments
     ::isum(shirt, shirt);
 
-    ::imul(one, one); // called with float arguments
+    ::imul(one, one); // invoked with float arguments
     ::imul(shirt, tshirt);
 
     constexpr ::enable_if_t<std::is_arithmetic<unsigned>::value, bool> yes { false };

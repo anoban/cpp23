@@ -1,6 +1,8 @@
 #include <concepts>
 #include <type_traits>
 
+// NOLINTBEGIN(cppcoreguidelines-narrowing-conversions)
+
 // make sure the passed predicate template has a public static const bool memeber named value
 template<template<class> class predicate, class candidate> concept validate_predicate =
     std::is_same<class predicate<candidate>::value, bool>::value;
@@ -135,3 +137,5 @@ static_assert(::factorial(4) == 24);
 template<class... TList> static consteval long double fsum(const TList&... values) noexcept { return (... + ::factorial(values)); }
 
 static_assert(::fsum(2.0, 3, 7.0F, 5U, 4.0L, 2, 5LLU, 4L, 4, 8LU, 2, 0, 9, 2, 4Ui8, 5, 6I16, 6, 5, 7LL, 7, 4Ui16, 9, 2, 8) == 823577);
+
+// NOLINTEND(cppcoreguidelines-narrowing-conversions)
