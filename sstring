@@ -4,6 +4,7 @@
 #include <cstring>
 #include <iostream>
 #include <new>
+#include <string>
 
 #include <sal.h> // to please g++
 
@@ -90,7 +91,7 @@ class sstring {
 
         inline __cdecl sstring(_In_ const sstring& other) noexcept : // not exactly a trivial copy constructor
             _size(other._size),
-            _capacity(other._size * 2 /* choosing not to simply use the other string's capacity */),
+            _capacity(_size * 2 /* choosing not to simply use the other string's capacity */),
             _resource(new (std::nothrow) char[_capacity]) {
             ::_putws(__cxx_sstring_internal_imps::wsignature(__PRETTY_FUNCTION__));
             if (!_resource) { // has the allocation failed,
@@ -101,6 +102,21 @@ class sstring {
 
             ::memset(_resource, 0U, _capacity);
             ::strcpy_s(_resource, _size, other._resource);
+        }
+
+        inline __cdecl sstring(_In_ const std::string& other) noexcept : // converting constructor
+            _size(other.length() + 1),                                   // std::string::length() doesn't count the null terminator
+            _capacity(_size * 2 /* choosing not to simply use the other string's capacity */),
+            _resource(new (std::nothrow) char[_capacity]) {
+            ::_putws(__cxx_sstring_internal_imps::wsignature(__PRETTY_FUNCTION__));
+            if (!_resource) { // has the allocation failed,
+                _capacity = _size = 0;
+                ::fputws(L"allocation failure!\n", stderr);
+                return;
+            }
+
+            ::memset(_resource, 0U, _capacity);
+            ::strcpy_s(_resource, other.length() + 1, other.data());
         }
 
         // optimizations like buffer reuse are deliberately ignored :(
@@ -146,6 +162,24 @@ class sstring {
 
             other._resource = nullptr;
             other._size = other._capacity = 0;
+
+            return *this;
+        }
+
+        inline __cdecl sstring(_Inout_ std::string&& other) noexcept :
+            _size(other.length() + 1), _capacity(other.capacity()), _resource(other.data()) {
+            ::_putws(__cxx_sstring_internal_imps::wsignature(__PRETTY_FUNCTION__));
+            // CANNOT DO CLEANUP WITH STD::STRING
+        }
+
+        inline sstring& __cdecl operator=(_Inout_ std::string&& other) noexcept {
+            ::_putws(__cxx_sstring_internal_imps::wsignature(__PRETTY_FUNCTION__));
+
+            delete[] _resource; // give up the old buffer
+            _size     = other.length() + 1;
+            _capacity = other.capacity();
+            _resource = other.data();
+            // CANNOT DO CLEANUP WITH STD::STRING
 
             return *this;
         }

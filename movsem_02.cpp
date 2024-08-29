@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <sstring>
-#include <string>
 
 static inline ::sstring skyfall() noexcept {
     // NOLINTNEXTLINE(modernize-return-braced-init-list)
@@ -52,6 +51,10 @@ int main() {               // NOLINT(bugprone-exception-escape)
 
     const std::string james(jbond.cbegin(), jbond.cend()); // will work with -std=c++98 too :)
     std::cout << james << '\n';
+
+    const std::string me    = "Anoban";
+    ::sstring         metoo = me;
+    std::cout << me << " " << metoo << '\n';
 
     return EXIT_SUCCESS;
 }
