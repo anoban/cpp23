@@ -4,6 +4,11 @@
 #include <algorithm>
 #include <sstring>
 
+#if __cplusplus < 201103L // standards prior to C++11
+    #define noexcept throw()
+    #define nullptr  NULL // replace nullptr with NULL
+#endif
+
 static inline ::sstring skyfall() noexcept {
     // NOLINTNEXTLINE(modernize-return-braced-init-list)
     return ::sstring("Skyfall is where we start, a thousand miles and poles apart, where worlds collide and days are dark!");
@@ -20,12 +25,12 @@ int main() {               // NOLINT(bugprone-exception-escape)
     ::sstring jbond("I've drowned and dreamt this moment.... so overdue I owe them................");
     std::cout << jbond << '\n';
 
-    sstring adele;       // default construction
+    ::sstring adele;     // default construction
     adele = ::skyfall(); // copy assignment in C++03, move assignment in C++11 and later
 
     std::cout << adele << '\n';
 
-    const sstring aaaaa('A', 50);
+    const ::sstring aaaaa('A', 50);
     std::cout << aaaaa << '\n';
 
     const ::sstring concatenated = skyfall() + " " + jbond; // boy look at that :)
