@@ -7,6 +7,7 @@
 #include <type_traits>
 
 using std::string;
+using std::wstring;
 
 template<bool predicate, class T> struct enable_if { };
 
@@ -20,6 +21,32 @@ static __declspec(noinline) typename ::enable_if<std::is_arithmetic<T>::value, T
 ) noexcept {
     return M_PI;
 }
+
+class real_wrapper;
+
+class integer_wrapper final {
+        long long _value;
+
+    public:
+        constexpr explicit integer_wrapper(const int& value) noexcept : _value { value } { }
+
+        constexpr long long value() const noexcept { return _value; }
+
+        integer_wrapper(const real_wrapper& other);
+};
+
+class real_wrapper final {
+        double _value;
+
+    public:
+        constexpr explicit real_wrapper(const double& value) noexcept : _value { value } { }
+
+        constexpr double value() const noexcept { return _value; }
+
+        real_wrapper(const integer_wrapper& other) noexcept : _value { static_cast<double>(other.value()) } { }
+};
+
+integer_wrapper::integer_wrapper(const real_wrapper& other) noexcept : _value { static_cast<long long>(other.value()) } { }
 
 int main() {
     const auto pi                     = ::function('A');
@@ -45,12 +72,15 @@ int main() {
     float* crefptr                    = const_cast<float*>(&crefage);
     *crefptr                         *= 2.00; // mutating an allegedely const float
 
+    ::printf_s("age = %010X, crefage = %010X\n", &age, &crefage);
     ::printf_s("age = %5d, mutated copy = %.10f\n", age, crefage);
 
     float* ptr = reinterpret_cast<float*>(&age); // won't work without the cast
-    // const float* cptr                = &age;                           // still an error
+                                                 // const float* cptr                = &age;                           // still an error
 
-    const string name { "Anoban" };
+    integer_wrapper     ten { 10 };
+    const real_wrapper& not_ten { ten }; // not a type punned reference but a reference to a completely different object
+    ::printf_s("ten = %010X, not_ten = %010X\n", &ten, &not_ten);
 
     return EXIT_SUCCESS;
 }
