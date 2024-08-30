@@ -2,6 +2,7 @@
 // <cstdint> requires C++11 and later with g++ hence won't compile with -std=c++03
 
 #include <algorithm>
+// #define __SSTRING_PRINT_METHOD_SIGNATURES_ON_CALL__
 #include <sstring>
 
 #if __cplusplus < 201103L // standards prior to C++11

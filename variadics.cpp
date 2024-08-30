@@ -116,8 +116,7 @@ static_assert(
     3.4877513665571724E+38
 );
 
-// 2, 3, 7, 5, 4, 2, 5, 4, 4, 8, 2, 0, 9, 2, 4, 5, 6, 6, 5, 7, 7, 4, 9, 2, 8
-// sum of factorials is 823577
+// 2, 3, 7, 5, 4, 2, 5, 4, 4, 8, 2, 0, 9, 2, 4, 5, 6, 6, 5, 7, 7, 4, 9, 2, 8 sum of factorials is 823577
 
 template<class T>
 [[nodiscard]] static consteval typename std::enable_if<std::is_arithmetic<T>::value, long double>::type factorial(const T& val) noexcept {

@@ -28,6 +28,12 @@
     #define nullptr  NULL // replace nullptr with NULL
 #endif
 
+#ifdef __SSTRING_PRINT_METHOD_SIGNATURES_ON_CALL__
+    #define print_signature() ::puts(__PRETTY_FUNCTION__)
+#else
+    #define print_signature()
+#endif
+
 namespace __cxx_sstring_internal_imps {
 
     // resorting to runtime conversion :(
@@ -60,12 +66,12 @@ class sstring {
 
     public:
         inline __cdecl sstring() noexcept : _size(0), _capacity(0), _resource(nullptr) { // default ctor
-            // ::_putws(__cxx_sstring_internal_imps::wsignature(__PRETTY_FUNCTION__));
+            print_signature();
         }
 
         inline __cdecl sstring(_In_ const char& ch, _In_ const size_type& repeats) noexcept :
             _size(repeats + 1), _capacity(_size * 2), _resource(new (std::nothrow) char[_capacity]) {
-            // ::_putws(__cxx_sstring_internal_imps::wsignature(__PRETTY_FUNCTION__));
+            print_signature();
             if (!_resource) { // has the allocation failed,
                 _capacity = _size = 0;
                 ::fputws(L"allocation failure!\n", stderr);
@@ -79,7 +85,7 @@ class sstring {
         inline __cdecl sstring(_In_ const char* const str) noexcept : // NOLINT(google-explicit-constructor) - a converting constructor
             _size(::strlen(str) + 1 /* +1 for the null terminator */), _capacity(_size * 2), _resource(new (std::nothrow) char[_capacity]) {
             // using ::strlen(str) here and using _size + 1 in strcpy_s will bite us in the ass when trying to copy or move
-            // ::_putws(__cxx_sstring_internal_imps::wsignature(__PRETTY_FUNCTION__));
+            print_signature();
             if (!_resource) { // has the allocation failed,
                 _capacity = _size = 0;
                 ::fputws(L"allocation failure!\n", stderr);
@@ -94,7 +100,7 @@ class sstring {
             _size(other._size),
             _capacity(_size * 2 /* choosing not to simply use the other string's capacity */),
             _resource(new (std::nothrow) char[_capacity]) {
-            // ::_putws(__cxx_sstring_internal_imps::wsignature(__PRETTY_FUNCTION__));
+            print_signature();
             if (!_resource) { // has the allocation failed,
                 _capacity = _size = 0;
                 ::fputws(L"allocation failure!\n", stderr);
@@ -109,7 +115,7 @@ class sstring {
             _size(other.length() + 1),                                   // std::string::length() doesn't count the null terminator
             _capacity(_size * 2 /* choosing not to simply use the other string's capacity */),
             _resource(new (std::nothrow) char[_capacity]) {
-            // ::_putws(__cxx_sstring_internal_imps::wsignature(__PRETTY_FUNCTION__));
+            print_signature();
             if (!_resource) { // has the allocation failed,
                 _capacity = _size = 0;
                 ::fputws(L"allocation failure!\n", stderr);
@@ -122,7 +128,7 @@ class sstring {
 
         // optimizations like buffer reuse are deliberately ignored :(
         inline sstring& __cdecl operator=(_In_ const sstring& other) noexcept {
-            // ::_putws(__cxx_sstring_internal_imps::wsignature(__PRETTY_FUNCTION__));
+            print_signature();
             if (this == &other) return *this;
 
             delete[] _resource; // give up the old buffer
@@ -146,14 +152,14 @@ class sstring {
         // move ctor
         inline __cdecl sstring(_Inout_ sstring&& other) noexcept :
             _size(other._size), _capacity(other._capacity), _resource(other._resource) {
-            // ::_putws(__cxx_sstring_internal_imps::wsignature(__PRETTY_FUNCTION__));
+            print_signature();
             other._resource = nullptr;
             other._size = other._capacity = 0;
         }
 
         // move assignment operator
         inline sstring& __cdecl operator=(_Inout_ sstring&& other) noexcept {
-            // ::_putws(__cxx_sstring_internal_imps::wsignature(__PRETTY_FUNCTION__));
+            print_signature();
             if (this == &other) return *this;
 
             delete[] _resource; // give up the old buffer
@@ -174,12 +180,12 @@ class sstring {
 
         inline __cdecl sstring(_Inout_ std::string&& other) noexcept :
             _size(other.length() + 1), _capacity(other.capacity()), _resource(other.data()) {
-           // ::_putws(__cxx_sstring_internal_imps::wsignature(__PRETTY_FUNCTION__));
+           print_signature();
             // CANNOT DO CLEANUP WITH STD::STRING
         }
 
         inline sstring& __cdecl operator=(_Inout_ std::string&& other) noexcept {
-           // ::_putws(__cxx_sstring_internal_imps::wsignature(__PRETTY_FUNCTION__));
+           print_signature();
 
             delete[] _resource; // give up the old buffer
             _size     = other.length() + 1;
@@ -194,14 +200,14 @@ class sstring {
 #endif
 
         inline __cdecl ~sstring() noexcept {
-            // ::_putws(__cxx_sstring_internal_imps::wsignature(__PRETTY_FUNCTION__));
+            print_signature();
             delete[] _resource;
             _resource = nullptr;
             _size = _capacity = 0;
         }
 
         static inline sstring __cdecl with_capacity(_In_ const size_type& size) noexcept { // a Rust style static ctor
-            // ::_putws(__cxx_sstring_internal_imps::wsignature(__PRETTY_FUNCTION__));
+            print_signature();
             sstring temporary;
             temporary._resource = new (std::nothrow) char[size];
             if (!temporary._resource) { // has the allocation failed,
@@ -226,7 +232,7 @@ class sstring {
 
         // operator usable for lvalues and rvalues for operands
         sstring __cdecl operator+(_In_ const sstring& other) const noexcept {
-            // ::_putws(__cxx_sstring_internal_imps::wsignature(__PRETTY_FUNCTION__));
+            print_signature();
 
             sstring temporary;
             temporary._resource = new (std::nothrow) char[(_size + other._size) * 2]; // has space for 2 null terminators
@@ -250,7 +256,7 @@ class sstring {
 
         // operator usable only with lvalue left operand
         sstring& __cdecl operator+=(_In_ const sstring& other) noexcept {
-            // ::_putws(__cxx_sstring_internal_imps::wsignature(__PRETTY_FUNCTION__));
+            print_signature();
 
             char* new_buffer = new (std::nothrow) char[(_size + other._size) * 2];
             if (!new_buffer) { // has the allocation failed,
@@ -300,6 +306,26 @@ class sstring {
         const char* cbegin() const noexcept { return _resource; }
 
         const char* cend() const noexcept { return _resource + _size; } // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
+        char& at(size_type& offset) noexcept {
+            assert(offset < _size);
+            return _resource[offset]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        }
+
+        const char& at(size_type& offset) const noexcept {
+            assert(offset < _size);
+            return _resource[offset]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        }
+
+        char& operator[](size_type& offset) noexcept {
+            assert(offset < _size);
+            return _resource[offset]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        }
+
+        const char& operator[](size_type& offset) const noexcept {
+            assert(offset < _size);
+            return _resource[offset]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        }
 };
 
 #if __cplusplus < 201103L
