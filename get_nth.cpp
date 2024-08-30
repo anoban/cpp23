@@ -19,3 +19,19 @@ static_assert(!std::is_same_v<::get_nth_t<2, wchar_t, long long, volatile short&
 static_assert(std::is_same_v<::get_nth_t<3, wchar_t, long long, volatile short&&, unsigned, const int, long&>, unsigned>);
 static_assert(std::is_same_v<::get_nth_t<1, float, double, volatile long double>, double>);
 static_assert(std::is_same_v<::get_nth_t<0, char, double, volatile long double&&, float&>, char>);
+
+template<class T, class U> struct is_same final {
+        static constexpr bool value = false;
+};
+
+template<class T> struct is_same<T, T> final {
+        static constexpr bool value = true;
+};
+
+template<class T, class U> constexpr bool is_same_v = ::is_same<T, U>::value;
+
+static_assert(!::is_same_v<char, const char>);
+static_assert(!::is_same_v<char, volatile char>);
+static_assert(!::is_same_v<float&&, const float&>);
+static_assert(::is_same_v<float&&, float&&>);
+static_assert(::is_same_v<long long, long long>);
