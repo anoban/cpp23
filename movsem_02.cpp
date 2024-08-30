@@ -9,6 +9,26 @@
     #define nullptr  NULL // replace nullptr with NULL
 #endif
 
+static inline std::string sentence_case(_In_ const std::string& asciistr) noexcept {
+    std::string copy(asciistr);
+    for (unsigned i = 0; i < copy.length(); ++i)
+        // when the current char is ' ' and the next char is an ascii lowercase letter
+        if (copy.at(i) == ' ' && copy.at(i + 1) >= 97 && copy.at(i + 1) <= 122) copy.at(i + 1) -= 32; // make it upper case
+    return copy;
+}
+
+#if (__cplusplus >= 201103L)
+
+static inline std::string sentence_case(_In_ std::string&& asciistr) noexcept {
+    std::string copy(std::move(asciistr));
+    for (unsigned i = 0; i < copy.length(); ++i)
+        // when the current char is ' ' and the next char is an ascii lowercase letter make it upper case
+        if (copy.at(i) == ' ' && copy.at(i + 1) >= 97 && copy.at(i + 1) <= 122) copy.at(i + 1) -= 32;
+    return copy;
+}
+
+#endif
+
 static inline ::sstring skyfall() noexcept {
     // NOLINTNEXTLINE(modernize-return-braced-init-list)
     return ::sstring("Skyfall is where we start, a thousand miles and poles apart, where worlds collide and days are dark!");
@@ -60,6 +80,20 @@ int main() {               // NOLINT(bugprone-exception-escape)
     const std::string me    = "Anoban";
     ::sstring         metoo = me;
     std::cout << me << " " << metoo << '\n';
+
+    std::string cohen = "A million candles burning for a help that never came!";
+    ::puts(cohen.c_str());
+
+    ::sstring want_it_darker = cohen; // copy construction
+    ::puts(want_it_darker.c_str());
+
+    want_it_darker = me; // copy assignment
+    ::puts(want_it_darker.c_str());
+
+    // invokes the conversion function to create a std::string from ::string, then the rvalue overload gets called in C++11 and later
+    // const lvalue overload gets called in C++03 and before
+    const std::string sentence = ::sentence_case(::skyfall());
+    ::puts(sentence.c_str());
 
     return EXIT_SUCCESS;
 }
