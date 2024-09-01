@@ -307,22 +307,22 @@ class sstring {
 
         const char* cend() const noexcept { return _resource + _size; } // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
-        char& at(size_type& offset) noexcept {
+        char& at(const size_type& offset) noexcept {
             assert(offset < _size);
             return _resource[offset]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
 
-        const char& at(size_type& offset) const noexcept {
+        const char& at(const size_type& offset) const noexcept {
             assert(offset < _size);
             return _resource[offset]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
 
-        char& operator[](size_type& offset) noexcept {
+        char& operator[](const size_type& offset) noexcept {
             assert(offset < _size);
             return _resource[offset]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
 
-        const char& operator[](size_type& offset) const noexcept {
+        const char& operator[](const size_type& offset) const noexcept {
             assert(offset < _size);
             return _resource[offset]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
