@@ -34,7 +34,7 @@
     #define print_signature()
 #endif
 
-namespace __cxx_sstring_internal_imps {
+namespace __cxx_sstring_internal_impl_ {
 
     // resorting to runtime conversion :(
     static inline const wchar_t* wsignature(_In_ const char* _cxx_signature) noexcept {
@@ -49,11 +49,16 @@ namespace __cxx_sstring_internal_imps {
         return _signature;
     }
 
-} // namespace __cxx_sstring_internal_imps
+} // namespace __cxx_sstring_internal_impl_
 
 // a super trivial string class with NO NON-TRIVIAL OPTIMIZATIONS whatsoever
 // class sstring works with all C++ standards from C++98 to C++23 :)
-class sstring {
+class sstring
+#if __cplusplus >= 201103L // standards prior to C++11 did not support the final keyword
+    final
+#endif
+{
+
     private:
 #if __cplusplus < 201103L                // standards prior to C++11
         typedef unsigned long size_type; // C++98 did not support long long types
