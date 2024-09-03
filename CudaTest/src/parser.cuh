@@ -19,6 +19,7 @@
     #include <concepts>
     #include <iomanip>
     #include <iostream>
+    #include <numeric>
     #include <ranges>
     #include <string>
     #include <string_view>
@@ -84,11 +85,45 @@ template<typename T> class record final {
 
         template<typename U> requires std::floating_point<U>
         __host__ __device__ record<long double> operator+(const record<U>& other) const noexcept {
-            //
+            return {
+                area + other.area,
+                perimeter + other.perimeter,
+                major_axis_length + other.major_axis_length,
+                minor_axis_length + other.minor_axis_length,
+                aspect_ratio + other.aspect_ratio,
+                eccentricity + other.eccentricity,
+                convex_area + other.convex_area,
+                equiv_diameter + other.equiv_diameter,
+                extent + other.extent,
+                solidity + other.solidity,
+                roundness + other.roundness,
+                compactness + other.compactness,
+                shape_factor_1 + other.shape_factor_1,
+                shape_factor_2 + other.shape_factor_2,
+                shape_factor_3 + other.shape_factor_3,
+                shape_factor_4 + other.shape_factor_4,
+            };
+            // ignoring the member `variety`
         }
 
         template<typename U> requires std::floating_point<U> __host__ __device__ record<T>& operator+=(const record<U>& other) noexcept {
-            //
+            area              += other.area;
+            perimeter         += other.perimeter;
+            major_axis_length += other.major_axis_length;
+            minor_axis_length += other.minor_axis_length;
+            aspect_ratio      += other.aspect_ratio;
+            eccentricity      += other.eccentricity;
+            convex_area       += other.convex_area;
+            equiv_diameter    += other.equiv_diameter;
+            extent            += other.extent;
+            solidity          += other.solidity;
+            roundness         += other.roundness;
+            compactness       += other.compactness;
+            shape_factor_1    += other.shape_factor_1;
+            shape_factor_2    += other.shape_factor_2;
+            shape_factor_3    += other.shape_factor_3;
+            shape_factor_4    += other.shape_factor_4;
+            // ignoring the member `variety`
             return *this;
         }
 

@@ -111,7 +111,10 @@ auto main() -> int {
     const auto rows { ::parse_beans_csv<float>(beans, true) };
 
     std::cout << std::setprecision(15);
-    for (const auto& row : rows) std::cout << row;
+    // for (const auto& row : rows) std::cout << row;
+
+    const auto sum = std::reduce(rows.cbegin(), rows.cend(), ::record<long double> {});
+    std::cout << sum;
 
     return EXIT_SUCCESS;
 }
