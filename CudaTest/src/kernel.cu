@@ -116,5 +116,33 @@ auto main() -> int {
     const auto sum = std::reduce(rows.cbegin(), rows.cend(), ::record<long double> {});
     std::cout << sum;
 
+    /* sum should be ::
+    
+    Area                                                       722040201
+    Perimeter                                               11641263.155
+    MajorAxisLength                                       4357450.955864
+    MinorAxisLength                                       2753106.689377
+    AspectRation                                            21549.506576
+    Eccentricity                                            10220.430884
+    ConvexArea                                                 731838973
+    EquivDiameter                                         3444457.097398
+    Extent                                                  10204.612969
+    Solidity                                                13436.001244
+    roundness                                               11886.239006
+    Compactness                                             10886.944574
+    ShapeFactor1                                               89.337275
+    ShapeFactor2                                               23.355759
+    ShapeFactor3                                             8759.905958
+    ShapeFactor4                                            13543.806737
+    
+    */
+
+    long double solidity {};
+    std::for_each(rows.cbegin(), rows.cend(), [&solidity](const decltype(rows)::value_type& row) noexcept -> void {
+        solidity += row.solidity;
+    });
+
+    std::cout << solidity; // why zero??
+
     return EXIT_SUCCESS;
 }

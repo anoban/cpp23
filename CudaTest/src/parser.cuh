@@ -127,13 +127,23 @@ template<typename T> class record final {
             return *this;
         }
 
-        template<typename char_t>
-        friend std::basic_ostream<char_t>& operator<<(_Inout_ std::basic_ostream<char_t>& ostream, _In_ const record& rcrd) noexcept {
-            ostream << rcrd.area << char_t(' ') << rcrd.perimeter << char_t(' ') << rcrd.major_axis_length << char_t(' ')
-                    << rcrd.minor_axis_length << char_t(' ') << rcrd.aspect_ratio << char_t(' ') << rcrd.eccentricity << char_t(' ')
-                    << rcrd.convex_area << char_t(' ') << rcrd.equiv_diameter << char_t(' ') << rcrd.extent << char_t(' ') << rcrd.solidity
-                    << char_t(' ') << rcrd.roundness << char_t(' ') << rcrd.compactness << char_t(' ') << rcrd.shape_factor_1 << char_t(' ')
-                    << rcrd.shape_factor_2 << char_t(' ') << rcrd.shape_factor_3 << char_t(' ') << rcrd.shape_factor_4 << char_t('\n');
+        friend std::ostream& operator<<(_Inout_ std::ostream& ostream, _In_ const record& rcrd) noexcept {
+            ostream << "Area " << rcrd.area << '\n'
+                    << "Perimeter " << rcrd.perimeter << '\n'
+                    << "MajorAxisLength " << rcrd.major_axis_length << '\n'
+                    << "MinorAxisLength " << rcrd.minor_axis_length << '\n'
+                    << "AspectRation " << rcrd.aspect_ratio << '\n'
+                    << "Eccentricity " << rcrd.eccentricity << '\n'
+                    << "ConvexArea " << rcrd.convex_area << '\n'
+                    << "EquivDiameter " << rcrd.equiv_diameter << '\n'
+                    << "Extent " << rcrd.extent << '\n'
+                    << "Solidity " << rcrd.solidity << '\n'
+                    << "roundness " << rcrd.roundness << '\n'
+                    << "Compactness " << rcrd.compactness << '\n'
+                    << "ShapeFactor1 " << rcrd.shape_factor_1 << '\n'
+                    << "ShapeFactor2 " << rcrd.shape_factor_2 << '\n'
+                    << "ShapeFactor3 " << rcrd.shape_factor_3 << '\n'
+                    << "ShapeFactor4 " << rcrd.shape_factor_4 << '\n';
             return ostream;
         }
 };
