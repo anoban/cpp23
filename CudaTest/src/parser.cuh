@@ -56,32 +56,32 @@ static_assert(::any_of_trait_v<std::is_arithmetic, float, double, long double, c
 template<typename T> class record final {
     public:
         using value_type = T;
+        unsigned area;
+        T        perimeter;
+        T        major_axis_length;
+        T        minor_axis_length;
+        T        aspect_ratio;
+        T        eccentricity;
+        T        convex_area;
+        T        equiv_diameter;
+        T        extent;
+        T        solidity;
+        T        roundness;
+        T        compactness;
+        T        shape_factor_1;
+        T        shape_factor_2;
+        T        shape_factor_3;
+        T        shape_factor_4;
+        char     variety[10]; // max is 9 so :)
 
-        T    area;
-        T    perimeter;
-        T    major_axis_length;
-        T    minor_axis_length;
-        T    aspect_ratio;
-        T    eccentricity;
-        T    convex_area;
-        T    equiv_diameter;
-        T    extent;
-        T    solidity;
-        T    roundness;
-        T    compactness;
-        T    shape_factor_1;
-        T    shape_factor_2;
-        T    shape_factor_3;
-        T    shape_factor_4;
-        char variety[10]; // max is 9 so :)
-
-        template<std::floating_point U> __host__ __device__ bool operator==(const record<U>& other) noexcept {
-            return !::memcmp(variety, other.variety, __crt_countof(variety));
-        }
-
-        template<std::floating_point U> __host__ __device__ bool operator!=(const record<U>& other) noexcept {
-            return ::memcmp(variety, other.variety, __crt_countof(variety));
-        }
+        // THIS IS TERRIBLE, DO AN ELEMENT WISE COMPARISON
+        // template<std::floating_point U> __host__ __device__ bool operator==(const record<U>& other) noexcept {
+        //     return !::memcmp(variety, other.variety, __crt_countof(variety));
+        // }
+        //
+        // template<std::floating_point U> __host__ __device__ bool operator!=(const record<U>& other) noexcept {
+        //     return ::memcmp(variety, other.variety, __crt_countof(variety));
+        // }
 };
 
 static_assert(::all_of_trait_v<std::is_standard_layout, record<float>, record<double>, record<long double>>()); // ;)
