@@ -1,4 +1,5 @@
 #include <charconv>
+#include <iomanip>
 #include <iostream>
 #include <string_view>
 
@@ -34,46 +35,88 @@ template<typename T> class record final {
         }
 };
 
-template<std::floating_point T> static constexpr record<T> parse_line(const std::string_view& line) noexcept {
+template<std::floating_point T> static constexpr record<T> parse_line(_In_ const std::string_view& line) noexcept {
     // a typical row will be in the format of,
     // 28395,610.291,208.178116708527,173.888747041636,1.19719142411602,0.549812187138347,28715,190.141097274511,0.763922518159806,0.988855998607,0.958027126250128,0.913357754795763,0.00733150613518321,0.00314728916733569,0.834222388245556,0.998723889013168,SEKER
-    record<T> temporary {};
-
+    record<T>         temporary {};
     const char* const cstart { line.data() };
     const char*       begin { line.data() };
 
     size_t caret = line.find(',', 0); // the first comma
-    std::from_chars(begin, begin + caret, temporary.area);
-    begin += caret;
+    std::from_chars(begin, cstart + caret /* this delimiter is exclusive */, temporary.area);
+    begin = cstart + caret + 1; // char next to the first comma
 
-    caret  = line.find(',', caret + 1); // the next coma
-    std::from_chars(begin, /* char next to the comma */ begin + caret, temporary.perimeter);
-    begin += caret;
+    caret = line.find(',', caret + 1); // the second comma
+    std::from_chars(begin, /* char next to the comma */ cstart + caret, temporary.perimeter);
+    begin = cstart + caret + 1;
 
-    std::from_chars(begin += 2, begin += line.find(',', std::distance(cstart, begin)) - 1, temporary.major_axis_length);
-    std::from_chars(begin += 2, begin += line.find(',', std::distance(cstart, begin)) - 1, temporary.minor_axis_length);
-    std::from_chars(begin += 2, begin += line.find(',', std::distance(cstart, begin)) - 1, temporary.aspect_ratio);
-    std::from_chars(begin += 2, begin += line.find(',', std::distance(cstart, begin)) - 1, temporary.eccentricity);
-    std::from_chars(begin += 2, begin += line.find(',', std::distance(cstart, begin)) - 1, temporary.convex_area);
-    std::from_chars(begin += 2, begin += line.find(',', std::distance(cstart, begin)) - 1, temporary.equiv_diameter);
-    std::from_chars(begin += 2, begin += line.find(',', std::distance(cstart, begin)) - 1, temporary.extent);
-    std::from_chars(begin += 2, begin += line.find(',', std::distance(cstart, begin)) - 1, temporary.roundness);
-    std::from_chars(begin += 2, begin += line.find(',', std::distance(cstart, begin)) - 1, temporary.compactness);
-    std::from_chars(begin += 2, begin += line.find(',', std::distance(cstart, begin)) - 1, temporary.extent);
-    std::from_chars(begin += 2, begin += line.find(',', std::distance(cstart, begin)) - 1, temporary.shape_factor_1);
-    std::from_chars(begin += 2, begin += line.find(',', std::distance(cstart, begin)) - 1, temporary.shape_factor_2);
-    std::from_chars(begin += 2, begin += line.find(',', std::distance(cstart, begin)) - 1, temporary.shape_factor_3);
-    std::from_chars(begin += 2, begin += line.find(',', std::distance(cstart, begin)) - 1, temporary.shape_factor_4);
+    caret = line.find(',', caret + 1);
+    std::from_chars(begin, cstart + caret, temporary.major_axis_length);
+    begin = cstart + caret + 1;
+
+    caret = line.find(',', caret + 1);
+    std::from_chars(begin, cstart + caret, temporary.minor_axis_length);
+    begin = cstart + caret + 1;
+
+    caret = line.find(',', caret + 1);
+    std::from_chars(begin, cstart + caret, temporary.aspect_ratio);
+    begin = cstart + caret + 1;
+
+    caret = line.find(',', caret + 1);
+    std::from_chars(begin, cstart + caret, temporary.eccentricity);
+    begin = cstart + caret + 1;
+
+    caret = line.find(',', caret + 1);
+    std::from_chars(begin, cstart + caret, temporary.convex_area);
+    begin = cstart + caret + 1;
+
+    caret = line.find(',', caret + 1);
+    std::from_chars(begin, cstart + caret, temporary.equiv_diameter);
+    begin = cstart + caret + 1;
+
+    caret = line.find(',', caret + 1);
+    std::from_chars(begin, cstart + caret, temporary.extent);
+    begin = cstart + caret + 1;
+
+    caret = line.find(',', caret + 1);
+    std::from_chars(begin, cstart + caret, temporary.roundness);
+    begin = cstart + caret + 1;
+
+    caret = line.find(',', caret + 1);
+    std::from_chars(begin, cstart + caret, temporary.compactness);
+    begin = cstart + caret + 1;
+
+    caret = line.find(',', caret + 1);
+    std::from_chars(begin, cstart + caret, temporary.extent);
+    begin = cstart + caret + 1;
+
+    caret = line.find(',', caret + 1);
+    std::from_chars(begin, cstart + caret, temporary.shape_factor_1);
+    begin = cstart + caret + 1;
+
+    caret = line.find(',', caret + 1);
+    std::from_chars(begin, cstart + caret, temporary.shape_factor_2);
+    begin = cstart + caret + 1;
+
+    caret = line.find(',', caret + 1);
+    std::from_chars(begin, cstart + caret, temporary.shape_factor_3);
+    begin = cstart + caret + 1;
+
+    caret = line.find(',', caret + 1);
+    std::from_chars(begin, cstart + caret, temporary.shape_factor_4);
+    begin = cstart + caret + 1;
 
     return temporary;
 }
 
-auto wmain() -> int {
-    const auto test = ::parse_line<double>(
+auto main() -> int {
+    std::cout << std::setprecision(15);
+
+    const auto test = ::parse_line<long double>(
         "28395,610.291,208.178116708527,173.888747041636,1.19719142411602,0.549812187138347,28715,190.141097274511,0.763922518159806,0.988855998607,0.958027126250128,0.913357754795763,0.00733150613518321,0.00314728916733569,0.834222388245556,0.998723889013168,SEKER"
     );
 
-    std::wcout << test;
+    std::cout << test;
 
     return EXIT_SUCCESS;
 }

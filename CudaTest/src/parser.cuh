@@ -17,8 +17,7 @@
     #include <cassert>
     #include <charconv>
     #include <concepts>
-    #include <cstdio>
-    #include <cstring>
+    #include <iostream>
     #include <ranges>
     #include <string>
     #include <string_view>
@@ -82,6 +81,16 @@ template<typename T> class record final {
         // template<std::floating_point U> __host__ __device__ bool operator!=(const record<U>& other) noexcept {
         //     return ::memcmp(variety, other.variety, __crt_countof(variety));
         // }
+
+        template<typename char_t>
+        friend std::basic_ostream<char_t>& operator<<(_Inout_ std::basic_ostream<char_t>& ostream, _In_ const record& rcrd) noexcept {
+            ostream << rcrd.area << char_t(' ') << rcrd.perimeter << char_t(' ') << rcrd.major_axis_length << char_t(' ')
+                    << rcrd.minor_axis_length << char_t(' ') << rcrd.aspect_ratio << char_t(' ') << rcrd.eccentricity << char_t(' ')
+                    << rcrd.convex_area << char_t(' ') << rcrd.equiv_diameter << char_t(' ') << rcrd.extent << char_t(' ') << rcrd.solidity
+                    << char_t(' ') << rcrd.roundness << char_t(' ') << rcrd.compactness << char_t(' ') << rcrd.shape_factor_1 << char_t(' ')
+                    << rcrd.shape_factor_2 << char_t(' ') << rcrd.shape_factor_3 << char_t(' ') << rcrd.shape_factor_4 << char_t('\n');
+            return ostream;
+        }
 };
 
 static_assert(::all_of_trait_v<std::is_standard_layout, record<float>, record<double>, record<long double>>()); // ;)
