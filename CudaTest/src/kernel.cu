@@ -1,5 +1,7 @@
 ﻿#include <parser.cuh>
 
+static constexpr size_t N_RECORDS { 13'612 };
+
 template<std::floating_point T> [[nodiscard]] static constexpr record<T> parse_line(_In_ const std::string_view& line) noexcept {
     // a typical row will be in the format of,
     // 28395,610.291,208.178116708527,173.888747041636,1.19719142411602,0.549812187138347,28715,190.141097274511,0.763922518159806,0.988855998607,0.958027126250128,0.913357754795763,0.00733150613518321,0.00314728916733569,0.834222388245556,0.998723889013168,SEKER
@@ -81,7 +83,7 @@ template<typename T>
     _In_ const std::string& csv, _In_ const bool& has_header
 ) noexcept {
     const auto nlines { std::ranges::count(csv, '\n') }; // 13,612
-    assert(nlines == 13'612);
+    assert(nlines == N_RECORDS);
 
     std::vector<::record<T>> records {};
     records.reserve(nlines); // space for 1 extra record is there since we will not parse the header
@@ -105,9 +107,10 @@ auto main() -> int {
 
     unsigned long fsize {};
     std::string   beans { ::open(LR"(dry_beans.csv)", &fsize) };
-    // ::puts(beans.c_str());
 
     const auto rows { ::parse_beans_csv<float>(beans, true) };
+
+    std::cout << std::setprecision(15);
     for (const auto& row : rows) std::cout << row;
 
     return EXIT_SUCCESS;
