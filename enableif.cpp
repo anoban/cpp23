@@ -17,52 +17,52 @@ template<typename T> struct is_integral; // declaration of the type trait is_int
 // type trait is_integral for integrals :: char, unsigned char, short, unsigned short, int, unsigned, long, unsigned long, long long, unsigned long long
 template<> struct is_integral<char> {
         static const bool value { true };
-        typedef char      type;
+        using type = char;
 };
 
 template<> struct is_integral<unsigned char> {
-        static const bool     value { true };
-        typedef unsigned char type;
+        static const bool value { true };
+        using type = unsigned char;
 };
 
 template<> struct is_integral<short> {
         static const bool value { true };
-        typedef short     type;
+        using type = short;
 };
 
 template<> struct is_integral<unsigned short> {
-        static const bool      value { true };
-        typedef unsigned short type;
+        static const bool value { true };
+        using type = unsigned short;
 };
 
 template<> struct is_integral<int> {
         static const bool value { true };
-        typedef int       type;
+        using type = int;
 };
 
 template<> struct is_integral<unsigned> {
         static const bool value { true };
-        typedef unsigned  type;
+        using type = unsigned int;
 };
 
 template<> struct is_integral<long> {
         static const bool value { true };
-        typedef long      type;
+        using type = long;
 };
 
 template<> struct is_integral<unsigned long> {
-        static const bool     value { true };
-        typedef unsigned long type;
+        static const bool value { true };
+        using type = unsigned long;
 };
 
 template<> struct is_integral<long long> {
         static const bool value { true };
-        typedef long long type;
+        using type = long long;
 };
 
 template<> struct is_integral<unsigned long long> {
-        static const bool          value { true };
-        typedef unsigned long long type;
+        static const bool value { true };
+        using type = unsigned long long;
 };
 
 // std::enable_if basically takes advantage of template substitution failure to disable the use of certain types as template arguments!
@@ -98,7 +98,7 @@ template<typename T>
 }
 
 // hand rolled enable_if
-template<bool predicate, class T> struct enable_if final { };
+template<bool predicate, class T = void> struct enable_if final { };
 
 template<class T> struct enable_if<true, T> final {
         static constexpr bool value = true;
@@ -110,14 +110,15 @@ template<bool predicate, class T> using enable_if_t = typename ::enable_if<predi
 auto main() -> int {
     constexpr float one { 634.8567623 }, two { 6.046654 };
     constexpr short shirt { 54 }, tshirt { 84 };
+
     ::isum(one, two); // invoked with float arguments
     ::isum(shirt, shirt);
 
     ::imul(one, one); // invoked with float arguments
     ::imul(shirt, tshirt);
 
-    constexpr ::enable_if_t<std::is_arithmetic<unsigned>::value, bool> yes { false };
-    constexpr ::enable_if_t<!std::is_arithmetic<double>::value, bool>  nope { false }; // error
+    constexpr ::enable_if_t<::is_arithmetic<unsigned>, bool> yes { false };
+    constexpr ::enable_if_t<!::is_arithmetic<double>, bool>  nope { false }; // error
 
     return EXIT_SUCCESS;
 }

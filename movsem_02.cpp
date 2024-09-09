@@ -1,14 +1,6 @@
-// g++ movsem_02.cpp -Wall -Wextra -Wpedantic -O3 -std=c++xx -o movsem_02.exe -I ./
-// <cstdint> requires C++11 and later with g++ hence won't compile with -std=c++03
-
+#define __SSTRING_PRINT_METHOD_SIGNATURES_ON_CALL__ 0
 #include <algorithm>
-// #define __SSTRING_PRINT_METHOD_SIGNATURES_ON_CALL__
 #include <sstring>
-
-#if __cplusplus < 201103L // standards prior to C++11
-    #define noexcept throw()
-    #define nullptr  NULL // replace nullptr with NULL
-#endif
 
 static inline std::string sentence_case(_In_ const std::string& asciistr) noexcept {
     std::string copy(asciistr);
@@ -63,8 +55,6 @@ int main() {               // NOLINT(bugprone-exception-escape)
     jbond += " swept away I'm stooooolennnnnn..... let the sky fall.... when it crumbles we'll stand tall and face it all together...!";
     ::puts(jbond.c_str());
 
-#if (__cplusplus >= 201103L)
-
     for (const auto& c : jbond) {
         ::putchar(c);
         ::putchar('\n');
@@ -72,8 +62,6 @@ int main() {               // NOLINT(bugprone-exception-escape)
 
     std::transform(jbond.begin(), jbond.end(), jbond.begin(), ::toupper);
     ::puts(jbond.c_str());
-
-#endif
 
     const std::string james(jbond.cbegin(), jbond.cend()); // will work with -std=c++98 too :)
     std::cout << james << '\n';

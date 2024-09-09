@@ -21,13 +21,13 @@
 // with g++/clang++/icx fall back to using the variable __PRETTY_FUNCTION__
 #endif
 
-#ifdef __SSTRING_PRINT_METHOD_SIGNATURES_ON_CALL__
+#if __SSTRING_PRINT_METHOD_SIGNATURES_ON_CALL__
     #define print_signature() ::puts(__PRETTY_FUNCTION__)
 #else
     #define print_signature()
 #endif
 
-namespace __cxx_sstring_internal_imps {
+namespace __cxx_sstring_internal_impl {
 
     // resorting to runtime conversion :(
     static inline const wchar_t* wsignature(_In_ const char* _cxx_signature) noexcept {
@@ -42,7 +42,7 @@ namespace __cxx_sstring_internal_imps {
         return _signature;
     }
 
-} // namespace __cxx_sstring_internal_imps
+} // namespace __cxx_sstring_internal_impl
 
 // a super trivial string class with NO NON-TRIVIAL OPTIMIZATIONS whatsoever
 // class sstring works with all C++ standards from C++98 to C++23 :)

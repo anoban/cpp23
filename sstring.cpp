@@ -1,4 +1,4 @@
-// #define __SSTRING_PRINT_METHOD_SIGNATURES_ON_CALL__
+#define __SSTRING_PRINT_METHOD_SIGNATURES_ON_CALL__ 0
 
 #include <iostream>
 #include <ranges>
@@ -16,7 +16,10 @@ auto main() -> int {
         name += " Anoban";
         std::cout << "length = " << name.length() << " capacity = " << name.capacity() << '\n';
     }
-
     std::cout << name << '\n';
+
+    const ::sstring skyfall { "I've drowned and dreamt this moment! I'm swept awaaaaaay I'm stolennnnnnnnnn!" };
+    std::cout << skyfall << '\n';
+
     return EXIT_SUCCESS;
 }

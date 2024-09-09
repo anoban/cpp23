@@ -85,7 +85,7 @@ static_assert(!overloads::any_of<std::is_floating_point, char, long long, short,
 
 namespace foldexpressions {
 
-    template<template<class> class predicate, class... TList> requires requires { predicate<class ::get_first<TList...>::type>::value; }
+    template<template<class> class predicate, class... TList> requires requires { predicate<typename ::get_first<TList...>::type>::value; }
     static consteval bool all_of() noexcept {
         return (... && predicate<TList>::value);
     }

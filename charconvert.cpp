@@ -24,13 +24,11 @@ template<typename T> class record final {
         T        shape_factor_4;
         char     variety[10]; // max is 9 so :)
 
-        template<typename char_t>
-        friend std::basic_ostream<char_t>& operator<<(_Inout_ std::basic_ostream<char_t>& ostream, _In_ const record& rcrd) noexcept {
-            ostream << rcrd.area << char_t(' ') << rcrd.perimeter << char_t(' ') << rcrd.major_axis_length << char_t(' ')
-                    << rcrd.minor_axis_length << char_t(' ') << rcrd.aspect_ratio << char_t(' ') << rcrd.eccentricity << char_t(' ')
-                    << rcrd.convex_area << char_t(' ') << rcrd.equiv_diameter << char_t(' ') << rcrd.extent << char_t(' ') << rcrd.solidity
-                    << char_t(' ') << rcrd.roundness << char_t(' ') << rcrd.compactness << char_t(' ') << rcrd.shape_factor_1 << char_t(' ')
-                    << rcrd.shape_factor_2 << char_t(' ') << rcrd.shape_factor_3 << char_t(' ') << rcrd.shape_factor_4 << char_t('\n');
+        friend std::ostream& operator<<(_Inout_ std::ostream& ostream, _In_ const record& rcrd) noexcept {
+            ostream << rcrd.area << ' ' << rcrd.perimeter << ' ' << rcrd.major_axis_length << ' ' << rcrd.minor_axis_length << ' '
+                    << rcrd.aspect_ratio << ' ' << rcrd.eccentricity << ' ' << rcrd.convex_area << ' ' << rcrd.equiv_diameter << ' '
+                    << rcrd.extent << ' ' << rcrd.solidity << ' ' << rcrd.roundness << ' ' << rcrd.compactness << ' ' << rcrd.shape_factor_1
+                    << ' ' << rcrd.shape_factor_2 << ' ' << rcrd.shape_factor_3 << ' ' << rcrd.shape_factor_4 << '\n';
             return ostream;
         }
 };
@@ -41,6 +39,8 @@ template<std::floating_point T> static constexpr record<T> parse_line(_In_ const
     record<T>         temporary {};
     const char* const cstart { line.data() };
     const char*       begin { line.data() };
+
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
     size_t caret = line.find(',', 0); // the first comma
     std::from_chars(begin, cstart + caret /* this delimiter is exclusive */, temporary.area);
@@ -105,6 +105,8 @@ template<std::floating_point T> static constexpr record<T> parse_line(_In_ const
     caret = line.find(',', caret + 1);
     std::from_chars(begin, cstart + caret, temporary.shape_factor_4);
     begin = cstart + caret + 1;
+
+    // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
     return temporary;
 }
