@@ -9,6 +9,8 @@
 template<class T> requires std::is_arithmetic_v<T> class wrapper final {
     private:
         T _value;
+        template<class _Ty> requires std::is_arithmetic_v<_Ty>
+        friend class wrapper; // to help different typed instantiations of this class template cross access private members
 
     public:
         constexpr wrapper() noexcept : _value {} { }
@@ -23,7 +25,16 @@ template<class T> requires std::is_arithmetic_v<T> class wrapper final {
         constexpr ~wrapper() noexcept { _value = 0; }
 
         // conversion operator
-        template<class _Ty> requires std::is_arithmetic_v<_Ty> operator _Ty() noexcept { return static_cast<_Ty>(_value); }
+        //  template<class _Ty> requires std::is_arithmetic_v<_Ty> operator _Ty() noexcept {
+        //      ::_putws(__FUNCTIONW__);
+        //      return static_cast<_Ty>(_value);
+        //  }
+
+        // will a converting ctor make the above operation ambiguous??
+        template<class _Ty> requires std::is_arithmetic_v<_Ty>
+        constexpr wrapper(const wrapper<_Ty>& other) noexcept : _value { static_cast<T>(other._value) } {
+            ::_putws(__FUNCTIONW__);
+        }
 };
 
 auto wmain() -> int {

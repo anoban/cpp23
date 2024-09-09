@@ -6,8 +6,6 @@
 #include <new>
 #include <string>
 
-#include <sal.h> // to please g++
-
 #ifndef LPREFIX
     #define LPREFIX(expression) L"" expression // relies on automatic concatenation of adjacent string literals
 #endif
@@ -21,11 +19,6 @@
 #if defined(_MSC_VER) && defined(_MSC_FULL_VER) && !defined(__GNUG__) && !defined(__GNUC__) && !defined(__llvm__) && !defined(__clang__)
     #define __PRETTY_FUNCTION__ __FUNCSIG__
 // with g++/clang++/icx fall back to using the variable __PRETTY_FUNCTION__
-#endif
-
-#if __cplusplus < 201103L // standards prior to C++11
-    #define noexcept throw()
-    #define nullptr  NULL // replace nullptr with NULL
 #endif
 
 #ifdef __SSTRING_PRINT_METHOD_SIGNATURES_ON_CALL__
@@ -55,11 +48,7 @@ namespace __cxx_sstring_internal_imps {
 // class sstring works with all C++ standards from C++98 to C++23 :)
 class sstring {
     private:
-#if __cplusplus < 201103L                // standards prior to C++11
-        typedef unsigned long size_type; // C++98 did not support long long types
-#else                                    // C++11 or later
         using size_type = unsigned long long;
-#endif
         size_type _size;     // does not count the null terminator
         size_type _capacity; // at construction, capacity will usually be twice the size of the string
         char*     _resource; // string buffer
@@ -147,8 +136,7 @@ class sstring {
             return *this;
         }
 
-#if (__cplusplus >= 201103L) // implement move semantics
-
+        // implement move semantics
         // move ctor
         inline __cdecl sstring(_Inout_ sstring&& other) noexcept :
             _size(other._size), _capacity(other._capacity), _resource(other._resource) {
@@ -172,32 +160,6 @@ class sstring {
 
             return *this;
         }
-        /*
-
-        THESE MOVES ARE PRONE TO DOUBLE FREE EXCEPTIONS BECAUSE WE CANNOT NULLIFY THE INTERNAL BUFFER OF THE std::string OBJECT WE STOLE
-        THE BUFFER FROM. WHEN THE DESTRUCTORS ARE CALLED, DTORS OF sstring & std::string WILL TRY TO FREE THE SAME BUFFER
-        FOR EVERY sstring CONSTRUCTED THIS WAY!
-
-        inline __cdecl sstring(_Inout_ std::string&& other) noexcept :
-            _size(other.length() + 1), _capacity(other.capacity()), _resource(other.data()) {
-           print_signature();
-            // CANNOT DO CLEANUP WITH STD::STRING
-        }
-
-        inline sstring& __cdecl operator=(_Inout_ std::string&& other) noexcept {
-           print_signature();
-
-            delete[] _resource; // give up the old buffer
-            _size     = other.length() + 1;
-            _capacity = other.capacity();
-            _resource = other.data();
-            // CANNOT DO CLEANUP WITH STD::STRING
-
-            return *this;
-        }
-
-        */
-#endif
 
         inline __cdecl ~sstring() noexcept {
             print_signature();
@@ -290,6 +252,11 @@ class sstring {
             return true;
         }
 
+        inline bool operator==(_In_ const char* const string) const noexcept {
+            if (!string) return false;
+            return !::strncmp(_resource, string, _size);
+        }
+
         friend inline std::ostream& __cdecl operator<<(_Inout_ std::ostream& ostream, _In_ const sstring& string) noexcept {
             ostream << string.c_str();
             return ostream;
@@ -327,8 +294,3 @@ class sstring {
             return _resource[offset]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
 };
-
-#if __cplusplus < 201103L
-    #undef noexcept // DON'T LET THESE POLLUTE THE .CPP FILES THAT INCLUDE THIS HEADER
-    #undef nullptr
-#endif
