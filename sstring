@@ -294,3 +294,5 @@ class sstring {
             return _resource[offset]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
 };
+
+#undef print_signature()
