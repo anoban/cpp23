@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <sstring>
 
-static inline std::string sentence_case(_In_ const std::string& asciistr) noexcept {
+[[nodiscard("expensive")]] static inline std::string sentence_case(_In_ const std::string& asciistr) noexcept {
     std::string copy(asciistr);
     for (unsigned i = 0; i < copy.length(); ++i)
         // when the current char is ' ' and the next char is an ascii lowercase letter
@@ -10,9 +10,7 @@ static inline std::string sentence_case(_In_ const std::string& asciistr) noexce
     return copy;
 }
 
-#if (__cplusplus >= 201103L)
-
-static inline std::string sentence_case(_In_ std::string&& asciistr) noexcept {
+[[nodiscard("expensive")]] static inline std::string sentence_case(_In_ std::string&& asciistr) noexcept {
     std::string copy(std::move(asciistr));
     for (unsigned i = 0; i < copy.length(); ++i)
         // when the current char is ' ' and the next char is an ascii lowercase letter make it upper case
@@ -20,9 +18,7 @@ static inline std::string sentence_case(_In_ std::string&& asciistr) noexcept {
     return copy;
 }
 
-#endif
-
-static inline ::sstring skyfall() noexcept {
+[[nodiscard("expensive")]] static inline ::sstring skyfall() noexcept {
     // NOLINTNEXTLINE(modernize-return-braced-init-list)
     return ::sstring("Skyfall is where we start, a thousand miles and poles apart, where worlds collide and days are dark!");
 }
@@ -55,10 +51,8 @@ int main() {               // NOLINT(bugprone-exception-escape)
     jbond += " swept away I'm stooooolennnnnn..... let the sky fall.... when it crumbles we'll stand tall and face it all together...!";
     ::puts(jbond.c_str());
 
-    for (const auto& c : jbond) {
-        ::putchar(c);
-        ::putchar('\n');
-    }
+    for (const auto& c : jbond) ::putchar(c);
+    ::putchar('\n');
 
     std::transform(jbond.begin(), jbond.end(), jbond.begin(), ::toupper);
     ::puts(jbond.c_str());
