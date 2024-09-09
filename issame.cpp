@@ -1,3 +1,5 @@
+#include <cstdio>
+#include <numbers>
 #include <string>
 
 template<typename T, typename U> struct is_same final {
@@ -26,9 +28,9 @@ template<typename T, typename... TList> struct all_identical final {
 #if defined(__llvm__) && defined(__clang__)
         static constexpr bool value { ::is_same_v<T, typename __first<TList...>::type> && all_identical<TList...>::value };
 #elif defined(_MSC_VER) && defined(_MSC_FULL_VER)
-        static constexpr bool value { ::is_same_v<T, typename __first_type<TList...>> && all_identical<TList...>::value };
+        static constexpr bool value { ::is_same_v<T, __first_type<TList...>> && all_identical<TList...>::value };
 #endif
-        // as usual FUCK g++
+        // as usual, FUCK g++
 };
 
 template<typename T, typename U> struct all_identical<T, U> final {
@@ -40,6 +42,10 @@ static_assert(::all_identical<float&, float&, float&, float&>::value);
 static_assert(!::all_identical<float&, float&, const float&, float&>::value);
 
 auto wmain() -> int {
-    //
+    constexpr auto pi { std::numbers::pi_v<typename std::enable_if_t<
+        ::all_identical<const volatile double&&, const volatile double&&, const volatile double&&>::value,
+        long double>> };
+    ::wprintf_s(L"%2.15Lf\n", pi); // NOLINT(cppcoreguidelines-pro-type-vararg)
+
     return EXIT_SUCCESS;
 }
