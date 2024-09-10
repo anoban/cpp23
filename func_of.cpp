@@ -90,7 +90,8 @@ namespace foldexpressions {
         return (... && predicate<TList>::value);
     }
 
-    template<template<class> class predicate, class... TList> static consteval bool any_of() noexcept {
+    template<template<class> class predicate, class... TList> requires requires { predicate<typename ::get_first<TList...>::type>::value; }
+    static consteval bool any_of() noexcept {
         return (... || predicate<TList>::value);
     }
 
@@ -103,3 +104,103 @@ static_assert(foldexpressions::any_of<std::is_floating_point, float, double, sho
 static_assert(!foldexpressions::any_of<std::is_floating_point, char, long long, short, unsigned, int, long>());
 
 // yeehawww :)))
+
+// test whether the requires clause is actually working using a hand rolled type trait
+
+namespace type_traits {
+
+    template<class T> struct is_usable_on_x86 final {
+            static constexpr bool value { false };
+    };
+
+    template<> struct is_usable_on_x86<char> final {
+            static constexpr bool value { true };
+            using type = char;
+    };
+
+    template<> struct is_usable_on_x86<unsigned char> final {
+            static constexpr bool value { true };
+            using type = unsigned char;
+    };
+
+    template<> struct is_usable_on_x86<short> final {
+            static constexpr bool value { true };
+            using type = short;
+    };
+
+    template<> struct is_usable_on_x86<unsigned short> final {
+            static constexpr bool value { true };
+            using type = unsigned short;
+    };
+
+    template<> struct is_usable_on_x86<int> final {
+            static constexpr bool value { true };
+            using type = int;
+    };
+
+    template<> struct is_usable_on_x86<unsigned int> final {
+            static constexpr bool value { true };
+            using type = unsigned int;
+    };
+
+    template<> struct is_usable_on_x86<float> final {
+            static constexpr bool value { true };
+            using type = float;
+    };
+
+    // same goal, with a different approach
+    template<class T, bool compatible = sizeof(T) <= 4LLU> struct is_x86_compatible final {
+            static constexpr bool qualified { false };
+    };
+
+    template<class T> struct is_x86_compatible<T, true> final {
+            static constexpr bool qualified {
+                true
+            }; // instead of naming the predicate value, we'll use `qualified`, this should fail the requires clause
+            using type = T;
+    };
+
+} // namespace type_traits
+
+static_assert(!foldexpressions::all_of<type_traits::is_usable_on_x86, float, const double, long double>());
+static_assert(!foldexpressions::all_of<type_traits::is_usable_on_x86, char, float, double, long double>());
+static_assert(
+    !foldexpressions::all_of<type_traits::is_usable_on_x86, char, unsigned short, int, float, long, double, long long, long double>()
+);
+static_assert(foldexpressions::any_of<type_traits::is_usable_on_x86, float, short, unsigned, int>());
+static_assert(foldexpressions::any_of<type_traits::is_usable_on_x86, char, unsigned char, short, unsigned, int>());
+
+// clang says "note: candidate template ignored: invalid explicitly-specified argument for template parameter 'predicate'"
+// NOT BECAUSE OF THE REQUIRES CLAUSE BUT BECAUSE is_x86_compatible'S SIGNATURE DOESN'T MATCH TEMPLATE<CLASS> CLASS
+
+/*
+ static_assert(!foldexpressions::all_of<type_traits::is_x86_compatible, float, const double, long double>());
+ static_assert(!foldexpressions::all_of<type_traits::is_x86_compatible, char, float, double, long double>());
+ static_assert(
+     !foldexpressions::all_of<type_traits::is_x86_compatible, char, unsigned short, int, float, long, double, long long, long double>()
+ );
+ static_assert(foldexpressions::any_of<type_traits::is_x86_compatible, float, short, unsigned, int>());
+ static_assert(foldexpressions::any_of<type_traits::is_x86_compatible, char, unsigned char, short, unsigned, int>());
+*/
+
+namespace _foldexpressions {
+
+    template<template<class, bool = false> class predicate, class... TList>
+    requires requires { predicate<typename ::get_first<TList...>::type>::qualified; } static consteval bool all_of() noexcept {
+        return (... && predicate<TList>::qualified);
+    }
+
+    template<template<class, bool = false> class predicate, class... TList>
+    requires requires { predicate<typename ::get_first<TList...>::type>::qualified; } static consteval bool any_of() noexcept {
+        return (... || predicate<TList>::qualified);
+    }
+
+} // namespace _foldexpressions
+
+static_assert(!_foldexpressions::all_of<type_traits::is_x86_compatible, float, const double, long double>());
+static_assert(_foldexpressions::all_of<type_traits::is_x86_compatible, char, float, short, unsigned char, wchar_t, bool>());
+static_assert(
+    !_foldexpressions::all_of<type_traits::is_x86_compatible, char, unsigned short, int, float, long, double, long long, long double>()
+);
+static_assert(_foldexpressions::any_of<type_traits::is_x86_compatible, float, short, unsigned, int>());
+static_assert(_foldexpressions::any_of<type_traits::is_x86_compatible, char, unsigned char, short, unsigned, int>());
