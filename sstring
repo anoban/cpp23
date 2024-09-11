@@ -1,3 +1,7 @@
+#if __cplusplus < 201103L
+    #error At least a C++11 standard compilant compiler is required!
+#endif
+
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
