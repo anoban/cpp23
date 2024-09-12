@@ -29,7 +29,7 @@ template<class T> requires std::is_arithmetic_v<T> class wrapper final {
         constexpr ~wrapper() noexcept { _value = 0; }
 
         // conversion operator
-        template<class _Ty> requires std::is_arithmetic_v<_Ty> operator _Ty() noexcept {
+        template<class _Ty> requires std::is_arithmetic_v<_Ty> operator _Ty() const noexcept {
             ::_putws(L"template<class _Ty> requires std::is_arithmetic_v<_Ty> operator _Ty() noexcept");
             return static_cast<_Ty>(_value);
         }
@@ -81,6 +81,7 @@ auto wmain() -> int {
     // invocation of conversion operator and non-template copy ctor
     const ::wrapper<unsigned char> ucpi { 3 };
     const ::wrapper<double>        what { ucpi };
+    const ::wrapper<double>        should_be_okay { double(ucpi) };
 
     return EXIT_SUCCESS;
 }

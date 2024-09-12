@@ -21,5 +21,7 @@ auto main() -> int {
     const ::sstring skyfall { "I've drowned and dreamt this moment! I'm swept awaaaaaay I'm stolennnnnnnnnn!" };
     std::cout << skyfall << '\n';
 
+    ::sstring all_my_own_stunts {""};
+
     return EXIT_SUCCESS;
 }
