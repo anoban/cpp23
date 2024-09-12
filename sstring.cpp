@@ -21,7 +21,7 @@ auto main() -> int {
     const ::sstring skyfall { "I've drowned and dreamt this moment! I'm swept awaaaaaay I'm stolennnnnnnnnn!" };
     std::cout << skyfall << '\n';
 
-    ::sstring all_my_own_stunts {""};
+    ::sstring bane { "But no ordinary child, a child born in hell, forged from suffering and hardened by pain, not a man from privilege!" };
 
     return EXIT_SUCCESS;
 }
