@@ -11,7 +11,7 @@ template<typename T> struct real final {
 
 template<> constexpr real<float>::real(const float&) noexcept = delete;
 
-static constexpr auto nope { real { std::numbers::egamma_v<float> } }; // call to deleted constructor of 'real<float>
+// static constexpr auto nope { real { std::numbers::egamma_v<float> } }; // call to deleted constructor of 'real<float>
 
 template<class T, class = std::enable_if<std::is_integral_v<T>, T>::type> class Integral final {
     private:

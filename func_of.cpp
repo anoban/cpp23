@@ -148,18 +148,6 @@ namespace type_traits {
             using type = float;
     };
 
-    // same goal, with a different approach
-    template<class T, bool compatible = sizeof(T) <= 4LLU> struct is_x86_compatible final {
-            static constexpr bool qualified { false };
-    };
-
-    template<class T> struct is_x86_compatible<T, true> final {
-            static constexpr bool qualified {
-                true
-            }; // instead of naming the predicate value, we'll use `qualified`, this should fail the requires clause
-            using type = T;
-    };
-
 } // namespace type_traits
 
 static_assert(!foldexpressions::all_of<type_traits::is_usable_on_x86, float, const double, long double>());
@@ -170,18 +158,32 @@ static_assert(
 static_assert(foldexpressions::any_of<type_traits::is_usable_on_x86, float, short, unsigned, int>());
 static_assert(foldexpressions::any_of<type_traits::is_usable_on_x86, char, unsigned char, short, unsigned, int>());
 
+template<class T, bool compatible = (sizeof(T) <= 4LLU)> struct is_x86_compatible final {
+        static constexpr bool qualified { false };
+};
+
+template<class T> struct is_x86_compatible<T, true> final {
+        // instead of naming the predicate `value`, we'll use `qualified`, this should fail the requires clause
+        static constexpr bool qualified { true };
+        using type = T;
+};
+
+template<template<typename, bool = false> class unary_predicate, class T, class... TList> struct all_of_v2 final {
+        static constexpr bool value { unary_predicate<T>::qualified && all_of_v2<unary_predicate, TList...>::qualified };
+};
+
+template<template<typename, bool = false> class unary_predicate, class T> struct all_of_v2<unary_predicate, T> final {
+        static constexpr bool value { unary_predicate<T>::qualified };
+};
+
 // clang says "note: candidate template ignored: invalid explicitly-specified argument for template parameter 'predicate'"
 // NOT BECAUSE OF THE REQUIRES CLAUSE BUT BECAUSE is_x86_compatible'S SIGNATURE DOESN'T MATCH TEMPLATE<CLASS> CLASS
 
-/*
- static_assert(!foldexpressions::all_of<type_traits::is_x86_compatible, float, const double, long double>());
- static_assert(!foldexpressions::all_of<type_traits::is_x86_compatible, char, float, double, long double>());
- static_assert(
-     !foldexpressions::all_of<type_traits::is_x86_compatible, char, unsigned short, int, float, long, double, long long, long double>()
- );
- static_assert(foldexpressions::any_of<type_traits::is_x86_compatible, float, short, unsigned, int>());
- static_assert(foldexpressions::any_of<type_traits::is_x86_compatible, char, unsigned char, short, unsigned, int>());
-*/
+static_assert(!::all_of_v2<::is_x86_compatible, float, const double, long double>::value);
+static_assert(!::all_of_v2<::is_x86_compatible, char, float, double, long double>::value);
+static_assert(!::all_of_v2<::is_x86_compatible, char, unsigned short, int, float, long, double, long long, long double>());
+static_assert(foldexpressions::any_of<::is_x86_compatible, float, short, unsigned, int>());
+static_assert(foldexpressions::any_of<::is_x86_compatible, char, unsigned char, short, unsigned, int>());
 
 namespace _foldexpressions {
 

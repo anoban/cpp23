@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <numbers>
+#include <ranges>
 
 // references and pointers do not allow type punned bindings!
 
@@ -46,9 +47,9 @@ template<class T> requires std::is_arithmetic_v<T> class wrapper final {
         // instead of falling back to using the conversion operator & non-templated copy ctor
 };
 
-// template<typename T> requires std::is_arithmetic_v<T> constexpr ::wrapper<T>::wrapper(const wrapper<unsigned char>&) noexcept = delete;
+template<> template<> constexpr ::wrapper<double>::wrapper(const wrapper<unsigned>&) noexcept = delete;
 
-template<std::floating_point T> static constexpr T e_v = static_cast<T>(2.71828182845905L);
+template<std::floating_point T> static constexpr T e_v                                        = static_cast<T>(2.71828182845905L);
 
 [[nodiscard]] static inline constexpr double pi() noexcept { return 3.14159265358979; }
 
@@ -80,8 +81,27 @@ auto wmain() -> int {
 
     // invocation of conversion operator and non-template copy ctor
     const ::wrapper<unsigned char> ucpi { 3 };
+    const ::wrapper<unsigned>      ui32pi { std::numeric_limits<unsigned>::max() };
     const ::wrapper<double>        what { ucpi };
     const ::wrapper<double>        should_be_okay { double(ucpi) };
+    const ::wrapper<double>        should_not_be_okay { ui32pi }; // call to a deleted ctor
+
+    // binding an rvalue reference T&& to a prvalue of type T triggers a temporary materialization!
+    [[maybe_unused]] unsigned&& rvref { 87245 };
+
+    // we could also have a const rvalue reference, but it is not something that's particularly useful
+    const std::wstring&& crvref { L"What can I do with this?" }; // this might as well have been a const std::wstring object
 
     return EXIT_SUCCESS;
 }
+
+static inline constexpr double&& power(const float& base, const unsigned& exp) noexcept {
+    if (!exp) return 1.0;
+    if (exp == 1) return base;
+    double temp { base };
+    for (const auto& _ : std::ranges::views::iota(1U, exp)) temp *= base;
+    return static_cast<double&&>(temp); // without the cast, an lvalue cannot be returned as an rvalue reference
+    // casting is stupid because "read of temporary whose lifetime has ended"
+}
+
+static_assert(::power(std::numbers::egamma, 0) == 1.0000);
