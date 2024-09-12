@@ -19,7 +19,7 @@ template<class T> requires std::is_arithmetic_v<T> class wrapper final {
     public:
         constexpr wrapper() noexcept : _value {} { }
 
-        constexpr explicit wrapper(const T& _init) noexcept : _value { _init } { }
+        constexpr explicit wrapper(const T& _init) noexcept : _value { _init } { ::_putws(L"" __FUNCSIG__); }
 
         wrapper(const wrapper&)            = delete; // no copy ctor
         wrapper& operator=(const wrapper&) = delete; // no copy assignment operator
@@ -37,11 +37,16 @@ template<class T> requires std::is_arithmetic_v<T> class wrapper final {
         // when a templated copy ctor is available, the compiler uses it instead of a conversion operator
         // because technically a use of conversion operator as defined here requires invocation of the copy ctor (as defined here) down the line
         // with the acquired wrapped value type
-        template<class _Ty> requires std::is_arithmetic_v<_Ty>
-        constexpr wrapper(const wrapper<_Ty>& other) noexcept : _value { static_cast<T>(other._value) } {
+        template<class _Ty> constexpr wrapper(const wrapper<_Ty>& other) noexcept : _value { static_cast<T>(other._value) } {
             ::_putws(L"template<class _Ty> requires std::is_arithmetic_v<_Ty> constexpr wrapper(const wrapper<_Ty>& other) noexcept");
         }
+
+        template<> constexpr wrapper<unsigned char>(const wrapper<unsigned char>&) noexcept = delete;
+        // for unsigned chars the compiler will err saying call to a deleted ctor
+        // instead of falling back to using the conversion operator & non-templated copy ctor
 };
+
+// template<typename T> requires std::is_arithmetic_v<T> constexpr ::wrapper<T>::wrapper(const wrapper<unsigned char>&) noexcept = delete;
 
 template<std::floating_point T> static constexpr T e_v = static_cast<T>(2.71828182845905L);
 
@@ -62,14 +67,20 @@ auto wmain() -> int {
     auto                      pi { wrapper { 3.14159265358979L } };
     const wrapper<float>&     okay { pi };
     wrapper<unsigned short>&& okay_too { pi };
+
     std::wcout << std::addressof(pi) << L'\n' << std::addressof(okay) << L'\n' << std::addressof(okay_too) << L'\n';
 
     const unsigned short& truncation = std::numbers::pi_v<double>;
 
     const float*       ptr           = &std::numbers::pi_v<float>; // works
-    const double*      _ptr          = &2.71828182845905;          //  error: cannot take the address of an rvalue of type 'double'
+    // const double*      _ptr          = &2.71828182845905;          //  error: cannot take the address of an rvalue of type 'double'
     const long double* __ptr         = &::e_v<long double>; // works, seems like we can take the address of constexpr'd variable templates
 
-    const double* _pi                = &::pi(); // WOW
+    // const double* _pi                = &::pi(); // WOW
+
+    // invocation of conversion operator and non-template copy ctor
+    const ::wrapper<unsigned char> ucpi { 3 };
+    const ::wrapper<double>        what { ucpi };
+
     return EXIT_SUCCESS;
 }
