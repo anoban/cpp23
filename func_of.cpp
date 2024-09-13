@@ -3,11 +3,11 @@
 #include <type_traits>
 
 template<class T, class... TList> struct __cxx_typelist_counter final {
-        static const size_t count = 1 + __cxx_typelist_counter<TList...>::count;
+        static constexpr size_t count = 1 + __cxx_typelist_counter<TList...>::count;
 };
 
 template<class T> struct __cxx_typelist_counter<T> final {
-        static const size_t count = 1;
+        static constexpr size_t count = 1;
 };
 
 static_assert(__cxx_typelist_counter<wchar_t, long long, volatile short&&, unsigned, const int, long&>::count == 6);
@@ -158,51 +158,73 @@ static_assert(
 static_assert(foldexpressions::any_of<type_traits::is_usable_on_x86, float, short, unsigned, int>());
 static_assert(foldexpressions::any_of<type_traits::is_usable_on_x86, char, unsigned char, short, unsigned, int>());
 
-template<class T, bool compatible = (sizeof(T) <= 4LLU)> struct is_x86_compatible final {
+template<class T, bool compatible = (sizeof(T) <= 4LLU)> struct is_leq_4bytes final {
         static constexpr bool qualified { false };
 };
 
-template<class T> struct is_x86_compatible<T, true> final {
+template<class T> struct is_leq_4bytes<T, true> final {
         // instead of naming the predicate `value`, we'll use `qualified`, this should fail the requires clause
         static constexpr bool qualified { true };
-        using type = T;
 };
 
-template<template<typename, bool = false> class unary_predicate, class T, class... TList> struct all_of_v2 final {
-        static constexpr bool value { unary_predicate<T>::qualified && all_of_v2<unary_predicate, TList...>::qualified };
+static_assert(::is_leq_4bytes<float>::qualified);
+static_assert(::is_leq_4bytes<const char&>::qualified);
+static_assert(!::is_leq_4bytes<volatile double&&>::qualified);
+static_assert(::is_leq_4bytes<wchar_t>::qualified);
+static_assert(!::is_leq_4bytes<unsigned long long*>::qualified);
+static_assert(::is_leq_4bytes<long&&>::qualified);
+static_assert(::is_leq_4bytes<char>::qualified);
+
+template<template<typename, bool = false> class unary_predicate, class T, class... TList>
+requires requires { unary_predicate<T>::qualified; } struct all_of_v2 final {
+        static_assert(!unary_predicate<T>::qualified); // providing default arguments is a terrible idea here!
+        static constexpr bool value { unary_predicate<T>::qualified && all_of_v2<unary_predicate, TList...>::value };
 };
 
-template<template<typename, bool = false> class unary_predicate, class T> struct all_of_v2<unary_predicate, T> final {
+template<template<typename, bool = false> class unary_predicate, class T> requires requires { unary_predicate<T>::qualified; }
+struct all_of_v2<unary_predicate, T> final {
+        static_assert(!unary_predicate<T>::qualified);
+
         static constexpr bool value { unary_predicate<T>::qualified };
 };
 
-// clang says "note: candidate template ignored: invalid explicitly-specified argument for template parameter 'predicate'"
-// NOT BECAUSE OF THE REQUIRES CLAUSE BUT BECAUSE is_x86_compatible'S SIGNATURE DOESN'T MATCH TEMPLATE<CLASS> CLASS
+template<template<typename, bool = false> class unary_predicate, class T, class... TList>
+requires requires { unary_predicate<T>::qualified; } struct any_of_v2 final {
+        static_assert(!unary_predicate<T>::qualified);
 
-static_assert(!::all_of_v2<::is_x86_compatible, float, const double, long double>::value);
-static_assert(!::all_of_v2<::is_x86_compatible, char, float, double, long double>::value);
-static_assert(!::all_of_v2<::is_x86_compatible, char, unsigned short, int, float, long, double, long long, long double>());
-static_assert(foldexpressions::any_of<::is_x86_compatible, float, short, unsigned, int>());
-static_assert(foldexpressions::any_of<::is_x86_compatible, char, unsigned char, short, unsigned, int>());
+        static constexpr bool value { unary_predicate<T>::qualified || any_of_v2<unary_predicate, TList...>::value };
+};
 
-namespace _foldexpressions {
+template<template<typename, bool = false> class unary_predicate, class T> requires requires { unary_predicate<T>::qualified; }
+struct any_of_v2<unary_predicate, T> final {
+        static_assert(!unary_predicate<T>::qualified);
 
-    template<template<class, bool = false> class predicate, class... TList>
+        static constexpr bool value { unary_predicate<T>::qualified };
+};
+
+static_assert(!::all_of_v2<::is_leq_4bytes, float, const double, long double>::value);
+static_assert(!::all_of_v2<::is_leq_4bytes, char, float, double, long double>::value);
+static_assert(::all_of_v2<::is_leq_4bytes, char, volatile unsigned short, int, float, long, const char, long&&, const unsigned&>::value);
+static_assert(::any_of_v2<::is_leq_4bytes, float, short, unsigned, int>::value);
+static_assert(::any_of_v2<::is_leq_4bytes, char, unsigned char, short, unsigned, int>::value);
+static_assert(!::any_of_v2<::is_leq_4bytes, const char*, unsigned long long&&, const double&, long long* const, volatile float*>::value);
+
+namespace foldexpr {
+
+    template<template<class, bool> class predicate, class... TList>
     requires requires { predicate<typename ::get_first<TList...>::type>::qualified; } static consteval bool all_of() noexcept {
         return (... && predicate<TList>::qualified);
     }
 
-    template<template<class, bool = false> class predicate, class... TList>
+    template<template<class, bool> class predicate, class... TList>
     requires requires { predicate<typename ::get_first<TList...>::type>::qualified; } static consteval bool any_of() noexcept {
         return (... || predicate<TList>::qualified);
     }
 
-} // namespace _foldexpressions
+} // namespace foldexpr
 
-static_assert(!_foldexpressions::all_of<type_traits::is_x86_compatible, float, const double, long double>());
-static_assert(_foldexpressions::all_of<type_traits::is_x86_compatible, char, float, short, unsigned char, wchar_t, bool>());
-static_assert(
-    !_foldexpressions::all_of<type_traits::is_x86_compatible, char, unsigned short, int, float, long, double, long long, long double>()
-);
-static_assert(_foldexpressions::any_of<type_traits::is_x86_compatible, float, short, unsigned, int>());
-static_assert(_foldexpressions::any_of<type_traits::is_x86_compatible, char, unsigned char, short, unsigned, int>());
+static_assert(!foldexpr::all_of<::is_leq_4bytes, float, const double, long double>());
+static_assert(foldexpr::all_of<::is_leq_4bytes, char, float, short, unsigned char, wchar_t, bool>());
+static_assert(!foldexpr::all_of<::is_leq_4bytes, char, unsigned short, int, float, long, double, long long, long double>());
+static_assert(foldexpr::any_of<::is_leq_4bytes, float, short, unsigned, int>());
+static_assert(foldexpr::any_of<::is_leq_4bytes, char, unsigned char, short, unsigned, int>());
