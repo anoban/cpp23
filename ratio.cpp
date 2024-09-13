@@ -20,7 +20,7 @@ std::basic_ostream<char_type>& operator<<=(std::basic_ostream<char_type>& ostrea
     return ostream;
 }
 
-inline namespace { // handrolled ratio template
+inline namespace { // handrolled std::ratio alternative
     template<__int64 _rnumer, __int64 _rdenom> struct ratio final {
             static constexpr __int64 num { _rnumer };
             static constexpr __int64 den { _rdenom };

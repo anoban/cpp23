@@ -119,6 +119,8 @@ class sstring {
             ::strcpy_s(_resource, other.length() + 1, other.data());
         }
 
+        // TODO :: implement ctors taking a pair of iterators as arguments!!
+
         // optimizations like buffer reuse are deliberately ignored :(
         inline sstring& __cdecl operator=(_In_ const sstring& other) noexcept {
             print_signature();
