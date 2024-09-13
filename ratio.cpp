@@ -20,15 +20,32 @@ std::basic_ostream<char_type>& operator<<=(std::basic_ostream<char_type>& ostrea
     return ostream;
 }
 
-template<template<int64_t, int64_t> class _ratio> requires requires {
-    _ratio<1, 1>::num;
-    _ratio<1, 1>::den;
-} struct to_wstr final {
-        static constexpr const wchar_t* operator()() const noexcept { static wchar_t ascii[10] {}; }
-};
+inline namespace { // handrolled ratio template
+    template<__int64 _rnumer, __int64 _rdenom> struct ratio final {
+            static constexpr __int64 num { _rnumer };
+            static constexpr __int64 den { _rdenom };
+
+            // NOLINTNEXTLINE(google-explicit-constructor) - enable implicit conversion to real types
+            template<typename T> requires std::floating_point<T> [[nodiscard]] constexpr operator T() const noexcept {
+                return static_cast<T>(num) / static_cast<T>(den);
+            }
+
+            template<typename char_t>
+            friend std::basic_ostream<char_t>& operator<<(_In_ const ratio& fraction, _Inout_ std::basic_ostream<char_t>& ostr)
+                noexcept(noexcept(ostr << num)) {
+                ostr << fraction.num << char_t('/') << fraction.den << char_t('\n');
+                return ostr;
+            }
+    };
+
+    template<__int64 _rnumer> struct ratio<_rnumer, 0> final {
+            // a ratio template with 0 as denominator is prone to divide by zero errors
+            // hence, leaving this specialization empty (could have also used a statc_assert inside the main template :p)
+    };
+} // namespace
 
 auto wmain() -> int {
-    std::wcout << std::setprecision(5);
+    std::wcout << std::fixed << std::setprecision(5);
 
     using two_third = std::ratio<2, 3>;
     using one_third = std::ratio<1, 3>;

@@ -175,30 +175,27 @@ static_assert(!::is_leq_4bytes<unsigned long long*>::qualified);
 static_assert(::is_leq_4bytes<long&&>::qualified);
 static_assert(::is_leq_4bytes<char>::qualified);
 
-template<template<typename, bool = false> class unary_predicate, class T, class... TList>
-requires requires { unary_predicate<T>::qualified; } struct all_of_v2 final {
-        static_assert(!unary_predicate<T>::qualified); // providing default arguments is a terrible idea here!
-        static constexpr bool value { unary_predicate<T>::qualified && all_of_v2<unary_predicate, TList...>::value };
+template<template<typename, bool /* = false*/> class unary_predicate, class T, class... TList>
+requires requires { unary_predicate<T, true>::qualified; } struct all_of_v2 final {
+        // static_assert(!unary_predicate<T>::qualified); // providing default arguments is a terrible idea here!
+        // becaue the compiler always uses the default `false` instead of using unary_predicate::qualified
+        static constexpr bool value { unary_predicate<T, is_criterion_met>::qualified && all_of_v2<unary_predicate, TList...>::value };
 };
 
-template<template<typename, bool = false> class unary_predicate, class T> requires requires { unary_predicate<T>::qualified; }
+template<template<typename, bool> class unary_predicate, class T> requires requires { unary_predicate<T>::qualified; }
 struct all_of_v2<unary_predicate, T> final {
         static_assert(!unary_predicate<T>::qualified);
 
         static constexpr bool value { unary_predicate<T>::qualified };
 };
 
-template<template<typename, bool = false> class unary_predicate, class T, class... TList>
+template<template<typename, bool is_criterion_met> class unary_predicate, class T, class... TList>
 requires requires { unary_predicate<T>::qualified; } struct any_of_v2 final {
-        static_assert(!unary_predicate<T>::qualified);
-
         static constexpr bool value { unary_predicate<T>::qualified || any_of_v2<unary_predicate, TList...>::value };
 };
 
-template<template<typename, bool = false> class unary_predicate, class T> requires requires { unary_predicate<T>::qualified; }
+template<template<typename, bool> class unary_predicate, class T> requires requires { unary_predicate<T>::qualified; }
 struct any_of_v2<unary_predicate, T> final {
-        static_assert(!unary_predicate<T>::qualified);
-
         static constexpr bool value { unary_predicate<T>::qualified };
 };
 

@@ -1,5 +1,5 @@
 #if __cplusplus < 201103L
-    #error At least a C++11 standard compilant compiler is required!
+    #error At least, a C++11 standard compilant compiler is required!
 #endif
 
 #include <cassert>
@@ -20,7 +20,7 @@
 // in LLVM and GCC, __FUNCTION__ and __PRETTY_FUNCTION__ are variables NOT MACROS!
 // in MSVC, __FUNCSIG__ expands as a MACRO (Microsoft extension)
 
-#if defined(_MSC_VER) && defined(_MSC_FULL_VER) && !defined(__GNUG__) && !defined(__GNUC__) && !defined(__llvm__) && !defined(__clang__)
+#if defined(_MSC_VER) && defined(_MSC_FULL_VER) && !defined(__llvm__) && !defined(__clang__)
     #define __PRETTY_FUNCTION__ __FUNCSIG__
 // with g++/clang++/icx fall back to using the variable __PRETTY_FUNCTION__
 #endif
@@ -220,8 +220,8 @@ class sstring {
             return temporary;
         }
 
-        // operator usable only with lvalue left operand
-        sstring& __cdecl operator+=(_In_ const sstring& other) noexcept {
+        // operator usable only with lvalue left operands
+        sstring& __cdecl operator+=(_In_ const sstring& other) & noexcept {
             print_signature();
 
             char* new_buffer = new (std::nothrow) char[(_size + other._size) * 2];

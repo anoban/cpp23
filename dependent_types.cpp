@@ -9,7 +9,7 @@ template<class T> struct enablde_if<true, T> final {
 };
 
 // alias template
-template<bool value, class T> using enable_if_t                 = typename ::enablde_if<value, T>::type;
+template<bool value, class T> using enable_if_t                 = typename /* cannot use class here */ ::enablde_if<value, T>::type;
 
 // alias templates DO NOT allow partial or explicit specializations!
 // template<template<class> class conditional, class T> using enable_if_t = typename ::enablde_if<conditional<T>::value, T>::type;
