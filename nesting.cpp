@@ -30,8 +30,7 @@ template<class T, class = std::enable_if<std::is_integral_v<T>, T>::type> class 
         constexpr ~Integral() = default;
 
         // conversion operator, to convert to arithmetic types
-        template<class U, bool is_unsigned = std::is_unsigned<U>::value> requires std::is_arithmetic_v<U>
-        [[nodiscard]] constexpr operator U() const noexcept {
+        template<class U> requires std::is_arithmetic_v<U> [[nodiscard]] constexpr operator U() const noexcept {
             return static_cast<U>(_value);
         }
 
@@ -41,7 +40,7 @@ template<class T, class = std::enable_if<std::is_integral_v<T>, T>::type> class 
 };
 
 // delete the conversion operator of Integral template when the required type is unsigned
-template<class T> template<> constexpr Integral<T> operator unsigned() noexcept = delete;
+template<> template<> constexpr Integral<unsigned>::operator unsigned() noexcept = delete;
 
 template<class T, class = std::enable_if<std::is_floating_point_v<T>, T>::type> class Floating final {
     private:
