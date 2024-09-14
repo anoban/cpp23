@@ -1,36 +1,40 @@
-#include <cstddef>
+#include <cstdio>
 #include <cstdlib>
-#include <string>
-#include <type_traits>
 
-template<
-    typename char_t,
-    std::size_t default_capacity = 100,
-    typename                     = std::enable_if<std::is_same<char, char_t>::value || std::is_same<wchar_t, char_t>::value, char_t>::type>
-class string {
-        using value_type         = char_t;
-        using pointer_type       = char_t*;
-        using const_literal_type = const char_t* const;
-        using iterator           = char_t*;
-        using const_iterator     = const char_t*;
+static __declspec(noinline) double __stdcall power(_In_ const double& b, _In_ const unsigned short& exp) noexcept {
+    ::_putws(L"" __FUNCSIG__);
+    if (!exp) return 1.00;
+    if (exp == 1) return b;
+    double result { b };
+    for (unsigned i = 1; i < exp; ++i) result *= b;
+    return result;
+}
 
-    public:
-        explicit string() noexcept : buffer { ::malloc(default_capacity * sizeof(char_t)) } { }
+static __declspec(noinline) double __stdcall power(_In_ const float b, _In_ const unsigned short exp) noexcept {
+    ::_putws(L"" __FUNCSIG__);
+    if (!exp) return 1.00;
+    if (exp == 1) return b;
+    double result { b };
+    for (unsigned i = 1; i < exp; ++i) result *= b;
+    return result;
+}
 
-        explicit string(const_literal_type str) noexcept { }
+static __declspec(noinline) double __stdcall cube(_In_ const double& value) noexcept { return value * value * value; }
 
-        ~string() noexcept {
-            ::free(buffer);
-            buffer = nullptr;
-            length = capacity = 0;
-        }
+auto wmain() -> int {
+    const auto four { ::power(2.000, 2) }; // the compiler always prefers the const reference overload!
+    ::wprintf_s(L"%.5lf\n", four);
 
-    private:
-        pointer_type buffer {};
-        std::size_t  length {};
-        std::size_t  capacity {};
-};
+    constexpr double   three { 3.00000 };
+    constexpr unsigned five { 5 };
 
-template<typename T> static constexpr typename std::basic_string<T> concatenate(const T&) noexcept { }
+    const auto what { ::power(three, five) };
+    ::wprintf_s(L"%.5lf\n", what);
 
-int wmain() { }
+    const auto nine { ::cube(three) };
+    const auto sixty_four { ::cube(4.0000) };
+    // a function taking const T& should be able to bind both lvalues and rvalues!
+    // hence the requirement an identifier of type const T& should also be able to bind values of type T&& (rvalues of type T)
+
+    return EXIT_SUCCESS;
+}

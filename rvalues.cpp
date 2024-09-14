@@ -5,10 +5,11 @@
 #include <numbers>
 #include <type_traits>
 
-template<typename T, typename = std::enable_if<std::is_arithmetic<T>::value, T>::type> class pair {
+template<typename T, typename = std::enable_if<std::is_arithmetic<T>::value, T>::type> class pair final {
     private:
         T first;
         T second;
+        template<typename, typename> friend class pair; // makes all instantiations of template pair<> friends
 
     public:
         constexpr pair() noexcept : first(), second() { }
@@ -40,9 +41,9 @@ template<typename T, typename = std::enable_if<std::is_arithmetic<T>::value, T>:
         }
 
         // universal ctor
-        template<typename U>
-        constexpr explicit pair(const ::pair<typename std::enable_if<std::is_arithmetic<U>::value, U>::type>& other) noexcept :
-            first(static_cast<decltype(first)>(other.first)), second(static_cast<decltype(second)>(other.second)) { }
+        template<typename U /*, typename std::enable_if_t<std::is_arithmetic_v<U>, bool> is_valid */>
+        constexpr explicit pair(const ::pair<U>& other) noexcept :
+            first(static_cast<T>(other.first)), second(static_cast<T>(other.second)) { }
 
         template<typename char_t> friend std::basic_ostream<char_t>& operator<<(std::basic_ostream<char_t>& ostream, const pair& object) {
             // using function style casts
@@ -54,23 +55,23 @@ template<typename T, typename = std::enable_if<std::is_arithmetic<T>::value, T>:
 
 int wmain() {
     constexpr ::pair<float> fpair { std::numbers::pi_v<float> };
-    std::wcout << fpair << std::endl;
+    std::wcout << fpair << L'\n';
 
     constexpr auto spair { ::pair<short> {} };
-    std::wcout << spair << std::endl;
+    std::wcout << spair << L'\n';
 
     constexpr auto dpair {
         ::pair<double> { 12.086, 6543.0974 }
     };
-    std::wcout << dpair << std::endl;
+    std::wcout << dpair << L'\n';
 
     constexpr auto z { dpair };
     ::pair<float>  q {};
     q = fpair;
-    std::wcout << q << std::endl;
+    std::wcout << q << L'\n';
 
-    constexpr ::pair<long> lpair { fpair };
-    std::wcout << to << std::endl;
+    constexpr ::pair<long> lpair { fpair }; // callsc the templated copy ctor
+    std::wcout << lpair << L'\n';
 
     q = q;
 
