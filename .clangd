@@ -1,5 +1,5 @@
 CompileFlags:
-  Add: [-Wall, -Wextra, -pedantic, -O0, -std=c++23, -c, -I./, -I./include/, -nocudainc, -nocudalib]
+  Add: [-Wall, -Wextra, -pedantic, -O0, -std=c++23, -c, -I./, -I./include/, -nocudainc, -nocudalib, -DDEBUG, -D_DEBUG]
   Compiler:  clang++.exe
   CompilationDatabase: None
 
@@ -8,14 +8,15 @@ Completion:
 
 Index:
   Background: Skip
+  StandardLibrary: Yes
 
 InlayHints:
+  Enabled: Yes
   BlockEnd: Yes
   Designators: Yes
-  Enabled: Yes
   ParameterNames: Yes
   DeducedTypes: Yes
-  TypeNameLimit: 24
+  TypeNameLimit: 0
 
 Hover:
   ShowAKA: Yes
@@ -23,3 +24,9 @@ Hover:
 Diagnostics:
   UnusedIncludes: Strict
   MissingIncludes: None
+
+  ClangTidy:
+    FastCheckFilter: None
+
+Style:
+  FullyQualifiedNamespaces: Yes

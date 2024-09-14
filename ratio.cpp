@@ -36,6 +36,10 @@ inline namespace { // handrolled std::ratio alternative
                 ostr << fraction.num << char_t('/') << fraction.den << char_t('\n');
                 return ostr;
             }
+
+            template<__int64 __rnum, __int64 __rden> constexpr decltype(auto) operator+(_In_ const ratio<__rnum, __rden>&) const noexcept {
+                return ratio<_rnumer + __rnum, _rdenom + __rden> {};
+            }
     };
 
     template<__int64 _rnumer> struct ratio<_rnumer, 0> final {

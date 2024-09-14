@@ -30,7 +30,7 @@ template<class T> requires std::is_arithmetic_v<T> class wrapper final {
         constexpr ~wrapper() noexcept { _value = 0; }
 
         // conversion operator
-        template<class _Ty> requires std::is_arithmetic_v<_Ty> operator _Ty() const noexcept {
+        template<class _Ty> requires std::is_arithmetic_v<_Ty> operator _Ty() const noexcept { // NOLINT(google-explicit-constructor)
             ::_putws(L"template<class _Ty> requires std::is_arithmetic_v<_Ty> operator _Ty() noexcept");
             return static_cast<_Ty>(_value);
         }
@@ -38,6 +38,7 @@ template<class T> requires std::is_arithmetic_v<T> class wrapper final {
         // when a templated copy ctor is available, the compiler uses it instead of a conversion operator
         // because technically a use of conversion operator as defined here requires invocation of the copy ctor (as defined here) down the line
         // with the acquired wrapped value type
+        // NOLINTNEXTLINE(google-explicit-constructor)
         template<class _Ty> constexpr wrapper(const wrapper<_Ty>& other) noexcept : _value { static_cast<T>(other._value) } {
             ::_putws(L"template<class _Ty> requires std::is_arithmetic_v<_Ty> constexpr wrapper(const wrapper<_Ty>& other) noexcept");
         }
@@ -47,9 +48,12 @@ template<class T> requires std::is_arithmetic_v<T> class wrapper final {
         // instead of falling back to using the conversion operator & non-templated copy ctor
 };
 
-template<> template<> constexpr ::wrapper<double>::wrapper(const wrapper<unsigned>&) noexcept = delete;
+template<> template<> constexpr ::wrapper<double>::wrapper(const wrapper<unsigned>&) noexcept                              = delete;
 
-template<std::floating_point T> static constexpr T e_v                                        = static_cast<T>(2.71828182845905L);
+// we cannot specialize an inner template without specializing the outer template! yikes!
+template<class T> requires std::is_arithmetic_v<T> template<std::floating_point U> wrapper<T>::operator U() const noexcept = delete;
+
+template<std::floating_point T> static constexpr T e_v = static_cast<T>(2.71828182845905L);
 
 [[nodiscard]] static inline constexpr double pi() noexcept { return 3.14159265358979; }
 
@@ -95,13 +99,13 @@ auto wmain() -> int {
     return EXIT_SUCCESS;
 }
 
-static inline constexpr double&& power(const float& base, const unsigned& exp) noexcept {
+static inline consteval double power(const float& base, const unsigned& exp) noexcept {
     if (!exp) return 1.0;
     if (exp == 1) return base;
     double temp { base };
     for (const auto& _ : std::ranges::views::iota(1U, exp)) temp *= base;
-    return static_cast<double&&>(temp); // without the cast, an lvalue cannot be returned as an rvalue reference
-    // casting is stupid because "read of temporary whose lifetime has ended"
+    return temp; // we can cast temp to double&&, but an lvalue cannot be returned as an rvalue reference
+    // clang says "read of temporary whose lifetime has ended"
 }
 
 static_assert(::power(std::numbers::egamma, 0) == 1.0000);
