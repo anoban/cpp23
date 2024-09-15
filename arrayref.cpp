@@ -7,6 +7,10 @@
 static __declspec(noinline) double __stdcall cube(const float& x) noexcept { return x * x * x; }
 static __declspec(noinline) double __stdcall quad(const float& x) noexcept { return x * x * x * x; }
 
+template<class T, size_t len> static __declspec(noinline) void __stdcall quad(T (&array)[len]) noexcept {
+    for (T& e : array) e *= (e * e * e);
+}
+
 template<size_t __len> static constexpr inline void capitalize(_Inout_ char (&string)[__len]) noexcept {
     for (auto& c : string) c = static_cast<char>(::toupper(c));
 }
@@ -32,6 +36,9 @@ auto wmain() -> int {
     char adele[] { "Let the sky fall.............. when it crumbles...." };
     ::capitalize(adele);
     ::wprintf_s(L"%S\n", adele);
+
+    quad(array);
+    for (const auto& e : array) ::wprintf_s(L"%6u\n", e);
 
     return EXIT_SUCCESS;
 }
