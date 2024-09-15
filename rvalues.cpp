@@ -53,8 +53,7 @@ template<typename T, typename = typename std::enable_if<std::is_arithmetic<T>::v
         // consider operator overloading
         template<typename U> [[nodiscard]] constexpr pair<long double> operator+(_In_ const pair<U>& other) const& noexcept {
             // this operator+ is for const pair<T>& types, so operator+() will work with both lvalues and rvalues
-            // an operator+ with signature
-            // template<typename U> [[nodiscard]] constexpr pair<long double> operator+(_In_ const pair<U>& other) & noexcept
+            // an operator+ with signature template<typename U> [[nodiscard]] constexpr pair<long double> operator+(_In_ const pair<U>& other) & noexcept
             // will only be usable with a non const pair<T>& lvalue type
             return pair<long double> { first + other.first, second + other.second };
         }

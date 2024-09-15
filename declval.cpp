@@ -14,11 +14,11 @@ template<typename T> [[nodiscard]] constexpr typename std::add_rvalue_reference_
 static_assert(std::is_same_v<decltype(std::numbers::pi_v<double> * 2.000L), long double>); // see!
 
 // since the receiving entity is of type float, the value gets down casted
-[[maybe_unused]] constexpr float twopi                       = std::numbers::pi_v<double> * 2.000L;
+[[maybe_unused]] constexpr float twopi                           = std::numbers::pi_v<double> * 2.000L;
 
 // this template captures the type of evaluationg the hypothetical assignment expression
-template<typename LT, typename RT> using assignment_result_t = decltype(::declval<LT>() = ::declval<RT>());
-// LT has to be a modifiable lvalue reference
+template<typename _Ty0, typename _Ty1> using assignment_result_t = decltype(::declval<_Ty0>() = ::declval<_Ty1>());
+// _Ty0 has to be a modifiable lvalue reference
 
 // static_assert(std::is_same_v<::assignment_result_t<float, double>, float>); //  error C2106: '=': left operand must be l-value
 // it has to be a modifiable lvalue reference
@@ -31,45 +31,46 @@ static_assert(std::is_same_v<::assignment_result_t<float&, short&>, float&>);
 static_assert(std::is_same_v<::assignment_result_t<short&, short*>, float&>);
 // ill formed error C2440: '=': cannot convert from 'short *' to 'short'
 
-template<typename LT, typename RT> using deref_assignment_result_t = decltype(::declval<LT>() = *::declval<RT>());
+template<typename _Ty0, typename _Ty1> using deref_assignment_result_t = decltype(::declval<_Ty0>() = *::declval<_Ty1>());
 static_assert(std::is_same_v<::deref_assignment_result_t<float&, short*>, float&>); // that's cool see :)
 
 // instead of this hard errors at compile time we could rework the implementation to handle illformed types more subtly using SFINAE!
+// bool is_valid_assignment = std::is_same_v<decltype(::declval<_Ty0>() = ::declval<_Ty1>()), _Ty0>
+// when decltype(::declval<_Ty0>() = ::declval<_Ty1>()) is eagerly evaluated during template instantiation, we'll get a hard
+// compile time error instead of a gentle and swift redirection to a specialization from SFINAE!
+// to make that work, we need to add another layer of indirection
 
-template<typename LT, typename RT, bool is_assignment_valid = std::is_same_v<decltype(::declval<LT>() = ::declval<RT>()), LT>>
-struct is_assignable {
-        // no type aliases
+template<typename _Ty0, typename _Ty1, typename> struct is_assignable final {
         static constexpr bool value { false };
 };
 
-// partial spl for when LT is indeed an lvalue reference & ::declval<LT>() = ::declval<RT>() is well formed
-// i.e when ::declval<LT>() = ::declval<RT>() is syntactically and semantically valid
-template<typename LT, typename RT> struct is_assignable<LT, RT, true> {
-        using left_type  = LT;
-        using right_type = RT;
+// partial specialization when ::declval<_Ty0>() = ::declval<_Ty1>() is well formed
+// i.e when ::declval<_Ty0>() = ::declval<_Ty1>() is syntactically and semantically valid
+template<typename _Ty0, typename _Ty1> struct is_assignable<_Ty0, _Ty1, decltype(::declval<_Ty0>() = ::declval<_Ty1>())> final {
+        using left_operand_type  = _Ty0;
+        using right_operand_type = _Ty1;
         static constexpr bool value { true };
 };
 
-template<typename LT, typename RT> constexpr bool is_assignable_v = ::is_assignable<LT, RT>::value;
+template<typename _Ty0, typename _Ty1> inline constexpr bool is_assignable_v = ::is_assignable<_Ty0, _Ty1>::value;
 
-template<typename LT, typename RT, bool is_assignable = ::is_assignable_v<LT, RT>> struct assignment_result {
-        using result_type = void; // signifies that the assinment is invalid
+template<typename _Ty0, typename _Ty1, bool is_assignable = ::is_assignable_v<_Ty0, _Ty1>> struct assignment_result {
+        using type = void; // signifies that the assinment is invalid
 };
 
-// partial spl when LHT is in fact an lvalue reference and ::declval<LT>() = ::declval<RT>() is well formed
-template<typename LT, typename RT> struct assignment_result<LT, RT, true> {
-        using result_type = decltype(::declval<LT>() = ::declval<RT>());
+// partial spl when LHT is in fact an lvalue reference and ::declval<_Ty0>() = ::declval<_Ty1>() is well formed
+template<typename _Ty0, typename _Ty1> struct assignment_result<_Ty0, _Ty1, true> {
+        using type = decltype(::declval<_Ty0>() = ::declval<_Ty1>());
 };
 
-static_assert(std::is_same_v<typename ::assignment_result<float&, const volatile double>::result_type, float&>);
+static_assert(std::is_same_v<typename ::assignment_result<float&, const volatile double>::type, float&>);
 static_assert(std::is_same_v<
-              typename ::assignment_result<const float&, const volatile double>::result_type,
+              typename ::assignment_result<const float&, const volatile double>::type,
               void>); // const float& cannot be assigned to
-
-static_assert(std::
-                  is_same_v<typename ::assignment_result<long&, const double* const>::result_type, void>); // ill formed - invalid type pair
-static_assert(std::is_same_v<typename ::assignment_result<long, long>::result_type, void>);   // LHT must be a modifiable lvalue reference
-static_assert(std::is_same_v<typename ::assignment_result<long&&, long>::result_type, void>); // LHT must be a modifiable lvalue reference
+static_assert(std::is_same_v<>);
+static_assert(std::is_same_v<typename ::assignment_result<long&, const double* const>::type, void>); // ill formed - invalid type pair
+static_assert(std::is_same_v<typename ::assignment_result<long, long>::type, void>);   // LHT must be a modifiable lvalue reference
+static_assert(std::is_same_v<typename ::assignment_result<long&&, long>::type, void>); // LHT must be a modifiable lvalue reference
 
 auto wmain() -> int {
     const auto empty { ::declval<std::wstring>() }; // this will compile but will err at link time!
