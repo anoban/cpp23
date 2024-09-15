@@ -13,7 +13,7 @@ template<> constexpr real<float>::real(const float&) noexcept = delete;
 
 // static constexpr auto nope { real { std::numbers::egamma_v<float> } }; // call to deleted constructor of 'real<float>
 
-template<class T, class = std::enable_if<std::is_integral_v<T>, T>::type> class Integral final {
+template<class T, class = typename std::enable_if<std::is_integral_v<T>, T>::type> class Integral final {
     private:
         T _value {};
 
@@ -40,9 +40,9 @@ template<class T, class = std::enable_if<std::is_integral_v<T>, T>::type> class 
 };
 
 // delete the conversion operator of Integral template when the required type is unsigned
-template<> template<> constexpr Integral<unsigned>::operator unsigned() noexcept = delete;
+template<> template<> constexpr Integral<unsigned>::operator unsigned() const noexcept = delete;
 
-template<class T, class = std::enable_if<std::is_floating_point_v<T>, T>::type> class Floating final {
+template<class T, class = typename std::enable_if<std::is_floating_point_v<T>, T>::type> class Floating final {
     private:
         T _value {};
 
@@ -124,4 +124,15 @@ template<typename... TList>
 static_assert(::ssum(10, 11, 12, 13, 14, 15, 16) == 91); // :) cool
 // static_assert(::ssum(10, 11, 12LLU, 13Ui16, 14, 15U, 16) == 91); // SFNAEd invalid
 
-// template<typename... TList> [[nodiscard]] long double consteval ssum(const TList&... args) noexcept = delete;
+template<class T, class U> [[nodiscard]] static consteval long double product(_In_ const T& arg0, _In_ const U& arg1) noexcept {
+    return arg0 * arg1;
+}
+
+// template<class T> [[nodiscard]] static consteval long double product(_In_ const T& arg0) noexcept { return arg0; }
+
+template<class T, class... TList>
+[[nodiscard]] static consteval long double product(_In_ const T& arg, _In_ const TList&... argv) noexcept {
+    return arg * ::product(argv...);
+}
+
+static_assert(::product(10U, 11LLU, 12Ui16, 13LL, 14L, 15.000, 16.0L) == 57657600.00);
