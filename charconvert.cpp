@@ -3,8 +3,7 @@
 #include <iostream>
 #include <string_view>
 
-template<typename T> class record final {
-    public:
+template<typename T> struct record final {
         using value_type = T;
         unsigned area;
         T        perimeter;

@@ -22,7 +22,7 @@ Hover:
   ShowAKA: Yes
 
 Diagnostics:
-  UnusedIncludes: Strict
+  UnusedIncludes: None
   MissingIncludes: None
 
   ClangTidy:

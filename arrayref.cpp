@@ -8,12 +8,12 @@ static __declspec(noinline) double __stdcall cube(const float& x) noexcept { ret
 static __declspec(noinline) double __stdcall quad(const float& x) noexcept { return x * x * x * x; }
 
 template<size_t __len> static constexpr inline void capitalize(_Inout_ char (&string)[__len]) noexcept {
-    for (auto& c : string) c = ::toupper(c);
+    for (auto& c : string) c = static_cast<char>(::toupper(c));
 }
 
 template<class T, size_t __len>
-static constexpr inline void square(_Inout_ T (&array)[__len]) noexcept requires requires(const T& x) { x* x; } {
-    for (size_t i = 0; i < __len; ++i) array[i] = array[i] * array[i];
+static constexpr inline void square(_Inout_ T (&array)[__len]) noexcept requires requires(T& x) { x *= x; } {
+    for (size_t i = 0; i < __len; ++i) array[i] *= array[i];
 }
 
 auto wmain() -> int {
