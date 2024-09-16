@@ -40,7 +40,8 @@
     #pragma warning(push)
 
     // Turn MSVC /analyze rules that generate too much noise. TODO: fix in the tool.
-    #pragma warning(disable : 26493) // don't use c-style casts // TODO: MSVC suppression in templates                                     \
+    #pragma warning(disable : 26493                                                                                                        \
+    ) // don't use c-style casts // TODO: MSVC suppression in templates                                     \
                                      // does not always work
 
     #ifndef GSL_USE_STD_BYTE
@@ -150,7 +151,7 @@ namespace gsl {
         static_assert(
             E,
             "gsl::to_byte(t) must be provided an unsigned char, otherwise data loss may occur. "
-            "If you are calling to_byte with an integer contant use: gsl::to_byte<t>() version."
+            "If you are calling to_byte with an integer contant use: gsl::to_byte<T>() version."
         );
         return static_cast<byte>(t);
     }

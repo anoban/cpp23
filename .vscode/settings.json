@@ -100,6 +100,8 @@
         "execution": "cpp",
         "queue": "cpp",
         "typeindex": "cpp",
-        "sstring": "cpp"
+        "sstring": "cpp",
+        "gspan": "cpp",
+        "gbyte": "cpp"
     }
 }
