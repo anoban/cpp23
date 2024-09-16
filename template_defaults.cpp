@@ -1,20 +1,24 @@
 #include <cstdlib>
 #include <type_traits>
 
-template<class _Type> constexpr auto declval() noexcept -> typename std::add_rvalue_reference_t<_Type>;
+template<class _Type> constexpr auto declval() noexcept -> typename std::add_rvalue_reference_t<_Type>; // remember reference collapsing
+static_assert(std::is_same_v<decltype(declval<float>()), float&&>);                                     // T + && => T&&
+static_assert(std::is_same_v<decltype(declval<float&>()), float&>);                                     // T& + && => T&
+static_assert(std::is_same_v<decltype(declval<float&&>()), float&&>);                                   // T&& + && => T&&
 
 static_assert(std::is_same_v<decltype(.54564F), float>);
 
 namespace utilities {
-    template<class _TyL, class _TyR, class _TyS = _TyL> struct void_if_assignment_is_valid final {
+    template<class _TyL, class _TyR, _TyL&& _VAssign = {}> struct void_if_assignment_is_valid final {
             static constexpr bool value = false;
     };
 
-    template<class _TyL, class _TyR> struct void_if_assignment_is_valid<_TyL, _TyR, decltype(::declval<_TyL>() = declval<_TyR>())> final {
+    template<class _TyL, class _TyR>
+    struct void_if_assignment_is_valid<_TyL, _TyR, declval<decltype(::declval<_TyL>() = declval<_TyR>())>()> final {
             static constexpr bool value = true;
     };
 
-    static_assert(void_if_assignment_is_valid<float&, double>::value);
+    static_assert(void_if_assignment_is_valid<float&&, double>::value);
 } // namespace utilities
 
 template<class _TyL, class _TyR, class _TySFINAE> struct is_assignable final {
