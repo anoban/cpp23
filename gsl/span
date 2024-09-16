@@ -22,12 +22,10 @@
 #include <iterator>    // for reverse_iterator, distance, random_access_...
 #include <type_traits> // for enable_if_t, declval, is_convertible, inte...
 
-// clang-format off
-#include <gassert>     // for Expects
-#include <gbyte>       // for byte
-#include <gspan_ext>   // for span specialization of gsl::at and other span-related extensions
-#include <gutil>       // for narrow_cast
-// clang-format on
+#include <./assert>     // for Expects
+#include <./byte>       // for byte
+#include <./util>       // for narrow_cast
+#include <gsl/span_ext> // for span specialization of gsl::at and other span-related extensions
 
 #if defined(_MSC_VER) && !defined(__clang__)
     #pragma warning(push)
@@ -89,10 +87,10 @@ namespace gsl {
                 using pointer_type      = Type*;
                 using reference_type    = Type&;
 
-#if defined(_MSC_VER) && defined(_MSC_FULL_VER)
+#ifdef _MSC_VER
                 using _Unchecked_type = pointer_type;
 #endif // _MSC_VER
-                constexpr span_iterator() noexcept = default;
+                constexpr span_iterator() = default;
 
                 constexpr span_iterator(pointer_type begin, pointer_type end, pointer_type current) :
                     begin_(begin), end_(end), current_(current) { }
@@ -110,7 +108,6 @@ namespace gsl {
                     Expects(begin_ <= current_ && current_ < end_);
                     return current_;
                 }
-
                 constexpr span_iterator& operator++() noexcept {
                     Expects(begin_ && current_ && end_);
                     Expects(current_ < end_);
@@ -236,7 +233,7 @@ namespace gsl {
                 // clang-format off
         GSL_SUPPRESS(bounds.1) // NO-FORMAT: attribute
                 // clang-format on
-                constexpr pointer_type _Unwrapped() const noexcept { // after seeking *this to a high water mark, or using one of the
+                constexpr pointer _Unwrapped() const noexcept { // after seeking *this to a high water mark, or using one of the
                     // _Verify_xxx functions above, unwrap this span_iterator to a raw
                     // pointer
                     return current_;
@@ -252,15 +249,15 @@ namespace gsl {
                 // clang-format off
         GSL_SUPPRESS(con.3) // NO-FORMAT: attribute // TODO: false positive
                 // clang-format on
-                constexpr void _Seek_to(const pointer_type p) noexcept { // adjust the position of *this to previously verified location p
+                constexpr void _Seek_to(const pointer p) noexcept { // adjust the position of *this to previously verified location p
                     // after _Unwrapped
                     current_ = p;
                 }
 #endif
 
-                pointer_type begin_ { nullptr };
-                pointer_type end_ { nullptr };
-                pointer_type current_ { nullptr };
+                pointer      begin_   = nullptr;
+                pointer_type end_     = nullptr;
+                pointer_type current_ = nullptr;
         };
 
         template<std::size_t Ext> class extent_type {
