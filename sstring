@@ -34,7 +34,7 @@
 namespace __cxx_sstring_internal_impl {
 
     // resorting to runtime conversion :(
-    static inline const wchar_t* wsignature(_In_ const char* _cxx_signature) noexcept {
+    static const wchar_t* wsignature(_In_ const char* _cxx_signature) noexcept {
         static const unsigned _signature_length = 512;
         static wchar_t        _signature[_signature_length]; // NOLINT(modernize-avoid-c-arrays)
 
@@ -58,11 +58,11 @@ class sstring {
         char*     _resource; // string buffer
 
     public:
-        inline __cdecl sstring() noexcept : _size(0), _capacity(0), _resource(nullptr) { // default ctor
+        __cdecl sstring() noexcept : _size(0), _capacity(0), _resource(nullptr) { // default ctor
             print_signature();
         }
 
-        inline __cdecl sstring(_In_ const char& ch, _In_ const size_type& repeats) noexcept :
+        __cdecl sstring(_In_ const char& ch, _In_ const size_type& repeats) noexcept :
             _size(repeats + 1), _capacity(_size * 2), _resource(new (std::nothrow) char[_capacity]) {
             print_signature();
             if (!_resource) { // has the allocation failed,
@@ -76,7 +76,7 @@ class sstring {
         }
 
         template<size_t len>
-        inline __cdecl sstring(_In_ const char (&str)[len]) noexcept :
+        __cdecl sstring(_In_ const char (&str)[len]) noexcept : // NOLINT(google-explicit-constructor)
             _size(len), _capacity(_size * 2), _resource(new (std::nothrow) char[_capacity]) {
             print_signature();
             if (!_resource) { // has the allocation failed,
@@ -89,7 +89,7 @@ class sstring {
             ::strcpy_s(_resource, _size, str);
         }
 
-        inline __cdecl sstring(_In_ const char* const str) noexcept : // NOLINT(google-explicit-constructor) - a converting constructor
+        __cdecl sstring(_In_ const char* const str) noexcept : // NOLINT(google-explicit-constructor) - a converting constructor
             _size(::strlen(str) + 1 /* +1 for the null terminator */), _capacity(_size * 2), _resource(new (std::nothrow) char[_capacity]) {
             // using ::strlen(str) here and using _size + 1 in strcpy_s will bite us in the ass when trying to copy or move
             assert(str);
@@ -104,7 +104,7 @@ class sstring {
             ::strcpy_s(_resource, _size, str);
         }
 
-        inline __cdecl sstring(_In_ const sstring& other) noexcept : // not exactly a trivial copy constructor
+        __cdecl sstring(_In_ const sstring& other) noexcept : // not exactly a trivial copy constructor
             _size(other._size),
             _capacity(_size * 2 /* choosing not to simply use the other string's capacity */),
             _resource(new (std::nothrow) char[_capacity]) {
@@ -119,8 +119,8 @@ class sstring {
             ::strcpy_s(_resource, _size, other._resource);
         }
 
-        inline __cdecl sstring(_In_ const std::string& other) noexcept : // NOLINT(google-explicit-constructor) - converting constructor
-            _size(other.length() + 1),                                   // std::string::length() doesn't count the null terminator
+        __cdecl sstring(_In_ const std::string& other) noexcept : // NOLINT(google-explicit-constructor) - converting constructor
+            _size(other.length() + 1),                            // std::string::length() doesn't count the null terminator
             _capacity(_size * 2 /* choosing not to simply use the other string's capacity */),
             _resource(new (std::nothrow) char[_capacity]) {
             print_signature();
@@ -137,7 +137,7 @@ class sstring {
         // TODO :: implement ctors taking a pair of iterators as arguments!!
 
         // optimizations like buffer reuse are deliberately ignored :(
-        inline sstring& __cdecl operator=(_In_ const sstring& other) noexcept {
+        sstring& __cdecl operator=(_In_ const sstring& other) noexcept {
             print_signature();
             if (this == &other) return *this;
 
@@ -159,15 +159,14 @@ class sstring {
 
         // implement move semantics
         // move ctor
-        inline __cdecl sstring(_Inout_ sstring&& other) noexcept :
-            _size(other._size), _capacity(other._capacity), _resource(other._resource) {
+        __cdecl sstring(_Inout_ sstring&& other) noexcept : _size(other._size), _capacity(other._capacity), _resource(other._resource) {
             print_signature();
             other._resource = nullptr;
             other._size = other._capacity = 0;
         }
 
         // move assignment operator
-        inline sstring& __cdecl operator=(_Inout_ sstring&& other) noexcept {
+        sstring& __cdecl operator=(_Inout_ sstring&& other) noexcept {
             print_signature();
             if (this == &other) return *this;
 
@@ -182,14 +181,14 @@ class sstring {
             return *this;
         }
 
-        inline __cdecl ~sstring() noexcept {
+        __cdecl ~sstring() noexcept {
             print_signature();
             delete[] _resource;
             _resource = nullptr;
             _size = _capacity = 0;
         }
 
-        static inline sstring __cdecl with_capacity(_In_ const size_type& size) noexcept { // a Rust style static ctor
+        static sstring __cdecl with_capacity(_In_ const size_type& size) noexcept { // a Rust style static ctor
             print_signature();
             sstring temporary;
             temporary._resource = new (std::nothrow) char[size];
@@ -203,15 +202,15 @@ class sstring {
         }
 
         // NOLINTNEXTLINE(google-explicit-constructor - implicit conversion function
-        inline __cdecl operator std::string() const noexcept { return std::string(cbegin(), cend()); }
+        __cdecl operator std::string() const noexcept { return std::string(cbegin(), cend()); }
 
-        inline size_type __stdcall length() const noexcept { return _size; }
+        size_type __stdcall length() const noexcept { return _size; }
 
-        inline size_type __stdcall capacity() const noexcept { return _capacity; }
+        size_type __stdcall capacity() const noexcept { return _capacity; }
 
-        inline char* __cdecl c_str() noexcept { return _resource; }
+        char* __cdecl c_str() noexcept { return _resource; }
 
-        inline const char* __cdecl c_str() const noexcept { return _resource; }
+        const char* __cdecl c_str() const noexcept { return _resource; }
 
         // operator usable for lvalues and rvalues for operands
         sstring __cdecl operator+(_In_ const sstring& other) const noexcept {
@@ -272,7 +271,7 @@ class sstring {
             // TODO
         }
 
-        inline bool __cdecl operator==(_In_ const sstring& other) const noexcept {
+        bool __cdecl operator==(_In_ const sstring& other) const noexcept {
             if (this == &other) return true;
             if (_size != other._size) return false;
 
@@ -282,17 +281,17 @@ class sstring {
             return true;
         }
 
-        inline bool __cdecl operator==(_In_ const char* const string) const noexcept {
+        bool __cdecl operator==(_In_ const char* const string) const noexcept {
             if (!string) return false;
             return !::strncmp(_resource, string, _size);
         }
 
-        friend inline bool __cdecl operator==(_In_ const char* const array, _In_ const sstring& string) noexcept {
+        friend bool __cdecl operator==(_In_ const char* const array, _In_ const sstring& string) noexcept {
             if (!array) return false;
             return !::strncmp(string._resource, array, string._size);
         }
 
-        friend inline std::ostream& __cdecl operator<<(_Inout_ std::ostream& ostream, _In_ const sstring& string) noexcept {
+        friend std::ostream& __cdecl operator<<(_Inout_ std::ostream& ostream, _In_ const sstring& string) noexcept {
             ostream << string.c_str();
             return ostream;
         }
@@ -332,7 +331,7 @@ class sstring {
         }
 
         template<size_t __strlen>
-        friend inline ::sstring __cdecl operator+(
+        friend ::sstring __cdecl operator+(
             _In_ const char (&str)[__strlen] /* compiler will accomodate the null terminator in this length */, _In_ const ::sstring& string
         ) noexcept {
             print_signature();
@@ -359,4 +358,4 @@ class sstring {
         }
 };
 
-#undef print_signature()
+#undef print_signature

@@ -158,13 +158,9 @@ static_assert(
 static_assert(foldexpressions::any_of<type_traits::is_usable_on_x86, float, short, unsigned, int>());
 static_assert(foldexpressions::any_of<type_traits::is_usable_on_x86, char, unsigned char, short, unsigned, int>());
 
-template<class T, bool compatible = (sizeof(T) <= 4LLU)> struct is_leq_4bytes final {
-        static constexpr bool qualified { false };
-};
-
-template<class T> struct is_leq_4bytes<T, true> final {
+template<class T> struct is_leq_4bytes final {
         // instead of naming the predicate `value`, we'll use `qualified`, this should fail the requires clause
-        static constexpr bool qualified { true };
+        static constexpr bool qualified { (sizeof(T) <= 4LLU) };
 };
 
 static_assert(::is_leq_4bytes<float>::qualified);
@@ -175,26 +171,24 @@ static_assert(!::is_leq_4bytes<unsigned long long*>::qualified);
 static_assert(::is_leq_4bytes<long&&>::qualified);
 static_assert(::is_leq_4bytes<char>::qualified);
 
-template<template<typename, bool /* = false*/> class unary_predicate, class T, class... TList>
-requires requires { unary_predicate<T, true>::qualified; } struct all_of_v2 final {
+template<template<typename> class unary_predicate, class T, class... TList> requires requires { unary_predicate<T>::qualified; }
+struct all_of_v2 final {
         // static_assert(!unary_predicate<T>::qualified); // providing default arguments is a terrible idea here!
         // becaue the compiler always uses the default `false` instead of using unary_predicate::qualified
-        static constexpr bool value { unary_predicate<T, is_criterion_met>::qualified && all_of_v2<unary_predicate, TList...>::value };
+        static constexpr bool value { unary_predicate<T>::qualified && all_of_v2<unary_predicate, TList...>::value };
 };
 
-template<template<typename, bool> class unary_predicate, class T> requires requires { unary_predicate<T>::qualified; }
+template<template<typename> class unary_predicate, class T> requires requires { unary_predicate<T>::qualified; }
 struct all_of_v2<unary_predicate, T> final {
-        static_assert(!unary_predicate<T>::qualified);
-
         static constexpr bool value { unary_predicate<T>::qualified };
 };
 
-template<template<typename, bool is_criterion_met> class unary_predicate, class T, class... TList>
-requires requires { unary_predicate<T>::qualified; } struct any_of_v2 final {
+template<template<typename> class unary_predicate, class T, class... TList> requires requires { unary_predicate<T>::qualified; }
+struct any_of_v2 final {
         static constexpr bool value { unary_predicate<T>::qualified || any_of_v2<unary_predicate, TList...>::value };
 };
 
-template<template<typename, bool> class unary_predicate, class T> requires requires { unary_predicate<T>::qualified; }
+template<template<typename> class unary_predicate, class T> requires requires { unary_predicate<T>::qualified; }
 struct any_of_v2<unary_predicate, T> final {
         static constexpr bool value { unary_predicate<T>::qualified };
 };
@@ -208,12 +202,12 @@ static_assert(!::any_of_v2<::is_leq_4bytes, const char*, unsigned long long&&, c
 
 namespace foldexpr {
 
-    template<template<class, bool> class predicate, class... TList>
+    template<template<class> class predicate, class... TList>
     requires requires { predicate<typename ::get_first<TList...>::type>::qualified; } static consteval bool all_of() noexcept {
         return (... && predicate<TList>::qualified);
     }
 
-    template<template<class, bool> class predicate, class... TList>
+    template<template<class> class predicate, class... TList>
     requires requires { predicate<typename ::get_first<TList...>::type>::qualified; } static consteval bool any_of() noexcept {
         return (... || predicate<TList>::qualified);
     }
