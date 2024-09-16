@@ -3,6 +3,8 @@
 #include <numbers>
 #include <type_traits>
 
+static inline void func(_Inout_ double& val) noexcept { val *= 2.000; }
+
 template<typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type> class pair final {
     private:
         T first;
@@ -112,6 +114,8 @@ auto wmain() -> int {
     [[maybe_unused]] constexpr auto okay { ::pair<float> { std::numbers::pi_v<float> } / fpair };
     ::pair<double>                  egamma { std::numbers::egamma }; // non const lvalue
     [[maybe_unused]] const auto     okay_too { ::pair<float> { egamma - fpair } };
+
+    const auto x { ::func(2.000) };
 
     return EXIT_SUCCESS;
 }
