@@ -34,7 +34,7 @@
 namespace __cxx_sstring_internal_impl {
 
     // resorting to runtime conversion :(
-    [[nodscard]] static inline const wchar_t* wsignature(_In_ const char* _cxx_signature) noexcept {
+    [[nodiscard]] static inline const wchar_t* wsignature(_In_ const char* _cxx_signature) noexcept {
         static const unsigned _signature_length = 512;
         static wchar_t        _signature[_signature_length]; // NOLINT(modernize-avoid-c-arrays)
 
@@ -152,7 +152,7 @@ class sstring {
         }
 
         // move assignment operator
-        [[nodscard]] inline sstring& __cdecl operator=(_Inout_ sstring&& other) noexcept {
+        [[nodiscard]] inline sstring& __cdecl operator=(_Inout_ sstring&& other) noexcept {
             print_signature();
             if (this == &other) return *this;
 
@@ -174,7 +174,7 @@ class sstring {
             _size = _capacity = 0;
         }
 
-        [[nodscard]] static inline sstring __cdecl with_capacity(_In_ const size_type& size) noexcept { // a Rust style static ctor
+        [[nodiscard]] static inline sstring __cdecl with_capacity(_In_ const size_type& size) noexcept { // a Rust style static ctor
             print_signature();
             sstring temporary;
             temporary._resource = new (std::nothrow) char[size];
@@ -188,18 +188,18 @@ class sstring {
         }
 
         // NOLINTNEXTLINE(google-explicit-constructor - implicit conversion function
-        [[nodscard]] inline __cdecl operator std::string() const noexcept { return std::string(cbegin(), cend()); }
+        [[nodiscard]] inline __cdecl operator std::string() const noexcept { return std::string(cbegin(), cend()); }
 
-        [[nodscard]] inline size_type __stdcall length() const noexcept { return _size; }
+        [[nodiscard]] inline size_type __stdcall length() const noexcept { return _size; }
 
-        [[nodscard]] inline size_type __stdcall capacity() const noexcept { return _capacity; }
+        [[nodiscard]] inline size_type __stdcall capacity() const noexcept { return _capacity; }
 
-        [[nodscard]] inline char* __cdecl c_str() noexcept { return _resource; }
+        [[nodiscard]] inline char* __cdecl c_str() noexcept { return _resource; }
 
-        [[nodscard]] inline const char* __cdecl c_str() const noexcept { return _resource; }
+        [[nodiscard]] inline const char* __cdecl c_str() const noexcept { return _resource; }
 
         // operator usable for lvalues and rvalues for operands
-        [[nodscard]] sstring __cdecl operator+(_In_ const sstring& other) const noexcept {
+        [[nodiscard]] sstring __cdecl operator+(_In_ const sstring& other) const noexcept {
             print_signature();
 
             sstring temporary;
@@ -223,7 +223,7 @@ class sstring {
         }
 
         // operator usable only with lvalue left operands
-        [[nodscard]] sstring& __cdecl operator+=(_In_ const sstring& other) & noexcept {
+        [[nodiscard]] sstring& __cdecl operator+=(_In_ const sstring& other) & noexcept {
             print_signature();
 
             char* new_buffer = new (std::nothrow) char[(_size + other._size) * 2];
@@ -248,7 +248,7 @@ class sstring {
             return *this;
         }
 
-        [[nodscard]] inline bool __cdecl operator==(_In_ const sstring& other) const noexcept {
+        [[nodiscard]] inline bool __cdecl operator==(_In_ const sstring& other) const noexcept {
             if (this == &other) return true;
             if (_size != other._size) return false;
 
@@ -258,57 +258,59 @@ class sstring {
             return true;
         }
 
-        [[nodscard]] inline bool __cdecl operator==(_In_ const char* const string) const noexcept {
+        [[nodiscard]] inline bool __cdecl operator==(_In_ const char* const string) const noexcept {
             if (!string) return false;
             return !::strncmp(_resource, string, _size);
         }
 
-        [[nodscard]] friend inline bool __cdecl operator==(_In_ const char* const array, _In_ const sstring& string) noexcept {
+        [[nodiscard]] friend inline bool __cdecl operator==(_In_ const char* const array, _In_ const sstring& string) noexcept {
             if (!array) return false;
             return !::strncmp(string._resource, array, string._size);
         }
 
-        [[nodscard]] friend inline std::ostream& __cdecl operator<<(_Inout_ std::ostream& ostream, _In_ const sstring& string) noexcept {
+        [[nodiscard]] friend inline std::ostream& __cdecl operator<<(_Inout_ std::ostream& ostream, _In_ const sstring& string) noexcept {
             ostream << string.c_str();
             return ostream;
         }
 
-        [[nodscard]] char* __stdcall begin() noexcept { return _resource; }
+        [[nodiscard]] char* __stdcall begin() noexcept { return _resource; }
 
-        [[nodscard]] char* __stdcall end() noexcept { return _resource + _size; } // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        [[nodiscard]] char* __stdcall end() noexcept {
+            return _resource + _size;
+        } // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
-        [[nodscard]] const char* __stdcall begin() const noexcept { return _resource; }
-
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        [[nodscard]] const char* __stdcall end() const noexcept { return _resource + _size; }
-
-        [[nodscard]] const char* __stdcall cbegin() const noexcept { return _resource; }
+        [[nodiscard]] const char* __stdcall begin() const noexcept { return _resource; }
 
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        [[nodscard]] const char* __stdcall cend() const noexcept { return _resource + _size; }
+        [[nodiscard]] const char* __stdcall end() const noexcept { return _resource + _size; }
 
-        [[nodscard]] char& __stdcall at(size_type& offset) noexcept {
+        [[nodiscard]] const char* __stdcall cbegin() const noexcept { return _resource; }
+
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        [[nodiscard]] const char* __stdcall cend() const noexcept { return _resource + _size; }
+
+        [[nodiscard]] char& __stdcall at(size_type& offset) noexcept {
             assert(offset < _size);
             return _resource[offset]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
 
-        [[nodscard]] const char& __stdcall at(size_type& offset) const noexcept {
+        [[nodiscard]] const char& __stdcall at(size_type& offset) const noexcept {
             assert(offset < _size);
             return _resource[offset]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
 
-        [[nodscard]] char& __stdcall operator[](size_type& offset) noexcept {
+        [[nodiscard]] char& __stdcall operator[](size_type& offset) noexcept {
             assert(offset < _size);
             return _resource[offset]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
 
-        [[nodscard]] const char& __stdcall operator[](size_type& offset) const noexcept {
+        [[nodiscard]] const char& __stdcall operator[](size_type& offset) const noexcept {
             assert(offset < _size);
             return _resource[offset]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
 
         template<size_t __strlen>
-        [[nodscard]] friend inline ::sstring __cdecl operator+(
+        [[nodiscard]] friend inline ::sstring __cdecl operator+(
             _In_ const char (&str)[__strlen] /* compiler will accomodate the null terminator in this length */, _In_ const ::sstring& string
         ) noexcept {
             print_signature();

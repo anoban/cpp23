@@ -16,6 +16,7 @@ auto main() -> int {
     const ::sstring&& simpson { "stupid " + world };
 
     std::cout << simpson << '\n';
+    std::cout << "length = " << simpson.length() << " capacity = " << simpson.capacity() << '\n';
 
     return EXIT_SUCCESS;
 }

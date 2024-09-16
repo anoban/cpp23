@@ -2,7 +2,7 @@
 
 __declspec(noinline) void function() noexcept;
 
-static unsigned internal_linkage { 22 };
+static unsigned internal_linkage { 82 };
 
 unsigned external_linkage { 11 };
 
