@@ -35,6 +35,7 @@ $cflags = @(
     "/Gw",
     "/I./",
     "/I./include/",
+    "/I./gsl/",
     "/J",
     "/MT",
     "/O3",

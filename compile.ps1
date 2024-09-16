@@ -28,6 +28,8 @@ $cflags = @(
     "/GL",
     "/Gw",
     "/I./",
+    "/I./include/",
+    "/I./gsl/",
     "/jumptablerdata",
     "/MP",
     "/MT", # statically link the multithreaded version of Windows libs
