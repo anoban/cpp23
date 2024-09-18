@@ -52,9 +52,15 @@ namespace __cxx_sstring_internal_impl {
 class sstring {
     private:
         using size_type = unsigned long long;
-        size_type _size;     // does not count the null terminator
+        size_type _size;     // inclusive of the null terminator
         size_type _capacity; // at construction, capacity will usually be twice the size of the string
         char*     _resource; // string buffer
+
+        // a private aggregate initializer like ctor
+        __cdecl sstring(_In_ char* const buffer, _In_ const size_type& size, _In_ const size_type& capacity) noexcept :
+            _size(size), _capacity(capacity), _resource(buffer) {
+            print_signature();
+        }
 
     public:
         __cdecl sstring() noexcept : _size(0), _capacity(0), _resource(nullptr) { // default ctor
@@ -108,7 +114,16 @@ class sstring {
         }
 #endif
 
-#ifdef __SSTRING_NO_MOVE_SEMANTICS__ // IT IS CRITICAL TO
+#ifdef __SSTRING_NO_MOVE_SEMANTICS__
+        // IT IS ABSOLUTELY CRITICAL TO DELETE THESE PRIOR TO DEFINING THE COPY CTOR AS
+        // THE COMPILER WILL IMPLICITLY DELETE THE PREVIOUSLY DEFINED COPY CTOR WHEN THE MOVE CTOR IS DELETED
+        // SO WE DEFINE THE COPY CTOR AFTER DELETING THE MOVE CTOR
+
+        // CONSTRUCTING A LOCAL ::sstring OBJECT AND MUTATING IT TO ULTIMATELY RETURN AS RESULT TYPE
+        // IMPLEMENTATIONS WILL ERR WHEN THE MOVE CTOR IS DELETED, BECAUSE TO RETURN A LVALUE (THE LOCAL OBJECT)
+        // AS AN RVALUE WE NEED THE MOVE CTOR
+        // WITH A DELETED MOVE CTOR, THE BEST BET IS TO INLINE CONSTRUCT AN OBJECT IN THE RETURN STATEMENT
+        // AND LET THE RVO TAKE CARE OF THE SEMANTICS
 
         // just #ifndef ing alone isn't enough as the compiler will generate the move constructor and
         // move assignment operator for us, which we do not want to happen!
@@ -205,15 +220,14 @@ class sstring {
 
         static sstring __cdecl with_capacity(_In_ const size_type& size) noexcept { // a Rust style static ctor
             print_signature();
-            sstring temporary;
-            temporary._resource = new (std::nothrow) char[size];
-            if (!temporary._resource) { // has the allocation failed,
+
+            auto buffer = new (std::nothrow) char[size];
+            if (!buffer) { // has the allocation failed,
                 ::fputws(L"allocation failure!\n", stderr);
-                return temporary;
+                return {}; // a default constructed ::sstring
             }
 
-            temporary._capacity = size; // temporary._size will be 0
-            return temporary;
+            return { buffer, 0, size };
         }
 
         // NOLINTNEXTLINE(google-explicit-constructor - implicit conversion function
@@ -231,24 +245,20 @@ class sstring {
         sstring __cdecl operator+(_In_ const sstring& other) const noexcept {
             print_signature();
 
-            sstring temporary;
-            temporary._resource = new (std::nothrow) char[(_size + other._size) * 2]; // has space for 2 null terminators
-            if (!temporary._resource) {                                               // has the allocation failed,
+            auto* buffer = new (std::nothrow) char[(_size + other._size) * 2]; // has space for 2 null terminators
+            if (!buffer) {                                                     // has the allocation failed,
                 ::fputws(L"allocation failure!\n", stderr);
-                return temporary;
+                return {}; // a default constructed ::sstring
             }
 
-            temporary._size     = _size + other._size - 1; // remove the null terminator of the first string
-            temporary._capacity = (_size + other._size) * 2;
-
-            ::memset(temporary._resource, 0U, temporary._capacity);
-            ::strcpy_s(temporary._resource, _size, _resource); // copy this buffer
-            ::strcpy_s(                                        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                temporary._resource + _size - 1 /* start @ the null terminator of the first string */,
+            ::memset(buffer, 0U, (_size + other._size) * 2);
+            ::strcpy_s(buffer, _size, _resource); // copy this buffer
+            ::strcpy_s(                           // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                buffer + _size - 1 /* start @ the null terminator of the first string */,
                 other._size,
                 other._resource
             ); // copy other's buffer
-            return temporary;
+            return { buffer, _size + other._size - 1 /* discount the null terminator of the first string */, (_size + other._size) * 2 };
         }
 
         // when concatenating a string literal, use this operator to bypass concatenation following the creation of a temporary
@@ -414,4 +424,5 @@ class sstring {
         }
 };
 
-#undef print_signature // trailing parenthesis is not necessary to undefine a macro
+#undef print_signature                               // trailing parenthesis is not necessary to undefine a macro
+static_assert(std::is_standard_layout_v<::sstring>); // WOW!
