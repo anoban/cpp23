@@ -11,8 +11,16 @@ template<class T, size_t len> static __declspec(noinline) void __stdcall quad(T 
     for (T& e : array) e *= (e * e * e);
 }
 
-template<size_t __len> static constexpr inline void capitalize(_Inout_ char (&string)[__len]) noexcept {
-    for (auto& c : string) c = static_cast<char>(::toupper(c));
+template<size_t __len> static inline char* capitalize(_Inout_ char (&string)[__len]) noexcept {
+    ::_putws(L"" __FUNCSIG__);
+    for (unsigned i = 0; i < __len; ++i) string[i] = static_cast<char>(::toupper(string[i]));
+    return string;
+}
+
+static inline char* capitalize(_Inout_ char* string) noexcept {
+    ::_putws(L"" __FUNCSIG__);
+    while (*string) *string++ = static_cast<char>(toupper(*string));
+    return string;
 }
 
 template<class T, size_t __len>
@@ -39,6 +47,8 @@ auto wmain() -> int {
 
     quad(array);
     for (const auto& e : array) ::wprintf_s(L"%6u\n", e);
+
+    // ::wprintf_s(L"%S\n", ::capitalize("wayyyy downnn we gooooooooo!"));
 
     return EXIT_SUCCESS;
 }

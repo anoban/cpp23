@@ -75,7 +75,7 @@ class sstring {
         }
 
         template<size_t len>
-        __cdecl sstring(_In_ const char (&str)[len]) noexcept : // NOLINT(google-explicit-constructor)
+        __cdecl sstring(_In_ const char (&string)[len]) noexcept : // NOLINT(google-explicit-constructor)
             _size(len), _capacity(_size * 2), _resource(new (std::nothrow) char[_capacity]) {
             print_signature();
             if (!_resource) { // has the allocation failed,
@@ -85,15 +85,17 @@ class sstring {
             }
 
             ::memset(_resource, 0U, _capacity);
-            ::strcpy_s(_resource, _size, str);
+            ::strcpy_s(_resource, _size, string);
         }
 
 #if 1
         [[deprecated("use the more efficient templated version when using string literals to construct a ::sstring object!"
-        )]] __cdecl explicit sstring(_In_ const char* const str) noexcept :
-            _size(::strlen(str) + 1 /* +1 for the null terminator */), _capacity(_size * 2), _resource(new (std::nothrow) char[_capacity]) {
+        )]] __cdecl explicit sstring(_In_ const char* const string) noexcept :
+            _size(::strlen(string) + 1 /* +1 for the null terminator */),
+            _capacity(_size * 2),
+            _resource(new (std::nothrow) char[_capacity]) {
             // using ::strlen(str) here and using _size + 1 in strcpy_s will bite us in the ass when trying to copy or move
-            assert(str);
+            assert(string);
             print_signature();
             if (!_resource) { // has the allocation failed,
                 _capacity = _size = 0;
@@ -102,7 +104,7 @@ class sstring {
             }
 
             ::memset(_resource, 0U, _capacity);
-            ::strcpy_s(_resource, _size, str);
+            ::strcpy_s(_resource, _size, string);
         }
 #endif
         __cdecl sstring(_In_ const sstring& other) noexcept : // not exactly a trivial copy constructor

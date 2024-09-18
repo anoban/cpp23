@@ -1,6 +1,6 @@
 #define __SSTRING_PRINT_METHOD_SIGNATURES_ON_CALL__
 #define __SSTRING_NO_MOVE_SEMANTICS__
-#include <sstring> // love it :)
+#include <sstring>
 #include <type_traits>
 
 // slightly doctored versions of STL's std::forward implementations
@@ -8,14 +8,19 @@ namespace nstd {
 
     // consider template<class T> explicit user(const T&& init) noexcept : name(std::forward<T>(init)) { ::puts(__FUNCSIG__); }
     // forwarding references can bind to lvalue references, const lvalue references, rvalue references and const rvalue references!
+    // in perfect forwarding the T of std::forward<T>() comes from the outer template where T&& was a universal reference
+
+    // in case of an rvalue reference T will just be a type e.g. if T&& is std::string&& then T is std::string
+    // in case of an lvalue reference T will a reference type e.g. if T&& is std::string& then T will be std::string&
+    // because T& + && = T&& (reference collapsing)
 
     template<typename T> [[nodiscard]] constexpr T&& forward(typename std::remove_reference_t<T>& _Arg) noexcept {
         return static_cast<T&&>(_Arg);
     }
 
-    template<typename T> requires std::is_lvalue_reference_v<T>
+    template<typename T> requires std::is_lvalue_reference_v<T> // this overload will only be used when T is an lvalue reference
     [[nodiscard]] constexpr T&& forward(typename std::remove_reference_t<T>&& _Arg) noexcept {
-        // static_assert(!std::is_lvalue_reference_v<T>, "bad forward call");
+        // static_assert(!std::is_lvalue_reference_v<T>, "bad forward call"); refactored this into a requires clause
         return static_cast<T&&>(_Arg);
     }
 
