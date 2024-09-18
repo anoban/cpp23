@@ -90,7 +90,7 @@ class sstring {
 
 #if 1
         [[deprecated("use the more efficient templated version when using string literals to construct a ::sstring object!"
-        )]] __cdecl explicit sstring(_In_ const char* const string) noexcept :
+        )]] explicit __cdecl sstring(_In_ const char* const string) noexcept :
             _size(::strlen(string) + 1 /* +1 for the null terminator */),
             _capacity(_size * 2),
             _resource(new (std::nothrow) char[_capacity]) {
@@ -107,6 +107,16 @@ class sstring {
             ::strcpy_s(_resource, _size, string);
         }
 #endif
+
+#ifdef __SSTRING_NO_MOVE_SEMANTICS__ // IT IS CRITICAL TO
+
+        // just #ifndef ing alone isn't enough as the compiler will generate the move constructor and
+        // move assignment operator for us, which we do not want to happen!
+        __cdecl sstring(_Inout_ sstring&&) noexcept            = delete;
+        sstring& __cdecl operator=(_Inout_ sstring&&) noexcept = delete;
+
+#endif // implement move semantics
+
         __cdecl sstring(_In_ const sstring& other) noexcept : // not exactly a trivial copy constructor
             _size(other._size),
             _capacity(_size * 2 /* choosing not to simply use the other string's capacity */),
@@ -160,15 +170,7 @@ class sstring {
             return *this;
         }
 
-#ifdef __SSTRING_NO_MOVE_SEMANTICS__
-
-        // just #ifndef ing alone isn't enough as the compiler will generate the move constructor and
-        // move assignment operator for us, which we do not want to happen!
-        __cdecl sstring(_Inout_ sstring&&) noexcept            = delete;
-        sstring& __cdecl operator=(_Inout_ sstring&&) noexcept = delete;
-
-#else // implement move semantics
-
+#ifndef __SSTRING_NO_MOVE_SEMANTICS__
         // move ctor
         __cdecl sstring(_Inout_ sstring&& other) noexcept : _size(other._size), _capacity(other._capacity), _resource(other._resource) {
             print_signature();

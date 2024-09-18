@@ -2,6 +2,7 @@
 #define __SSTRING_NO_MOVE_SEMANTICS__
 #include <sstring>
 #include <type_traits>
+#include <vector>
 
 // slightly doctored versions of STL's std::forward implementations
 namespace nstd {
@@ -100,5 +101,11 @@ auto main() -> int {
 
     book philosophers_stone { philosopher, rowling };        // expect both to be copy constructed
     book chamber_of_secrets { std::move(chamber), rowling }; // title will be move constructed, author will be copy constructed
+
+    ::puts(".................................");
+
+    std::vector<::sstring> container(100);
+    container.emplace_back("rvalue"); //
+
     return EXIT_SUCCESS;
 }
