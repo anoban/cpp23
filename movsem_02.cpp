@@ -23,7 +23,9 @@
     return ::sstring("Skyfall is where we start, a thousand miles and poles apart, where worlds collide and days are dark!");
 }
 
-static __declspec(noinline) ::sstring no_time_to_die() noexcept { return "That I've fallen for a lie.... you were never on my side...."; }
+static __declspec(noinline) ::sstring no_time_to_die() noexcept {
+    return ::sstring("That I've fallen for a lie.... you were never on my side....");
+}
 
 static const size_t MiB = 1024 * 1024;
 
@@ -77,6 +79,9 @@ int main() {               // NOLINT(bugprone-exception-escape)
     // const lvalue overload gets called in C++03 and before
     const std::string sentence = ::sentence_case(::skyfall());
     ::puts(sentence.c_str());
+
+    const auto* leonard { "If you want it darker? Let's kill the flame" };
+    ::sstring   darker { leonard }; // calls the sstring::sstring(const std::string &) ctor
 
     return EXIT_SUCCESS;
 }
