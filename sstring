@@ -56,9 +56,10 @@ class sstring {
         size_type _capacity; // at construction, capacity will usually be twice the size of the string
         char*     _resource; // string buffer
 
-        // a private aggregate initializer like ctor
+        // a private, aggregate initializer like ctor
         __cdecl sstring(_In_ char* const buffer, _In_ const size_type& size, _In_ const size_type& capacity) noexcept :
             _size(size), _capacity(capacity), _resource(buffer) {
+            assert(buffer);
             print_signature();
         }
 
@@ -258,6 +259,7 @@ class sstring {
                 other._size,
                 other._resource
             ); // copy other's buffer
+
             return { buffer, _size + other._size - 1 /* discount the null terminator of the first string */, (_size + other._size) * 2 };
         }
 
@@ -265,48 +267,45 @@ class sstring {
         template<size_t len> sstring __cdecl operator+(const char (&other)[len]) const noexcept {
             print_signature();
 
-            sstring temporary;
-            temporary._resource = new (std::nothrow) char[(_size + len) * 2]; // has space for 2 null terminators
-            if (!temporary._resource) {                                       // has the allocation failed,
+            auto* buffer = new (std::nothrow) char[(_size + len) * 2]; // has space for 2 null terminators
+            if (!buffer) {                                             // has the allocation failed,
                 ::fputws(L"allocation failure!\n", stderr);
-                return temporary;
+                return {};
             }
 
-            temporary._size     = _size + len - 1; // remove the null terminator of the first string
-            temporary._capacity = (_size + len) * 2;
-
-            ::memset(temporary._resource, 0U, temporary._capacity);
-            ::strcpy_s(temporary._resource, _size, _resource); // copy this buffer
-            ::strcpy_s(                                        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                temporary._resource + _size - 1 /* start @ the null terminator of the first string */,
+            ::memset(buffer, 0U, (_size + len) * 2);
+            ::strcpy_s(buffer, _size, _resource); // copy this buffer
+            ::strcpy_s(                           // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                buffer + _size - 1 /* start @ the null terminator of the first string */,
                 len,
                 other
             ); // copy other's buffer
-            return temporary;
+
+            return { buffer, _size + len - 1, (_size + len) * 2 };
         }
 
         // operator usable only with lvalue left operands
         sstring& __cdecl operator+=(_In_ const sstring& other) & noexcept {
             print_signature();
 
-            char* new_buffer = new (std::nothrow) char[(_size + other._size) * 2];
-            if (!new_buffer) { // has the allocation failed,
+            char* buffer = new (std::nothrow) char[(_size + other._size) * 2];
+            if (!buffer) { // has the allocation failed,
                 ::fputws(L"allocation failure!\n", stderr);
                 return *this;
             }
             _capacity = (_size + other._size) * 2; // use the previous state of _size before mutating it
 
-            ::memset(new_buffer, 0U, _capacity);
-            ::strcpy_s(new_buffer, _size /* older size */, _resource);
+            ::memset(buffer, 0U, _capacity);
+            ::strcpy_s(buffer, _size /* older size */, _resource);
             ::strcpy_s( // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                new_buffer + _size - 1 /* start @ the null terminator of the first string */,
+                buffer + _size - 1 /* start @ the null terminator of the first string */,
                 other._size,
                 other._resource
             ); // copy other's buffer
 
             _size = _size + other._size - 1; // discount the null terminator of the first string
             delete[] _resource;
-            _resource = new_buffer;
+            _resource = buffer;
 
             return *this;
         }
@@ -314,7 +313,7 @@ class sstring {
         template<size_t len> sstring& __cdecl operator+=(const char (&other)[len]) & noexcept {
             print_signature();
 
-            char* new_buffer = new (std::nothrow) char[(_size + len) * 2];
+            auto* new_buffer = new (std::nothrow) char[(_size + len) * 2];
             if (!new_buffer) { // has the allocation failed,
                 ::fputws(L"allocation failure!\n", stderr);
                 return *this;
@@ -351,10 +350,22 @@ class sstring {
             return !::strncmp(_resource, string, _size);
         }
 
+        template<size_t len> bool __cdecl operator==(_In_ const char (&string)[len]) const noexcept {
+            if (!string) return false;
+            if (len != _size) return false;
+            return !::strncmp(_resource, string, _size);
+        }
+
         // to make the equality comparisons valid in both directions
         friend bool __cdecl operator==(_In_ const char* const array, _In_ const sstring& string) noexcept {
             if (!array) return false;
             return !::strncmp(string._resource, array, string._size);
+        }
+
+        template<size_t len> friend bool __cdecl operator==(_In_ const char (&str)[len], _In_ const sstring& string) noexcept {
+            if (!str) return false;
+            if (len != string._size) return false;
+            return !::strncmp(string._resource, str, string._size);
         }
 
         friend std::ostream& __cdecl operator<<(_Inout_ std::ostream& ostream, _In_ const sstring& string) noexcept {
@@ -402,27 +413,25 @@ class sstring {
         ) noexcept {
             print_signature();
 
-            sstring temporary;
-            temporary._resource = new (std::nothrow) char[(len + string._size) * 2]; // has space for 2 null terminators
-            if (!temporary._resource) {                                              // has the allocation failed,
+            auto* buffer = new (std::nothrow) char[(len + string._size) * 2]; // has space for 2 null terminators
+            if (!buffer) {                                                    // has the allocation failed,
                 ::fputws(L"allocation failure!\n", stderr);
-                return temporary;
+                return {};
             }
 
-            temporary._size     = len + string._size - 1; // remove the null terminator of the first string
-            temporary._capacity = (len + string._size) * 2;
-
-            ::memset(temporary._resource, 0U, temporary._capacity);
-            ::strcpy_s(temporary._resource, len, str); // copy string literal into ::sstring's buffer
-            ::strcpy_s(                                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                temporary._resource + len - 1 /* start @ the null terminator of the first string */,
+            ::memset(buffer, 0U, (len + string._size) * 2);
+            ::strcpy_s(buffer, len, str); // copy string literal into ::sstring's buffer
+            ::strcpy_s(                   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                buffer + len - 1 /* start @ the null terminator of the first string */,
                 string._size,
                 string._resource
             ); // copy ::sstring object's internal buffer
 
-            return temporary;
+            return { buffer, len + string._size - 1, (len + string._size) * 2 };
         }
 };
 
-#undef print_signature                               // trailing parenthesis is not necessary to undefine a macro
 static_assert(std::is_standard_layout_v<::sstring>); // WOW!
+static_assert(sizeof(::sstring) == 24);
+
+#undef print_signature // trailing parenthesis is not necessary to undefine a macro
