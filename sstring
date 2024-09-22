@@ -1,6 +1,16 @@
-#if __cplusplus < 201103L
-    #define noexcept throw()
-    #define nullptr  NULL
+#if __cplusplus < 201103L // prior to C++11
+    #define noexcept                      throw()
+    #define nullptr                       NULL
+    #define __SSTRING_NO_MOVE_SEMANTICS__ 1
+    #define constexpr
+    #define __PRECPP11_STANDARD__
+    #define __CXX_ATTRIBUTE_SYNTAX__(attribute)
+#else
+    #define __CXX_ATTRIBUTE_SYNTAX__(attribute) attribute
+#endif
+
+#if defined(__GNUG__) && defined(__GNUC__)
+    #include <sal.h> // g++ will err without this
 #endif
 
 #include <cassert>
@@ -10,10 +20,6 @@
 #include <new>
 #include <string>
 
-#if defined(__GNUG__) && defined(__GNUC__)
-    #include <sal.h>
-#endif
-
 #ifndef LPREFIX
     #define LPREFIX(expression) L"" expression // relies on automatic concatenation of adjacent string literals
 #endif
@@ -22,9 +28,9 @@
 #define TO_WSTR(expression)         __TO_WSTR__(expression) // client facing macro
 
 // in LLVM and GCC, __FUNCTION__ and __PRETTY_FUNCTION__ are variables NOT MACROS!
-// in MSVC, __FUNCSIG__ expands as a MACRO (Microsoft extension)
+// in MSVC, __FUNCSIG__ can be expanded as a MACRO (Microsoft extension)
 
-#if defined(_MSC_VER) && defined(_MSC_FULL_VER) && !defined(__llvm__) && !defined(__clang__)
+#if defined(_MSC_VER) && defined(_MSC_FULL_VER) && !defined(__llvm__) && !defined(__clang__) && !defined(__GNUC__) && !defined(__GNUG__)
     #define __PRETTY_FUNCTION__ __FUNCSIG__
 // with g++/clang++/icx fall back to using the variable __PRETTY_FUNCTION__
 #endif
@@ -38,12 +44,18 @@
 namespace __cxx_sstring_internal_impl {
 
     // resorting to runtime conversion :(
-    static const wchar_t* wsignature(_In_ const char* _cxx_signature) noexcept {
+    __CXX_ATTRIBUTE_SYNTAX__(
+        [[maybe_unused,
+          deprecated("mixing regular ascii stdout and wide character stdout in a single programme is discouraged by Microsoft")]]
+    )
+    static constexpr const wchar_t* wsignature(_In_ const char* _cxx_signature) noexcept {
         static const unsigned _signature_length = 512;
         static wchar_t        _signature[_signature_length]; // NOLINT(modernize-avoid-c-arrays)
 
         unsigned charcount = 0;
-        ::memset(_signature, 0U, _signature_length * sizeof(wchar_t));
+        // ::memset(_signature, 0U, _signature_length * sizeof(wchar_t));   // using a raw loop to make this function constexpr
+        for (unsigned i = 0; i < _signature_length; ++i) _signature[i] = 0; // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
+
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic,cppcoreguidelines-pro-bounds-constant-array-index)
         while (*_cxx_signature) _signature[charcount++] = static_cast<wchar_t>(*_cxx_signature++);
         assert(charcount <= _signature_length);
@@ -52,11 +64,22 @@ namespace __cxx_sstring_internal_impl {
 
 } // namespace __cxx_sstring_internal_impl
 
-// a super trivial string class with NO NON-TRIVIAL OPTIMIZATIONS whatsoever
-// class sstring works with all C++ standards from C++98 to C++23 :)
-class sstring {
-    private:
+class sstring
+#ifndef __PRECPP11_STANDARD__
+    final
+#endif
+{
+        // a super trivial string class with NO NON-TRIVIAL OPTIMIZATIONS whatsoever
+        // class sstring works with all C++ standards from C++98 to C++23 :)
+
+    public:
+#ifdef __PRECPP11_STANDARD__
+        typedef unsigned long long size_type;
+#else
         using size_type = unsigned long long;
+#endif
+
+    private:
         size_type _size;     // inclusive of the null terminator
         size_type _capacity; // at construction, capacity will usually be twice the size of the string
         char*     _resource; // string buffer
@@ -101,8 +124,10 @@ class sstring {
         }
 
 #if 1
-        [[deprecated("use the more efficient templated version when using string literals to construct a ::sstring object!"
-        )]] explicit __cdecl sstring(_In_ const char* const string) noexcept :
+    #ifdef __CXX_ATTRIBUTE_SYNTAX__
+        [[deprecated("use the more efficient templated version when using string literals to construct a ::sstring object!")]]
+    #endif
+        explicit __cdecl sstring(_In_ const char* const string) noexcept :
             _size(::strlen(string) + 1 /* +1 for the null terminator */),
             _capacity(_size * 2),
             _resource(new (std::nothrow) char[_capacity]) {
@@ -120,7 +145,8 @@ class sstring {
         }
 #endif
 
-#ifdef __SSTRING_NO_MOVE_SEMANTICS__
+#if defined(__SSTRING_NO_MOVE_SEMANTICS__) && (__cplusplus >= 201103L) // rvalue reference signature is invalid in pre C++11 standards
+
         // IT IS ABSOLUTELY CRITICAL TO DELETE THESE PRIOR TO DEFINING THE COPY CTOR AS
         // THE COMPILER WILL IMPLICITLY DELETE THE PREVIOUSLY DEFINED COPY CTOR WHEN THE MOVE CTOR IS DELETED
         // SO WE DEFINE THE COPY CTOR AFTER DELETING THE MOVE CTOR
@@ -227,7 +253,7 @@ class sstring {
         static sstring __cdecl with_capacity(_In_ const size_type& size) noexcept { // a Rust style static ctor
             print_signature();
 
-            auto buffer = new (std::nothrow) char[size];
+            char* const buffer = new (std::nothrow) char[size];
             if (!buffer) { // has the allocation failed,
                 ::fputws(L"allocation failure!\n", stderr);
                 return {}; // a default constructed ::sstring
@@ -251,8 +277,8 @@ class sstring {
         sstring __cdecl operator+(_In_ const sstring& other) const noexcept {
             print_signature();
 
-            auto* buffer = new (std::nothrow) char[(_size + other._size) * 2]; // has space for 2 null terminators
-            if (!buffer) {                                                     // has the allocation failed,
+            char* const buffer = new (std::nothrow) char[(_size + other._size) * 2]; // has space for 2 null terminators
+            if (!buffer) {                                                           // has the allocation failed,
                 ::fputws(L"allocation failure!\n", stderr);
                 return {}; // a default constructed ::sstring
             }
@@ -272,8 +298,8 @@ class sstring {
         template<size_t len> sstring __cdecl operator+(const char (&other)[len]) const noexcept {
             print_signature();
 
-            auto* buffer = new (std::nothrow) char[(_size + len) * 2]; // has space for 2 null terminators
-            if (!buffer) {                                             // has the allocation failed,
+            char* const buffer = new (std::nothrow) char[(_size + len) * 2]; // has space for 2 null terminators
+            if (!buffer) {                                                   // has the allocation failed,
                 ::fputws(L"allocation failure!\n", stderr);
                 return {};
             }
@@ -293,7 +319,7 @@ class sstring {
         sstring& __cdecl operator+=(_In_ const sstring& other) & noexcept {
             print_signature();
 
-            char* buffer = new (std::nothrow) char[(_size + other._size) * 2];
+            char* const buffer = new (std::nothrow) char[(_size + other._size) * 2];
             if (!buffer) { // has the allocation failed,
                 ::fputws(L"allocation failure!\n", stderr);
                 return *this;
@@ -318,7 +344,7 @@ class sstring {
         template<size_t len> sstring& __cdecl operator+=(const char (&other)[len]) & noexcept {
             print_signature();
 
-            auto* new_buffer = new (std::nothrow) char[(_size + len) * 2];
+            char* const new_buffer = new (std::nothrow) char[(_size + len) * 2];
             if (!new_buffer) { // has the allocation failed,
                 ::fputws(L"allocation failure!\n", stderr);
                 return *this;
@@ -418,8 +444,8 @@ class sstring {
         ) noexcept {
             print_signature();
 
-            auto* buffer = new (std::nothrow) char[(len + string._size) * 2]; // has space for 2 null terminators
-            if (!buffer) {                                                    // has the allocation failed,
+            char* const buffer = new (std::nothrow) char[(len + string._size) * 2]; // has space for 2 null terminators
+            if (!buffer) {                                                          // has the allocation failed,
                 ::fputws(L"allocation failure!\n", stderr);
                 return {};
             }
