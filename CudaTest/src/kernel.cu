@@ -9,8 +9,11 @@ template<std::floating_point T> [[nodiscard]] static constexpr record<T> parse_l
     const char* const cstart { line.data() };
     const char*       begin { line.data() };
 
+    // Area, Perimeter, MajorAxisLength, MinorAxisLength, AspectRation, Eccentricity, ConvexArea, EquivDiameter, Extent, Solidity,
+    // roundness, Compactness, ShapeFactor1, ShapeFactor2, ShapeFactor3, ShapeFactor4, Class
+
     size_t caret = line.find(',', 0); // the first comma
-    std::from_chars(begin, cstart + caret /* this delimiter is exclusive */, temporary.area);
+    std::from_chars(begin, cstart + caret + 1 /* this delimiter is exclusive */, temporary.area);
     begin = cstart + caret + 1; // char next to the first comma
 
     caret = line.find(',', caret + 1); // the second comma
@@ -46,15 +49,15 @@ template<std::floating_point T> [[nodiscard]] static constexpr record<T> parse_l
     begin = cstart + caret + 1;
 
     caret = line.find(',', caret + 1);
+    std::from_chars(begin, cstart + caret, temporary.solidity);
+    begin = cstart + caret + 1;
+
+    caret = line.find(',', caret + 1);
     std::from_chars(begin, cstart + caret, temporary.roundness);
     begin = cstart + caret + 1;
 
     caret = line.find(',', caret + 1);
     std::from_chars(begin, cstart + caret, temporary.compactness);
-    begin = cstart + caret + 1;
-
-    caret = line.find(',', caret + 1);
-    std::from_chars(begin, cstart + caret, temporary.extent);
     begin = cstart + caret + 1;
 
     caret = line.find(',', caret + 1);
@@ -74,14 +77,14 @@ template<std::floating_point T> [[nodiscard]] static constexpr record<T> parse_l
     begin = cstart + caret + 1;
 
     // handle the string literal @ the end
-
+    // std::cout << temporary << '\n';
     return temporary;
 }
 
 template<typename T>
 [[nodiscard]] static std::enable_if<std::is_floating_point<T>::value, std::vector<::record<T>>>::type parse_beans_csv(
     _In_ const std::string& csv, _In_ const bool& has_header
-) noexcept {
+) noexcept(std::is_nothrow_move_constructible_v<record<T>>) {
     const auto nlines { std::ranges::count(csv, '\n') }; // 13,612
     assert(nlines == N_RECORDS);
 

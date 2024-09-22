@@ -57,6 +57,7 @@ static_assert(::any_of_trait_v<std::is_arithmetic, float, double, long double, c
 template<typename T> class record final {
     public:
         using value_type = T;
+
         unsigned long long area;
         T                  perimeter;
         T                  major_axis_length;

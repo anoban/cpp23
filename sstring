@@ -1,5 +1,6 @@
 #if __cplusplus < 201103L
-    #error At least, a C++11 standard compilant compiler is required!
+    #define noexcept throw()
+    #define nullptr  NULL
 #endif
 
 #include <cassert>
@@ -8,6 +9,10 @@
 #include <iostream>
 #include <new>
 #include <string>
+
+#if defined(__GNUG__) && defined(__GNUC__)
+    #include <sal.h>
+#endif
 
 #ifndef LPREFIX
     #define LPREFIX(expression) L"" expression // relies on automatic concatenation of adjacent string literals
