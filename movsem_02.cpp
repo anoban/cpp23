@@ -2,7 +2,22 @@
 #include <algorithm>
 #include <sstring>
 
-[[nodiscard("expensive")]] static inline std::string sentence_case(_In_ const std::string& asciistr) noexcept {
+#if __cplusplus < 201103L // prior to C++11
+    #define noexcept throw()
+    #define nullptr  NULL
+    #define __SSTRING_NO_MOVE_SEMANTICS__
+    #define constexpr
+    #define __CPLUSPLUS_PRE_CPP11
+    #define __CXX_ATTRIBUTE_SYNTAX__(...)
+    #define __CPP11_LVALUE_AMPERSAND__
+    #define __CPP11_RVALUE_AMPERSAND__
+#else
+    #define __CXX_ATTRIBUTE_SYNTAX__(...) __VA_ARGS__
+    #define __CPP11_LVALUE_AMPERSAND__    (&)
+    #define __CPP11_RVALUE_AMPERSAND__    (&&)
+#endif
+
+__CXX_ATTRIBUTE_SYNTAX__([[nodiscard("expensive")]]) static inline std::string sentence_case(_In_ const std::string& asciistr) noexcept {
     std::string copy(asciistr);
     for (unsigned i = 0; i < copy.length(); ++i)
         // when the current char is ' ' and the next char is an ascii lowercase letter
@@ -10,7 +25,7 @@
     return copy;
 }
 
-[[nodiscard("expensive")]] static inline std::string sentence_case(_In_ std::string&& asciistr) noexcept {
+__CXX_ATTRIBUTE_SYNTAX__([[nodiscard("expensive")]]) static inline std::string sentence_case(_In_ std::string&& asciistr) noexcept {
     std::string copy(std::move(asciistr));
     for (unsigned i = 0; i < copy.length(); ++i)
         // when the current char is ' ' and the next char is an ascii lowercase letter make it upper case
@@ -18,7 +33,7 @@
     return copy;
 }
 
-[[nodiscard("expensive")]] static inline ::sstring skyfall() noexcept {
+__CXX_ATTRIBUTE_SYNTAX__([[nodiscard("expensive")]]) static inline ::sstring skyfall() noexcept {
     // NOLINTNEXTLINE(modernize-return-braced-init-list)
     return ::sstring("Skyfall is where we start, a thousand miles and poles apart, where worlds collide and days are dark!");
 }
@@ -53,8 +68,10 @@ int main() {               // NOLINT(bugprone-exception-escape)
     jbond += " swept away I'm stooooolennnnnn..... let the sky fall.... when it crumbles we'll stand tall and face it all together...!";
     ::puts(jbond.c_str());
 
+#ifndef __CPLUSPLUS_PRE_CPP11
     for (const auto& c : jbond) ::putchar(c);
     ::putchar('\n');
+#endif
 
     std::transform(jbond.begin(), jbond.end(), jbond.begin(), ::toupper);
     ::puts(jbond.c_str());
@@ -80,8 +97,8 @@ int main() {               // NOLINT(bugprone-exception-escape)
     const std::string sentence = ::sentence_case(::skyfall());
     ::puts(sentence.c_str());
 
-    const auto* leonard { "If you want it darker? Let's kill the flame" };
-    ::sstring   darker { leonard }; // calls the sstring::sstring(const std::string &) ctor
+    const char* const leonard = "If you want it darker? Let's kill the flame";
+    ::sstring         darker(leonard); // calls the sstring::sstring(const std::string &) ctor
 
     return EXIT_SUCCESS;
 }

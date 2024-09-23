@@ -1,18 +1,3 @@
-#if __cplusplus < 201103L // prior to C++11
-    #define noexcept                      throw()
-    #define nullptr                       NULL
-    #define __SSTRING_NO_MOVE_SEMANTICS__ 1
-    #define constexpr
-    #define __PRECPP11_STANDARD__
-    #define __CXX_ATTRIBUTE_SYNTAX__(attribute)
-#else
-    #define __CXX_ATTRIBUTE_SYNTAX__(attribute) attribute
-#endif
-
-#if defined(__GNUG__) && defined(__GNUC__)
-    #include <sal.h> // g++ will err without this
-#endif
-
 #include <cassert>
 #include <cstdio>
 #include <cstring>
@@ -20,6 +5,20 @@
 #include <new>
 #include <string>
 
+// --------------------------------------// MACROS TO DEAL WITH COMPILER SPECIFIC IDIOSYNCRACIES //------------------------------------------
+#if defined(__GNUG__) && defined(__GNUC__)
+    #include <sal.h> // g++ will err without this
+#endif
+
+// in LLVM and GCC, __FUNCTION__ and __PRETTY_FUNCTION__ are variables NOT MACROS!
+// in MSVC, __FUNCSIG__ can be expanded as a MACRO (Microsoft extension)
+#if defined(_MSC_VER) && defined(_MSC_FULL_VER) && !defined(__llvm__) && !defined(__clang__) && !defined(__GNUC__) && !defined(__GNUG__)
+    #define __PRETTY_FUNCTION__ __FUNCSIG__
+// with g++/clang++/icx fall back to using the variable __PRETTY_FUNCTION__
+#endif
+// ------------------------------------------------------------------------------------------------------------------------------------------
+
+// ---------------------------------------------------------// HELPERS //--------------------------------------------------------------------
 #ifndef LPREFIX
     #define LPREFIX(expression) L"" expression // relies on automatic concatenation of adjacent string literals
 #endif
@@ -27,19 +26,29 @@
 #define __TO_WSTR__(expanded_macro) L##expanded_macro       // helper that actually does the token pasting
 #define TO_WSTR(expression)         __TO_WSTR__(expression) // client facing macro
 
-// in LLVM and GCC, __FUNCTION__ and __PRETTY_FUNCTION__ are variables NOT MACROS!
-// in MSVC, __FUNCSIG__ can be expanded as a MACRO (Microsoft extension)
-
-#if defined(_MSC_VER) && defined(_MSC_FULL_VER) && !defined(__llvm__) && !defined(__clang__) && !defined(__GNUC__) && !defined(__GNUG__)
-    #define __PRETTY_FUNCTION__ __FUNCSIG__
-// with g++/clang++/icx fall back to using the variable __PRETTY_FUNCTION__
-#endif
-
 #ifdef __SSTRING_PRINT_METHOD_SIGNATURES_ON_CALL__
     #define print_signature() ::puts(__PRETTY_FUNCTION__)
 #else
     #define print_signature()
 #endif
+// ------------------------------------------------------------------------------------------------------------------------------------------
+
+// --------------------------------------// MACROS TO DEAL WITH C++ STANDARDS SPECIFIC INCONSISTENCIES //------------------------------------
+#if __cplusplus < 201103L // prior to C++11
+    #define noexcept throw()
+    #define nullptr  NULL
+    #define __SSTRING_NO_MOVE_SEMANTICS__
+    #define constexpr
+    #define __CPLUSPLUS_PRE_CPP11
+    #define __CXX_ATTRIBUTE_SYNTAX__(...)
+    #define __CPP11_LVALUE_AMPERSAND__
+    #define __CPP11_RVALUE_AMPERSAND__
+#else
+    #define __CXX_ATTRIBUTE_SYNTAX__(...) __VA_ARGS__
+    #define __CPP11_LVALUE_AMPERSAND__    &
+    #define __CPP11_RVALUE_AMPERSAND__    &&
+#endif
+// ------------------------------------------------------------------------------------------------------------------------------------------
 
 namespace __cxx_sstring_internal_impl {
 
@@ -48,13 +57,14 @@ namespace __cxx_sstring_internal_impl {
         [[maybe_unused,
           deprecated("mixing regular ascii stdout and wide character stdout in a single programme is discouraged by Microsoft")]]
     )
-    static constexpr const wchar_t* wsignature(_In_ const char* _cxx_signature) noexcept {
+    static const wchar_t* wsignature(_In_ const char* _cxx_signature) noexcept {
         static const unsigned _signature_length = 512;
         static wchar_t        _signature[_signature_length]; // NOLINT(modernize-avoid-c-arrays)
 
         unsigned charcount = 0;
-        // ::memset(_signature, 0U, _signature_length * sizeof(wchar_t));   // using a raw loop to make this function constexpr
-        for (unsigned i = 0; i < _signature_length; ++i) _signature[i] = 0; // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
+        ::memset(_signature, 0U, _signature_length * sizeof(wchar_t)); // using a raw loop to make this function constexpr
+        // static variables are not allowed inside constexpr function bodies, hence we cannot make this function constexpr
+        // for (unsigned i = 0; i < _signature_length; ++i) _signature[i] = 0; // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
 
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic,cppcoreguidelines-pro-bounds-constant-array-index)
         while (*_cxx_signature) _signature[charcount++] = static_cast<wchar_t>(*_cxx_signature++);
@@ -65,16 +75,16 @@ namespace __cxx_sstring_internal_impl {
 } // namespace __cxx_sstring_internal_impl
 
 class sstring
-#ifndef __PRECPP11_STANDARD__
-    final
+#ifndef __CPLUSPLUS_PRE_CPP11
+    final // final is not a keyword in pre C++11 standard
 #endif
 {
         // a super trivial string class with NO NON-TRIVIAL OPTIMIZATIONS whatsoever
         // class sstring works with all C++ standards from C++98 to C++23 :)
 
     public:
-#ifdef __PRECPP11_STANDARD__
-        typedef unsigned long long size_type;
+#ifdef __CPLUSPLUS_PRE_CPP11
+        typedef unsigned long size_type; // g++ with -Wpedantic issues a diagnostic claimimg ISO C++ 1998 does not support 'long long'
 #else
         using size_type = unsigned long long;
 #endif
@@ -124,9 +134,9 @@ class sstring
         }
 
 #if 1
-    #ifdef __CXX_ATTRIBUTE_SYNTAX__
-        [[deprecated("use the more efficient templated version when using string literals to construct a ::sstring object!")]]
-    #endif
+        __CXX_ATTRIBUTE_SYNTAX__(
+            [[deprecated("use the more efficient templated version when using string literals to construct a ::sstring object!")]]
+        )
         explicit __cdecl sstring(_In_ const char* const string) noexcept :
             _size(::strlen(string) + 1 /* +1 for the null terminator */),
             _capacity(_size * 2),
@@ -146,6 +156,8 @@ class sstring
 #endif
 
 #if defined(__SSTRING_NO_MOVE_SEMANTICS__) && (__cplusplus >= 201103L) // rvalue reference signature is invalid in pre C++11 standards
+        // since pre C++11 standards did not support move semantics, we do not need to worry about the compiler automatically generating move
+        // constructor and the move assignment operator
 
         // IT IS ABSOLUTELY CRITICAL TO DELETE THESE PRIOR TO DEFINING THE COPY CTOR AS
         // THE COMPILER WILL IMPLICITLY DELETE THE PREVIOUSLY DEFINED COPY CTOR WHEN THE MOVE CTOR IS DELETED
@@ -316,7 +328,7 @@ class sstring
         }
 
         // operator usable only with lvalue left operands
-        sstring& __cdecl operator+=(_In_ const sstring& other) & noexcept {
+        sstring& __cdecl operator+=(_In_ const sstring& other) __CPP11_LVALUE_AMPERSAND__ noexcept {
             print_signature();
 
             char* const buffer = new (std::nothrow) char[(_size + other._size) * 2];
@@ -341,7 +353,7 @@ class sstring
             return *this;
         }
 
-        template<size_t len> sstring& __cdecl operator+=(const char (&other)[len]) & noexcept {
+        template<size_t len> sstring& __cdecl operator+=(const char (&other)[len]) __CPP11_LVALUE_AMPERSAND__ noexcept {
             print_signature();
 
             char* const new_buffer = new (std::nothrow) char[(_size + len) * 2];
@@ -462,7 +474,20 @@ class sstring
         }
 };
 
+#ifndef __CPLUSPLUS_PRE_CPP11
 static_assert(std::is_standard_layout_v<::sstring>); // WOW!
 static_assert(sizeof(::sstring) == 24);
+#endif
+
+#if __cplusplus < 201103L // prior to C++11
+    #undef noexcept
+    #undef nullptr
+    #undef constexpr
+    #undef __SSTRING_NO_MOVE_SEMANTICS__
+    #undef __CPLUSPLUS_PRE_CPP11
+#endif
 
 #undef print_signature // trailing parenthesis is not necessary to undefine a macro
+#undef __CXX_ATTRIBUTE_SYNTAX__
+#undef __CPP11_LVALUE_AMPERSAND__
+#undef __CPP11_RVALUE_AMPERSAND__
