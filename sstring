@@ -33,7 +33,7 @@
 #endif
 // ------------------------------------------------------------------------------------------------------------------------------------------
 
-// --------------------------------------// MACROS TO DEAL WITH C++ STANDARDS SPECIFIC INCONSISTENCIES //------------------------------------
+// -----------------------------------------------// MACROS TO DEAL WITH PRE C++11 STANDARDS //----------------------------------------------
 #if __cplusplus < 201103L // prior to C++11
     #define noexcept throw()
     #define nullptr  NULL
@@ -77,7 +77,7 @@ namespace __cxx_sstring_internal_impl {
 class sstring
 #ifndef __CPLUSPLUS_PRE_CPP11
     final // final is not a keyword in pre C++11 standard
-#endif
+#endif    // __CPLUSPLUS_PRE_CPP11
 {
         // a super trivial string class with NO NON-TRIVIAL OPTIMIZATIONS whatsoever
         // class sstring works with all C++ standards from C++98 to C++23 :)
@@ -87,7 +87,7 @@ class sstring
         typedef unsigned long size_type; // g++ with -Wpedantic issues a diagnostic claimimg ISO C++ 1998 does not support 'long long'
 #else
         using size_type = unsigned long long;
-#endif
+#endif // __CPLUSPLUS_PRE_CPP11
 
     private:
         size_type _size;     // inclusive of the null terminator
@@ -153,8 +153,9 @@ class sstring
             ::memset(_resource, 0U, _capacity);
             ::strcpy_s(_resource, _size, string);
         }
-#endif
+#endif // 1
 
+// defining __SSTRING_NO_MOVE_SEMANTICS__ with pre C++11 standards is pointless
 #if defined(__SSTRING_NO_MOVE_SEMANTICS__) && (__cplusplus >= 201103L) // rvalue reference signature is invalid in pre C++11 standards
         // since pre C++11 standards did not support move semantics, we do not need to worry about the compiler automatically generating move
         // constructor and the move assignment operator
@@ -174,7 +175,7 @@ class sstring
         __cdecl sstring(_Inout_ sstring&&) noexcept            = delete;
         sstring& __cdecl operator=(_Inout_ sstring&&) noexcept = delete;
 
-#endif // implement move semantics
+#endif // defined(__SSTRING_NO_MOVE_SEMANTICS__) && (__cplusplus >= 201103L)
 
         __cdecl sstring(_In_ const sstring& other) noexcept : // not exactly a trivial copy constructor
             _size(other._size),
@@ -488,6 +489,3 @@ static_assert(sizeof(::sstring) == 24);
 #endif
 
 #undef print_signature // trailing parenthesis is not necessary to undefine a macro
-#undef __CXX_ATTRIBUTE_SYNTAX__
-#undef __CPP11_LVALUE_AMPERSAND__
-#undef __CPP11_RVALUE_AMPERSAND__

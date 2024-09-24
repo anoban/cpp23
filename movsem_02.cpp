@@ -1,23 +1,14 @@
-#define __SSTRING_PRINT_METHOD_SIGNATURES_ON_CALL__ 0
+#define __SSTRING_PRINT_METHOD_SIGNATURES_ON_CALL__
 #include <algorithm>
 #include <sstring>
 
 #if __cplusplus < 201103L // prior to C++11
-    #define noexcept throw()
-    #define nullptr  NULL
-    #define __SSTRING_NO_MOVE_SEMANTICS__
     #define constexpr
     #define __CPLUSPLUS_PRE_CPP11
-    #define __CXX_ATTRIBUTE_SYNTAX__(...)
-    #define __CPP11_LVALUE_AMPERSAND__
-    #define __CPP11_RVALUE_AMPERSAND__
-#else
-    #define __CXX_ATTRIBUTE_SYNTAX__(...) __VA_ARGS__
-    #define __CPP11_LVALUE_AMPERSAND__    (&)
-    #define __CPP11_RVALUE_AMPERSAND__    (&&)
+    #define NAMESPACESTD(expr) (expr)
 #endif
 
-__CXX_ATTRIBUTE_SYNTAX__([[nodiscard("expensive")]]) static inline std::string sentence_case(_In_ const std::string& asciistr) noexcept {
+__CXX_ATTRIBUTE_SYNTAX__([[nodiscard("expensive")]]) static inline std::string sentence_case(_In_ const std::string& asciistr) throw() {
     std::string copy(asciistr);
     for (unsigned i = 0; i < copy.length(); ++i)
         // when the current char is ' ' and the next char is an ascii lowercase letter
@@ -25,7 +16,7 @@ __CXX_ATTRIBUTE_SYNTAX__([[nodiscard("expensive")]]) static inline std::string s
     return copy;
 }
 
-__CXX_ATTRIBUTE_SYNTAX__([[nodiscard("expensive")]]) static inline std::string sentence_case(_In_ std::string&& asciistr) noexcept {
+__CXX_ATTRIBUTE_SYNTAX__([[nodiscard("expensive")]]) static inline std::string sentence_case(_In_ std::string&& asciistr) throw() {
     std::string copy(std::move(asciistr));
     for (unsigned i = 0; i < copy.length(); ++i)
         // when the current char is ' ' and the next char is an ascii lowercase letter make it upper case
@@ -33,12 +24,12 @@ __CXX_ATTRIBUTE_SYNTAX__([[nodiscard("expensive")]]) static inline std::string s
     return copy;
 }
 
-__CXX_ATTRIBUTE_SYNTAX__([[nodiscard("expensive")]]) static inline ::sstring skyfall() noexcept {
-    // NOLINTNEXTLINE(modernize-return-braced-init-list)
+__CXX_ATTRIBUTE_SYNTAX__([[nodiscard("expensive")]]) static inline ::sstring skyfall() throw() {
+    // // NOLINTNEXTLINE(modernize-return-braced-init-list
     return ::sstring("Skyfall is where we start, a thousand miles and poles apart, where worlds collide and days are dark!");
 }
 
-static __declspec(noinline) ::sstring no_time_to_die() noexcept {
+static __declspec(noinline) ::sstring no_time_to_die() throw() {
     return ::sstring("That I've fallen for a lie.... you were never on my side....");
 }
 
