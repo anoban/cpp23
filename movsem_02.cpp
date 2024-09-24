@@ -16,6 +16,7 @@ __CXX_ATTRIBUTE_SYNTAX__([[nodiscard("expensive")]]) static inline std::string s
     return copy;
 }
 
+#ifndef __CPLUSPLUS_PRE_CPP11
 __CXX_ATTRIBUTE_SYNTAX__([[nodiscard("expensive")]]) static inline std::string sentence_case(_In_ std::string&& asciistr) throw() {
     std::string copy(std::move(asciistr));
     for (unsigned i = 0; i < copy.length(); ++i)
@@ -23,6 +24,7 @@ __CXX_ATTRIBUTE_SYNTAX__([[nodiscard("expensive")]]) static inline std::string s
         if (copy.at(i) == ' ' && copy.at(i + 1) >= 97 && copy.at(i + 1) <= 122) copy.at(i + 1) -= 32;
     return copy;
 }
+#endif
 
 __CXX_ATTRIBUTE_SYNTAX__([[nodiscard("expensive")]]) static inline ::sstring skyfall() throw() {
     // // NOLINTNEXTLINE(modernize-return-braced-init-list
@@ -90,6 +92,9 @@ int main() {               // NOLINT(bugprone-exception-escape)
 
     const char* const leonard = "If you want it darker? Let's kill the flame";
     ::sstring         darker(leonard); // calls the sstring::sstring(const std::string &) ctor
+
+    ::sstring james_from_iterators(james.begin(), james.end());
+    std::cout << james_from_iterators << '\n';
 
     return EXIT_SUCCESS;
 }

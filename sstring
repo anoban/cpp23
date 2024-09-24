@@ -36,6 +36,7 @@
 // -----------------------------------------------// MACROS TO DEAL WITH PRE C++11 STANDARDS //----------------------------------------------
 #if __cplusplus < 201103L // prior to C++11
     #define noexcept throw()
+    // #define noexcept(...) throw(__VA_ARGS__)
     #define nullptr  NULL
     #define __SSTRING_NO_MOVE_SEMANTICS__
     #define constexpr
@@ -208,6 +209,19 @@ class sstring
         }
 
         // TODO :: implement ctors taking a pair of iterators as arguments!!
+        template<class iterator_type>
+        sstring(_In_ iterator_type beg, _In_ iterator_type end) /* noexcept(noexcept(beg++)) gets problematic with pre C++11 standards */ :
+            _size(std::distance(beg, end)), _capacity(_size * 2), _resource(new (std::nothrow) char[_capacity]) {
+            print_signature();
+            if (!_resource) { // has the allocation failed,
+                _capacity = _size = 0;
+                ::fputws(L"allocation failure!\n", stderr);
+                return;
+            }
+
+            ::memset(_resource, 0U, _capacity);
+            std::copy(beg, end, _resource);
+        }
 
         // optimizations like buffer reuse are deliberately ignored :(
         sstring& __cdecl operator=(_In_ const sstring& other) noexcept {
@@ -269,10 +283,10 @@ class sstring
             char* const buffer = new (std::nothrow) char[size];
             if (!buffer) { // has the allocation failed,
                 ::fputws(L"allocation failure!\n", stderr);
-                return {}; // a default constructed ::sstring
+                return sstring(); // a default constructed ::sstring
             }
 
-            return { buffer, 0, size };
+            return sstring(buffer, 0, size); // NOLINT(modernize-return-braced-init-list)
         }
 
         // NOLINTNEXTLINE(google-explicit-constructor - implicit conversion function
@@ -293,7 +307,7 @@ class sstring
             char* const buffer = new (std::nothrow) char[(_size + other._size) * 2]; // has space for 2 null terminators
             if (!buffer) {                                                           // has the allocation failed,
                 ::fputws(L"allocation failure!\n", stderr);
-                return {}; // a default constructed ::sstring
+                return sstring(); // a default constructed ::sstring
             }
 
             ::memset(buffer, 0U, (_size + other._size) * 2);
@@ -304,7 +318,11 @@ class sstring
                 other._resource
             ); // copy other's buffer
 
-            return { buffer, _size + other._size - 1 /* discount the null terminator of the first string */, (_size + other._size) * 2 };
+            return sstring( // NOLINT(modernize-return-braced-init-list)
+                buffer,
+                _size + other._size - 1 /* discount the null terminator of the first string */,
+                (_size + other._size) * 2
+            );
         }
 
         // when concatenating a string literal, use this operator to bypass concatenation following the creation of a temporary
@@ -314,7 +332,7 @@ class sstring
             char* const buffer = new (std::nothrow) char[(_size + len) * 2]; // has space for 2 null terminators
             if (!buffer) {                                                   // has the allocation failed,
                 ::fputws(L"allocation failure!\n", stderr);
-                return {};
+                return sstring();
             }
 
             ::memset(buffer, 0U, (_size + len) * 2);
@@ -325,7 +343,7 @@ class sstring
                 other
             ); // copy other's buffer
 
-            return { buffer, _size + len - 1, (_size + len) * 2 };
+            return sstring(buffer, _size + len - 1, (_size + len) * 2); // NOLINT(modernize-return-braced-init-list)
         }
 
         // operator usable only with lvalue left operands
@@ -460,7 +478,7 @@ class sstring
             char* const buffer = new (std::nothrow) char[(len + string._size) * 2]; // has space for 2 null terminators
             if (!buffer) {                                                          // has the allocation failed,
                 ::fputws(L"allocation failure!\n", stderr);
-                return {};
+                return sstring();
             }
 
             ::memset(buffer, 0U, (len + string._size) * 2);
@@ -471,12 +489,12 @@ class sstring
                 string._resource
             ); // copy ::sstring object's internal buffer
 
-            return { buffer, len + string._size - 1, (len + string._size) * 2 };
+            return sstring(buffer, len + string._size - 1, (len + string._size) * 2); // NOLINT(modernize-return-braced-init-list)
         }
 };
 
 #ifndef __CPLUSPLUS_PRE_CPP11
-static_assert(std::is_standard_layout_v<::sstring>); // WOW!
+static_assert(std::is_standard_layout<::sstring>::value); // std::is_standard_layout_v is only available with standards C++17 and later
 static_assert(sizeof(::sstring) == 24);
 #endif
 
