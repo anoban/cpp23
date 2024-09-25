@@ -3,9 +3,7 @@
 #include <sstring>
 
 #if __cplusplus < 201103L // prior to C++11
-    #define constexpr
     #define __CPLUSPLUS_PRE_CPP11
-    #define NAMESPACESTD(expr) (expr)
 #endif
 
 __CXX_ATTRIBUTE_SYNTAX__([[nodiscard("expensive")]]) static inline std::string sentence_case(_In_ const std::string& asciistr) throw() {

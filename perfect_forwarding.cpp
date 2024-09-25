@@ -11,6 +11,9 @@ namespace nstd {
     // forwarding references can bind to lvalue references, const lvalue references, rvalue references and const rvalue references!
     // in perfect forwarding the T of std::forward<T>() comes from the outer template where T&& was a universal reference
 
+    // there is no type deduction in std::forward<T>, the type deduction happens in the outer template and the deduced
+    // template paramater is used to explicitly instantiate std::forward<T>
+
     // in case of an rvalue reference T will just be a type e.g. if T&& is std::string&& then T is std::string
     // in case of an lvalue reference T will a reference type e.g. if T&& is std::string& then T will be std::string&
     // because T& + && = T&& (reference collapsing)
@@ -19,8 +22,10 @@ namespace nstd {
         return static_cast<T&&>(_Arg);
     }
 
-    template<typename T> requires std::is_lvalue_reference_v<T> // this overload will only be used when T is an lvalue reference
-    [[nodiscard]] constexpr T&& forward(typename std::remove_reference_t<T>&& _Arg) noexcept {
+    template<typename T> requires std::is_lvalue_reference_v<T> // this overload will only be used when _Arg is an rvalue reference
+    // and T is deduced to be a non-reference type
+    [[nodiscard]] constexpr T&& forward(typename std::remove_reference_t<T>&& /* AN RVALUE REFERENCE NOT A UNIVERSAL REFERENCE */ _Arg
+    ) noexcept {
         // static_assert(!std::is_lvalue_reference_v<T>, "bad forward call"); refactored this into a requires clause
         return static_cast<T&&>(_Arg);
     }
@@ -63,6 +68,8 @@ class book final {
     public:
         template<class T, class U>
         explicit book(T&& _title /* forwarding reference */, U&& _author /* forwarding reference */) noexcept :
+            // if T is deduced to be ::sstring (which will happen when _title is an rvalue reference ::sstring&&)
+            // nstd::forward<T>(_title) will use the second overload with a rvalue reference argument
             title { nstd::forward<T>(_title) }, author { nstd::forward<U>(_author) } {
             ::puts(__FUNCSIG__);
         }

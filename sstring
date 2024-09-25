@@ -36,10 +36,9 @@
 // -----------------------------------------------// MACROS TO DEAL WITH PRE C++11 STANDARDS //----------------------------------------------
 #if __cplusplus < 201103L // prior to C++11
     #define noexcept throw()
-    // #define noexcept(...) throw(__VA_ARGS__)
+    // #define noexcept(...) throw(__VA_ARGS__) // this doesn't help with transforming the nested noexcept(expr) operators into throw(expr)
     #define nullptr  NULL
     #define __SSTRING_NO_MOVE_SEMANTICS__
-    #define constexpr
     #define __CPLUSPLUS_PRE_CPP11
     #define __CXX_ATTRIBUTE_SYNTAX__(...)
     #define __CPP11_LVALUE_AMPERSAND__
@@ -498,10 +497,9 @@ static_assert(std::is_standard_layout<::sstring>::value); // std::is_standard_la
 static_assert(sizeof(::sstring) == 24);
 #endif
 
-#if __cplusplus < 201103L // prior to C++11
+#if __cplusplus < 201103L // undefine the defined macros
     #undef noexcept
     #undef nullptr
-    #undef constexpr
     #undef __SSTRING_NO_MOVE_SEMANTICS__
     #undef __CPLUSPLUS_PRE_CPP11
 #endif
