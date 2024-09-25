@@ -1,4 +1,4 @@
-// Copyright 2015, Google Inc.
+// Copyright 2005, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,20 +27,38 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "gtest/gtest.h"
+// A sample program demonstrating using Google C++ testing framework.
 
-namespace {
-class DummyTest : public ::testing::TestWithParam<const char *> {};
+#include "sample1.h"
 
-TEST_P(DummyTest, Dummy) {}
+// Returns n! (the factorial of n).  For negative n, n! is defined to be 1.
+int Factorial(int n) {
+    int result = 1;
+    for (int i = 1; i <= n; i++) result *= i;
 
-INSTANTIATE_TEST_SUITE_P(InvalidTestName, DummyTest,
-                         ::testing::Values("InvalidWithQuotes"),
-                         ::testing::PrintToStringParamName());
+    return result;
+}
 
-}  // namespace
+// Returns true if and only if n is a prime number.
+bool IsPrime(int n) {
+    // Trivial case 1: small numbers
+    if (n <= 1) return false;
 
-int main(int argc, char *argv[]) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+    // Trivial case 2: even numbers
+    if (n % 2 == 0) return n == 2;
+
+    // Now, we have that n is odd and n >= 3.
+
+    // Try to divide n by every odd number i, starting from 3
+    for (int i = 3;; i += 2) {
+        // We only have to try i up to the square root of n
+        if (i > n / i) break;
+
+        // Now, we have i <= n/i < n.
+        // If n is divisible by i, n is not prime.
+        if (n % i == 0) return false;
+    }
+
+    // n has no integer factor in the range (1, n), and thus is prime.
+    return true;
 }
