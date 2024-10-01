@@ -1,5 +1,8 @@
 #include <gtest/gtest.h>
 
+// g++ -std=c++20 -Wall -Wextra -O3 -I./googletest/ -I./googletest/include/ ./googletest/src/gtest-all.cc gtestdemo.cpp  -static
+// clang .\gtestdemo.cpp -Wall -Wextra -static -march=native -O3 -std=c++20 -I.\googletest\ -I.\googletest\include\ .\googletest\src\gtest-all.cc
+
 template<class... TList> [[nodiscard]] static constexpr long double sum(const TList&... args) noexcept { return (... + args); }
 
 TEST(SUM, ZEROES) {

@@ -21,6 +21,7 @@ $cflags = @(
     "/diagnostics:caret",
     "/debug:none",
     "/DNDEBUG",
+    "/D_NDEBUG",
     "/EHsc",
     "/F0x10485100",
     "-fcf-protection:full",
@@ -70,7 +71,7 @@ $cflags = @(
     "/Qvec-with-mask",
     "/Qunroll:10000",
     "/TP",
-    "/vd3", # https://learn.microsoft.com/en-us/cpp/preprocessor/vtordisp?view=msvc-170
+    # "/vd3", # https://learn.microsoft.com/en-us/cpp/preprocessor/vtordisp?view=msvc-170
 	"/Wabi",
     "/Wall",
 	"/Wcomment",
