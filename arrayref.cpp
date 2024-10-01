@@ -66,3 +66,14 @@ auto wmain() -> int {
 
     return EXIT_SUCCESS;
 }
+
+template<class T, size_t length, class = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
+[[nodiscard]] static constexpr long double sum(const T (&array)[length]) noexcept {
+    long double sum {};
+    for (const auto& e : array) sum += e;
+    return sum;
+}
+
+constexpr int arr[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+static_assert(::sum(arr) == 45);

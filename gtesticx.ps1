@@ -1,10 +1,8 @@
-# a simple build script using Intel oneAPI C/C++ compiler
-
 $cfiles = [System.Collections.ArrayList]::new()
 $unrecognized = [System.Collections.ArrayList]::new()
 
 foreach ($arg in $args) {
-    if ($arg -clike "*.cpp") {
+    if (($arg -clike "*.cpp") -or ($arg -clike "*.cc")){
         [void]$cfiles.Add($arg.ToString().Replace(".\", ""))
     }
     else {
@@ -18,23 +16,24 @@ if ($unrecognized.Count -ne 0) {
 }
 
 $cflags = @(
+    "./googletest/src/gtest-all.cc",
     "/arch:AVX512",
-    "/debug:none"
     "/diagnostics:caret",
+    "/debug:none",
     "/DNDEBUG",
-    "/D_NDEBUG",
-    "/EHac",
+    "/EHsc",
     "/F0x10485100",
     "-fcf-protection:full",
-    "/fp:fast",
     "/Gd",
     "/GF",
     "/GR",  # RTTI
     "/GS",
     "/guard:cf",
     "/Gw",
-    "/I./",
-    "/J",
+    "/fp:fast",
+    "/Gw",
+    "/I./googletest/",
+    "/I./googletest/include/",
     "/MT",
     "/O3",
     "/Oi",
@@ -56,7 +55,6 @@ $cflags = @(
 	"/Qfp-speculation:safe",
     "/Qipo",
 	"/Qkeep-static-consts-",
-	# "/Qlong-double", causes compiler errors with c++20 and above
     "/Qm64",
     "/Qopt-assume-no-loop-carried-dep=2",
     "/Qopt-dynamic-align",
@@ -92,9 +90,18 @@ $cflags = @(
 	"/Wunused-function",
 	"/Wunused-variable",
 	"/Wwrite-strings",
-    "/wd4710",
-    "/wd4711",
-    "/wd4820",
+    "/Wall",
+    "/wd4514",      # removed unreferenced inline function
+    "/wd4710",      # not inlined
+    "/wd4711",      # selected for inline expansion
+    "/wd4820",      # struct padding
+    "/wd4623",
+    "/wd4625",
+    "/wd4626",
+    "/wd4668",
+    "/wd5026",
+    "/wd5027",
+    "/Zc:__cplusplus",
     "/Zc:char8_t",
 	"/Zc:strictStrings",
     "/Zc:twoPhase"
@@ -102,3 +109,8 @@ $cflags = @(
 
 Write-Host "icx.exe ${cfiles} ${cflags}" -ForegroundColor Cyan
 icx.exe $cfiles $cflags
+
+# If cl.exe returned 0 (True), (i.e if the compilation succeeded,)
+if ($? -eq $True){
+        Remove-Item "*.obj" -Force
+}
