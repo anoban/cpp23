@@ -42,8 +42,8 @@ template<typename T, typename = typename std::enable_if<std::is_arithmetic<T>::v
         // universal ctor
         // without the friend declaration, pair<T> cannot access the private members of pair<U> because these two are two completely
         // different classes in their post-instantiation state!
-        template<typename U>
-        constexpr pair(const ::pair<U>& other) noexcept : first(static_cast<T>(other.first)), second(static_cast<T>(other.second)) { }
+        template<typename U> constexpr pair(const ::pair<U>& other) noexcept :
+            first(static_cast<T>(other.first)), second(static_cast<T>(other.second)) { }
 
         template<typename char_t> friend std::basic_ostream<char_t>& operator<<(std::basic_ostream<char_t>& ostream, const pair& object) {
             // using function style casts

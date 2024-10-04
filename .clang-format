@@ -399,7 +399,7 @@ BreakAfterAttributes: Never     # Break after a group of C++11 attributes before
 # [[nodiscard]] inline int f();
 # [[gnu::const]] [[nodiscard]] int g();
 
-# BreakAfterReturnType: Automatic # requires clang-format 19.0
+BreakAfterReturnType: Automatic
 
 BreakArrays:     false                # This is currently only for formatting JSON.
 # if set to true;                     if set to false;
@@ -444,7 +444,7 @@ BreakConstructorInitializers: AfterColon  # The break constructor initializers s
 #    initializer1(),
 #    initializer2()
 
-# BreakFunctionDefinitionParameters: false # requires clang-format 19.0
+BreakFunctionDefinitionParameters: false
 
 BreakInheritanceList: AfterColon
 # class Foo :
@@ -462,7 +462,7 @@ BreakStringLiterals: false
 # const char* x =
 #     "veryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLongString";
 
-# BreakTemplateDeclarations: No # requires clang format 19.0
+BreakTemplateDeclarations: No
 
 ColumnLimit:    140          # A column limit of 0 means that there is no column limit. In this case, clang-format will respect
                              # the input's line breaking decisions within statements unless they contradict other rules.
@@ -752,7 +752,7 @@ MacroBlockBegin: ''
 
 MacroBlockEnd:   ''
 
-# MainIncludeChar: AngleBracket # requires clang format 19.0
+MainIncludeChar: AngleBracket
 
 MaxEmptyLinesToKeep: 1                  # The maximum number of consecutive empty lines to keep.
 

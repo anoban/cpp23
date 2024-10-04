@@ -116,7 +116,7 @@ auto main() -> int {
     // container.push_back("rvalue");
     // container.emplace_back("rvalue");
 
-    container.push_back(rowling);
-
+    // container.push_back(rowling);
+    container.emplace_back(rowling);
     return EXIT_SUCCESS;
 }

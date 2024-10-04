@@ -87,8 +87,7 @@ auto wmain() -> int {
 }
 
 // instead of using declval we could use something that actually returns an object
-template<typename T>
-constexpr decltype(auto) materialize() noexcept requires requires {
+template<typename T> constexpr decltype(auto) materialize() noexcept requires requires {
     T {}; /* T must be default constructible */
 } {
     return T {};
@@ -103,5 +102,3 @@ template<typename T> requires std::is_default_constructible_v<T> consteval T&& r
 template<typename T> consteval typename std::enable_if<std::is_default_constructible<T>::value, T&&>::type realize() noexcept {
     return T {};
 }
-
-

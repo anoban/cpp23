@@ -22,17 +22,17 @@ $cflags = @(
     "/debug:none",
     "/DNDEBUG",
     "/D_NDEBUG",
+    # "/DGTEST_HAS_SEH=0",
     "/EHsc",
     "/F0x10485100",
     "-fcf-protection:full",
     "/Gd",
     "/GF",
-    "/GR",  # RTTI
+    "/GR",
     "/GS",
     "/guard:cf",
     "/Gw",
     "/fp:fast",
-    "/Gw",
     "/I./googletest/",
     "/I./googletest/include/",
     "/MT",
@@ -54,7 +54,7 @@ $cflags = @(
 	"/Qimf-use-svml:false",
 	"/Qfma",
 	"/Qfp-speculation:safe",
-    "/Qipo",
+    #####"/Qipo",   #
 	"/Qkeep-static-consts-",
     "/Qm64",
     "/Qopt-assume-no-loop-carried-dep=2",
@@ -71,7 +71,7 @@ $cflags = @(
     "/Qvec-with-mask",
     "/Qunroll:10000",
     "/TP",
-    # "/vd3", # https://learn.microsoft.com/en-us/cpp/preprocessor/vtordisp?view=msvc-170
+    "/vd2", # https://learn.microsoft.com/en-us/cpp/preprocessor/vtordisp?view=msvc-170
 	"/Wabi",
     "/Wall",
 	"/Wcomment",
@@ -110,8 +110,3 @@ $cflags = @(
 
 Write-Host "icx.exe ${cfiles} ${cflags}" -ForegroundColor Cyan
 icx.exe $cfiles $cflags
-
-# If cl.exe returned 0 (True), (i.e if the compilation succeeded,)
-if ($? -eq $True){
-        Remove-Item "*.obj" -Force
-}
