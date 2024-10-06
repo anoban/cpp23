@@ -25,7 +25,7 @@ namespace nstd {
 
     template<typename _Ty> requires(!std::is_lvalue_reference_v<_Ty>) // this overload will only be used when _Arg is an rvalue reference
     // and T is deduced to be a non-reference type
-    [[nodiscard]] constexpr _Ty&& forward(typename std::remove_reference_t<_Ty>&& _Arg /* _Arg will only bind with rvaue references */
+    [[nodiscard]] constexpr _Ty&& forward(typename std::remove_reference_t<_Ty>&& _Arg /* _Arg will only bind with rvalue references */
     ) noexcept {
         // static_assert(!std::is_lvalue_reference_v<T>, "bad forward call"); refactored this into a requires clause
         return static_cast<_Ty&&>(_Arg); // T&& + && -> T&&, return type is an rvalue reference

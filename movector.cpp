@@ -3,7 +3,7 @@
 #include <type_traits>
 
 #define __SSTRING_PRINT_METHOD_SIGNATURES_ON_CALL__
-#define __SSTRING_NO_MOVE_SEMANTICS__
+// #define __SSTRING_NO_MOVE_SEMANTICS__
 
 class object final {
         unsigned _value;
@@ -14,17 +14,17 @@ class object final {
         object& operator=(const object&) noexcept = default;
         ~object() noexcept                        = default;
 
-        object(object&&)                          = delete;
-        object& operator=(object&&)               = delete;
+        object(object&&) noexcept                 = delete;
+        object& operator=(object&&) noexcept      = delete;
 };
 
 static_assert(std::is_standard_layout_v<object>);
 
 // http://www.gotw.ca/publications/mill22.htm
 
-static inline object factory() throw(std::is_nothrow_constructible_v<object>) { return object {}; }
+static inline object factory() noexcept { return object {}; }
 
-static inline object _factory() throw(std::is_nothrow_constructible_v<object>) {
+static inline object _factory() noexcept {
     object temporary {};
     return temporary;
 }
