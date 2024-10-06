@@ -1,5 +1,5 @@
 #define __SSTRING_PRINT_METHOD_SIGNATURES_ON_CALL__
-#define __SSTRING_NO_MOVE_SEMANTICS__
+// #define __SSTRING_NO_MOVE_SEMANTICS__
 #include <sstring>
 #include <type_traits>
 #include <vector>
@@ -18,16 +18,17 @@ namespace nstd {
     // in case of an lvalue reference T will a reference type e.g. if T&& is std::string& then T will be std::string&
     // because T& + && = T&& (reference collapsing)
 
-    template<typename T> [[nodiscard]] constexpr T&& forward(typename std::remove_reference_t<T>& _Arg) noexcept {
-        return static_cast<T&&>(_Arg);
+    template<typename T> [[nodiscard]] constexpr T&& forward(typename std::remove_reference_t<T>&
+                                                                 _Arg /* _Arg will only bind with lvalue references */) noexcept {
+        return static_cast<T&&>(_Arg); // T& + && -> T&, return type is an lvalue reference
     }
 
-    template<typename T> requires std::is_lvalue_reference_v<T> // this overload will only be used when _Arg is an rvalue reference
+    template<typename T> requires(!std::is_lvalue_reference_v<T>) // this overload will only be used when _Arg is an rvalue reference
     // and T is deduced to be a non-reference type
-    [[nodiscard]] constexpr T&& forward(typename std::remove_reference_t<T>&& /* AN RVALUE REFERENCE NOT A UNIVERSAL REFERENCE */ _Arg
+    [[nodiscard]] constexpr T&& forward(typename std::remove_reference_t<T>&& _Arg /* _Arg will only bind with rvaue references */
     ) noexcept {
         // static_assert(!std::is_lvalue_reference_v<T>, "bad forward call"); refactored this into a requires clause
-        return static_cast<T&&>(_Arg);
+        return static_cast<T&&>(_Arg); // T&& + && -> T&&, return type is an rvalue reference
     }
 
 } // namespace nstd
@@ -66,8 +67,7 @@ class book final {
         ::sstring author;
 
     public:
-        template<class T, class U>
-        explicit book(T&& _title /* forwarding reference */, U&& _author /* forwarding reference */) noexcept :
+        template<class T, class U> explicit book(T&& _title /* forwarding reference */, U&& _author /* forwarding reference */) noexcept :
             // if T is deduced to be ::sstring (which will happen when _title is an rvalue reference ::sstring&&)
             // nstd::forward<T>(_title) will use the second overload with a rvalue reference argument
             title { nstd::forward<T>(_title) }, author { nstd::forward<U>(_author) } {
@@ -113,10 +113,10 @@ auto main() -> int {
     ::puts(".................................");
 
     std::vector<::sstring> container(100);
-    // container.push_back("rvalue");
-    // container.emplace_back("rvalue");
+    container.push_back("rvalue");
+    container.emplace_back("rvalue");
 
-    // container.push_back(rowling);
+    container.push_back(rowling);
     container.emplace_back(rowling);
     return EXIT_SUCCESS;
 }

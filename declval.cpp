@@ -17,7 +17,7 @@ static_assert(std::is_same_v<decltype(std::numbers::pi_v<double> * 2.000L), long
 [[maybe_unused]] constexpr float twopi                           = std::numbers::pi_v<double> * 2.000L;
 
 // this template captures the type of evaluationg the hypothetical assignment expression
-template<typename _Ty0, typename _Ty1> using assignment_result_t = decltype(::declval<_Ty0>() = ::declval<_Ty1>());
+template<typename _Ty0, typename _Ty1> using assignment_result_t = typename decltype(::declval<_Ty0>() = ::declval<_Ty1>());
 // _Ty0 has to be a modifiable lvalue reference
 
 // static_assert(std::is_same_v<::assignment_result_t<float, double>, float>); //  error C2106: '=': left operand must be l-value
@@ -52,22 +52,22 @@ template<typename _Ty0, typename _Ty1> struct is_assignable<_Ty0, _Ty1, decltype
         static constexpr bool value { true };
 };
 
-template<typename _Ty0, typename _Ty1> inline constexpr bool is_assignable_v = ::is_assignable<_Ty0, _Ty1>::value;
+template<typename _Ty0, typename _Ty1> inline constexpr bool is_assignable_v = ::is_assignable<_Ty0, _Ty1, _Ty0>::value;
 
-template<typename _Ty0, typename _Ty1, bool is_assignable = ::is_assignable_v<_Ty0, _Ty1>> struct assignment_result {
+template<typename _Ty0, typename _Ty1, bool _is_assignable = ::is_assignable_v<_Ty0, _Ty1>> struct assignment_result {
         using type = void; // signifies that the assinment is invalid
 };
 
 // partial spl when LHT is in fact an lvalue reference and ::declval<_Ty0>() = ::declval<_Ty1>() is well formed
 template<typename _Ty0, typename _Ty1> struct assignment_result<_Ty0, _Ty1, true> {
-        using type = decltype(::declval<_Ty0>() = ::declval<_Ty1>());
+        using type = decltype(::declval<_Ty0>() = ::declval<_Ty1>()); // NOLINT(cppcoreguidelines-narrowing-conversions)
 };
 
 static_assert(std::is_same_v<typename ::assignment_result<float&, const volatile double>::type, float&>);
 static_assert(std::is_same_v<
               typename ::assignment_result<const float&, const volatile double>::type,
               void>); // const float& cannot be assigned to
-static_assert(std::is_same_v<>);
+static_assert(std::is_same_v<typename ::assignment_result<double&&, volatile int>::type, double&&>);
 static_assert(std::is_same_v<typename ::assignment_result<long&, const double* const>::type, void>); // ill formed - invalid type pair
 static_assert(std::is_same_v<typename ::assignment_result<long, long>::type, void>);   // LHT must be a modifiable lvalue reference
 static_assert(std::is_same_v<typename ::assignment_result<long&&, long>::type, void>); // LHT must be a modifiable lvalue reference

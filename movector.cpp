@@ -1,11 +1,15 @@
 #include <cstdlib>
+#include <sstring>
 #include <type_traits>
+
+#define __SSTRING_PRINT_METHOD_SIGNATURES_ON_CALL__
+#define __SSTRING_NO_MOVE_SEMANTICS__
 
 class object final {
         unsigned _value;
 
     public:
-        constexpr object() noexcept               = default;
+        object() noexcept                         = default;
         object(const object&) noexcept            = default;
         object& operator=(const object&) noexcept = default;
         ~object() noexcept                        = default;
@@ -16,15 +20,16 @@ class object final {
 
 static_assert(std::is_standard_layout_v<object>);
 
-static inline constexpr object factory() noexcept(std::is_nothrow_constructible_v<object>) { return object {}; }
+// http://www.gotw.ca/publications/mill22.htm
 
-static inline constexpr object _factory() noexcept(std::is_nothrow_constructible_v<object>) {
+static inline object factory() throw(std::is_nothrow_constructible_v<object>) { return object {}; }
+
+static inline object _factory() throw(std::is_nothrow_constructible_v<object>) {
     object temporary {};
     return temporary;
 }
 
-auto main() -> int {
-    //
-    constexpr auto obj { ::factory() };
+int main() {
+    const auto obj = ::factory();
     return EXIT_SUCCESS;
 }

@@ -15,6 +15,7 @@ static_assert(std::is_same_v<decltype(nstd::begin(text)), char*>);
 static_assert(std::is_same_v<decltype(nstd::begin("string literal")), const char*>);
 
 auto wmain() -> int {
-    //
+    constexpr wchar_t string[] { LR"(Hi there!)" };
+    static_assert(*nstd::begin(string) == L'H');
     return EXIT_SUCCESS;
 }
