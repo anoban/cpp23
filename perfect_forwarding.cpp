@@ -18,17 +18,17 @@ namespace nstd {
     // in case of an lvalue reference T will a reference type e.g. if T&& is std::string& then T will be std::string&
     // because T& + && = T&& (reference collapsing)
 
-    template<typename T> [[nodiscard]] constexpr T&& forward(typename std::remove_reference_t<T>&
-                                                                 _Arg /* _Arg will only bind with lvalue references */) noexcept {
-        return static_cast<T&&>(_Arg); // T& + && -> T&, return type is an lvalue reference
+    template<typename _Ty> [[nodiscard]] constexpr _Ty&& forward(typename std::remove_reference_t<_Ty>&
+                                                                     _Arg /* _Arg will only bind with lvalue references */) noexcept {
+        return static_cast<_Ty&&>(_Arg); // T& + && -> T&, return type is an lvalue reference
     }
 
-    template<typename T> requires(!std::is_lvalue_reference_v<T>) // this overload will only be used when _Arg is an rvalue reference
+    template<typename _Ty> requires(!std::is_lvalue_reference_v<_Ty>) // this overload will only be used when _Arg is an rvalue reference
     // and T is deduced to be a non-reference type
-    [[nodiscard]] constexpr T&& forward(typename std::remove_reference_t<T>&& _Arg /* _Arg will only bind with rvaue references */
+    [[nodiscard]] constexpr _Ty&& forward(typename std::remove_reference_t<_Ty>&& _Arg /* _Arg will only bind with rvaue references */
     ) noexcept {
         // static_assert(!std::is_lvalue_reference_v<T>, "bad forward call"); refactored this into a requires clause
-        return static_cast<T&&>(_Arg); // T&& + && -> T&&, return type is an rvalue reference
+        return static_cast<_Ty&&>(_Arg); // T&& + && -> T&&, return type is an rvalue reference
     }
 
 } // namespace nstd
@@ -49,7 +49,7 @@ class user final {
         ::sstring name;
 
     public:
-        template<class T> explicit user(const T& init) noexcept : name(init) { ::puts(__FUNCSIG__); }
+        template<class _Ty> explicit user(const _Ty& init) noexcept : name(init) { ::puts(__FUNCSIG__); }
         // explicit user(::sstring&& _name) noexcept : name(std::move(_name)) /* move construction */ { ::puts(__FUNCSIG__); }
         // explicit user(::sstring&& _name) noexcept : name(_name) /* copy construction */ { ::puts(__FUNCSIG__); }
 
@@ -67,10 +67,11 @@ class book final {
         ::sstring author;
 
     public:
-        template<class T, class U> explicit book(T&& _title /* forwarding reference */, U&& _author /* forwarding reference */) noexcept :
+        template<class _Ty, class U> explicit book(_Ty&& _title /* forwarding reference */, U&& _author /* forwarding reference */) noexcept
+            :
             // if T is deduced to be ::sstring (which will happen when _title is an rvalue reference ::sstring&&)
             // nstd::forward<T>(_title) will use the second overload with a rvalue reference argument
-            title { nstd::forward<T>(_title) }, author { nstd::forward<U>(_author) } {
+            title { nstd::forward<_Ty>(_title) }, author { nstd::forward<U>(_author) } {
             ::puts(__FUNCSIG__);
         }
 
