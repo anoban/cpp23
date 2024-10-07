@@ -1,5 +1,4 @@
 #define __SSTRING_PRINT_METHOD_SIGNATURES_ON_CALL__
-// #define __SSTRING_NO_MOVE_SEMANTICS__
 #include <sstring>
 #include <vector>
 

@@ -11,9 +11,9 @@ auto main() -> int {
     // const ::sstring* const error { &(hello + " there!") };
 
     // but we can indeed extend the temporary's lifetime by binding it to a const ::sstring& type or ::string&& type or const ::string&&
-    const ::sstring&  materialized { hello + " there!" };
-    ::sstring&&       temporary { hello + " there!, howdy?" };
-    const ::sstring&& simpson { "stupid " + world };
+    [[maybe_unused]] const ::sstring& materialized { hello + " there!" };
+    [[maybe_unused]] ::sstring&&      temporary { hello + " there!, howdy?" };
+    const ::sstring&&                 simpson { "stupid " + world };
 
     std::cout << simpson << '\n';
     std::cout << "length = " << simpson.length() << " capacity = " << simpson.capacity() << '\n';
