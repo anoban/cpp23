@@ -38,7 +38,6 @@
     #define noexcept throw()
     // #define noexcept(...) throw(__VA_ARGS__) // this doesn't help with transforming the nested noexcept(expr) operators into throw(expr)
     #define nullptr  NULL
-    #define __SSTRING_NO_MOVE_SEMANTICS__
     #define __CPLUSPLUS_PRE_CPP11
     #define __CXX_ATTRIBUTE_SYNTAX__(...)
     #define __CPP11_LVALUE_AMPERSAND__
@@ -119,8 +118,7 @@ class sstring
             ::memset(_resource, ch, repeats);
         }
 
-        template<size_t len>
-        __cdecl sstring(_In_ const char (&string)[len]) noexcept : // NOLINT(google-explicit-constructor)
+        template<size_t len> __cdecl sstring(_In_ const char (&string)[len]) noexcept : // NOLINT(google-explicit-constructor)
             _size(len), _capacity(_size * 2), _resource(new (std::nothrow) char[_capacity]) {
             print_signature();
             if (!_resource) { // has the allocation failed,
@@ -154,28 +152,6 @@ class sstring
             ::strcpy_s(_resource, _size, string);
         }
 #endif // 1
-
-// defining __SSTRING_NO_MOVE_SEMANTICS__ with pre C++11 standards is pointless
-#if defined(__SSTRING_NO_MOVE_SEMANTICS__) && (__cplusplus >= 201103L) // rvalue reference signature is invalid in pre C++11 standards
-        // since pre C++11 standards did not support move semantics, we do not need to worry about the compiler automatically generating move
-        // constructor and the move assignment operator
-
-        // IT IS ABSOLUTELY CRITICAL TO DELETE THESE PRIOR TO DEFINING THE COPY CTOR AS
-        // THE COMPILER WILL IMPLICITLY DELETE THE PREVIOUSLY DEFINED COPY CTOR WHEN THE MOVE CTOR IS DELETED
-        // SO WE DEFINE THE COPY CTOR AFTER DELETING THE MOVE CTOR
-
-        // CONSTRUCTING A LOCAL ::sstring OBJECT AND MUTATING IT TO ULTIMATELY RETURN AS RESULT TYPE
-        // IMPLEMENTATIONS WILL ERR WHEN THE MOVE CTOR IS DELETED, BECAUSE TO RETURN A LVALUE (THE LOCAL OBJECT)
-        // AS AN RVALUE WE NEED THE MOVE CTOR
-        // WITH A DELETED MOVE CTOR, THE BEST BET IS TO INLINE CONSTRUCT AN OBJECT IN THE RETURN STATEMENT
-        // AND LET THE RVO TAKE CARE OF THE SEMANTICS
-
-        // just #ifndef ing alone isn't enough as the compiler will generate the move constructor and
-        // move assignment operator for us, which we do not want to happen!
-        __cdecl sstring(_Inout_ sstring&&) noexcept            = delete;
-        sstring& __cdecl operator=(_Inout_ sstring&&) noexcept = delete;
-
-#endif // defined(__SSTRING_NO_MOVE_SEMANTICS__) && (__cplusplus >= 201103L)
 
         __cdecl sstring(_In_ const sstring& other) noexcept : // not exactly a trivial copy constructor
             _size(other._size),
@@ -243,7 +219,7 @@ class sstring
             return *this;
         }
 
-#ifndef __SSTRING_NO_MOVE_SEMANTICS__
+#ifndef __CPLUSPLUS_PRE_CPP11
         // move ctor
         __cdecl sstring(_Inout_ sstring&& other) noexcept : _size(other._size), _capacity(other._capacity), _resource(other._resource) {
             print_signature();
@@ -267,7 +243,7 @@ class sstring
             return *this;
         }
 
-#endif // __SSTRING_NO_MOVE_SEMANTICS__
+#endif // !__CPLUSPLUS_PRE_CPP11
 
         __cdecl ~sstring() noexcept {
             print_signature();
@@ -468,8 +444,7 @@ class sstring
             return _resource[offset]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
 
-        template<size_t len>
-        friend ::sstring __cdecl operator+(
+        template<size_t len> friend ::sstring __cdecl operator+(
             _In_ const char (&str)[len] /* compiler will accomodate the null terminator in this length */, _In_ const ::sstring& string
         ) noexcept {
             print_signature();

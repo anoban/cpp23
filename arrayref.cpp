@@ -24,8 +24,8 @@ static inline char* capitalize(_Inout_ char* string) noexcept {
     return string;
 }
 
-template<class T, size_t __len>
-static constexpr inline void square(_Inout_ T (&array)[__len]) noexcept requires requires(T& x) { x *= x; } {
+template<class T, size_t __len> static constexpr inline void square(_Inout_ T (&array)[__len]) noexcept requires requires(T& x) { x *= x; }
+{
     for (size_t i = 0; i < __len; ++i) array[i] *= array[i];
 }
 
