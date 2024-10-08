@@ -31,7 +31,7 @@ auto main() -> int {
 
     std::vector<::member> members {};
     members.emplace_back("Nathan", "Williams", 47, false, 78897.56497);
-    members.emplace_back(false, "Williams", 47, false, 78897.56497);
+    members.emplace_back(false, "Williams", 47, false, 78897.56497); // should err
 
     return EXIT_SUCCESS;
 }
