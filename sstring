@@ -84,9 +84,15 @@ class sstring
     public:
 #ifdef __CPLUSPLUS_PRE_CPP11
         typedef unsigned long size_type; // g++ with -Wpedantic issues a diagnostic claimimg ISO C++ 1998 does not support 'long long'
+		typedef char* iterator;
+		typedef const char* const_iterator;
 #else
         using size_type = unsigned long long;
+		using iterator = char*;
+		using const_iterator = const char*;
 #endif // __CPLUSPLUS_PRE_CPP11
+    
+
 
     private:
         size_type _size;     // inclusive of the null terminator
