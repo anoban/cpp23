@@ -38,7 +38,7 @@
     #define noexcept throw()
     // #define noexcept(...) throw(__VA_ARGS__) // this doesn't help with transforming the nested noexcept(expr) operators into throw(expr)
     #define nullptr  NULL
-    #define __CPLUSPLUS_PRE_CPP11
+    #define __CPLUSPLUS_PRE_STD11__
     #define __CXX_ATTRIBUTE_SYNTAX__(...)
     #define __CPP11_LVALUE_AMPERSAND__
     #define __CPP11_RVALUE_AMPERSAND__
@@ -74,25 +74,23 @@ namespace __cxx_sstring_internal_impl {
 } // namespace __cxx_sstring_internal_impl
 
 class sstring
-#ifndef __CPLUSPLUS_PRE_CPP11
+#ifndef __CPLUSPLUS_PRE_STD11__
     final // final is not a keyword in pre C++11 standard
-#endif    // __CPLUSPLUS_PRE_CPP11
+#endif    // __CPLUSPLUS_PRE_STD11__
 {
         // a super trivial string class with NO NON-TRIVIAL OPTIMIZATIONS whatsoever
         // class sstring works with all C++ standards from C++98 to C++23 :)
 
     public:
-#ifdef __CPLUSPLUS_PRE_CPP11
+#ifdef __CPLUSPLUS_PRE_STD11__
         typedef unsigned long size_type; // g++ with -Wpedantic issues a diagnostic claimimg ISO C++ 1998 does not support 'long long'
-		typedef char* iterator;
-		typedef const char* const_iterator;
+        typedef char*         iterator;
+        typedef const char*   const_iterator;
 #else
-        using size_type = unsigned long long;
-		using iterator = char*;
-		using const_iterator = const char*;
-#endif // __CPLUSPLUS_PRE_CPP11
-    
-
+        using size_type      = unsigned long long;
+        using iterator       = char*;
+        using const_iterator = const char*;
+#endif // __CPLUSPLUS_PRE_STD11__
 
     private:
         size_type _size;     // inclusive of the null terminator
@@ -137,12 +135,14 @@ class sstring
             ::strcpy_s(_resource, _size, string);
         }
 
-#if 1
+#ifdef __SSTRING_ALLOW_DPRECATED__
+        // the call to ::strlen() in the ctor makes this slightly less efficient compared to the templated version which
+        // can deduce the length at compile time without any runtime costs
         __CXX_ATTRIBUTE_SYNTAX__(
             [[deprecated("use the more efficient templated version when using string literals to construct a ::sstring object!")]]
         )
         explicit __cdecl sstring(_In_ const char* const string) noexcept :
-            _size(::strlen(string) + 1 /* +1 for the null terminator */),
+            _size(::strlen(string) + 1 /* + 1 for the null terminator */),
             _capacity(_size * 2),
             _resource(new (std::nothrow) char[_capacity]) {
             // using ::strlen(str) here and using _size + 1 in strcpy_s will bite us in the ass when trying to copy or move
@@ -157,7 +157,7 @@ class sstring
             ::memset(_resource, 0U, _capacity);
             ::strcpy_s(_resource, _size, string);
         }
-#endif // 1
+#endif
 
         __cdecl sstring(_In_ const sstring& other) noexcept : // not exactly a trivial copy constructor
             _size(other._size),
@@ -189,7 +189,7 @@ class sstring
             ::strcpy_s(_resource, other.length() + 1, other.data());
         }
 
-        // TODO :: implement ctors taking a pair of iterators as arguments!!
+        // use the iterator based ctor for constructing ::string objects from non-literal character arrays
         template<class iterator_type>
         sstring(_In_ iterator_type beg, _In_ iterator_type end) /* noexcept(noexcept(beg++)) gets problematic with pre C++11 standards */ :
             _size(std::distance(beg, end)), _capacity(_size * 2), _resource(new (std::nothrow) char[_capacity]) {
@@ -225,7 +225,7 @@ class sstring
             return *this;
         }
 
-#ifndef __CPLUSPLUS_PRE_CPP11
+#ifndef __CPLUSPLUS_PRE_STD11__
         // move ctor
         __cdecl sstring(_Inout_ sstring&& other) noexcept : _size(other._size), _capacity(other._capacity), _resource(other._resource) {
             print_signature();
@@ -249,7 +249,7 @@ class sstring
             return *this;
         }
 
-#endif // !__CPLUSPLUS_PRE_CPP11
+#endif // !__CPLUSPLUS_PRE_STD11__
 
         __cdecl ~sstring() noexcept {
             print_signature();
@@ -306,6 +306,30 @@ class sstring
             );
         }
 
+        sstring __cdecl operator+(_In_ const std::string& other) const noexcept {
+            print_signature();
+
+            char* const buffer = new (std::nothrow) char[(_size + other.length()) * 2]; // has space for 1 null terminator
+            if (!buffer) {
+                ::fputws(L"allocation failure!\n", stderr);
+                return sstring();
+            }
+
+            ::memset(buffer, 0U, (_size + other.length()) * 2);
+            ::strcpy_s(buffer, _size, _resource); // copy this buffer
+            ::strcpy_s(                           // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                buffer + _size - 1 /* start @ the null terminator of the first string */,
+                other.length(),
+                other.data()
+            ); // copy other's buffer
+
+            return sstring( // NOLINT(modernize-return-braced-init-list)
+                buffer,
+                _size + other.length() /* std::string::length() does not include the null terminator in the count */,
+                (_size + other.length()) * 2
+            );
+        }
+
         // when concatenating a string literal, use this operator to bypass concatenation following the creation of a temporary
         template<size_t len> sstring __cdecl operator+(const char (&other)[len]) const noexcept {
             print_signature();
@@ -327,7 +351,30 @@ class sstring
             return sstring(buffer, _size + len - 1, (_size + len) * 2); // NOLINT(modernize-return-braced-init-list)
         }
 
-        // operator usable only with lvalue left operands
+        // concatenation with string literals as the left operand
+        template<size_t len> friend ::sstring __cdecl operator+(
+            _In_ const char (&str)[len] /* compiler will accomodate the null terminator in this length */, _In_ const ::sstring& string
+        ) noexcept {
+            print_signature();
+
+            char* const buffer = new (std::nothrow) char[(len + string._size) * 2]; // has space for 2 null terminators
+            if (!buffer) {                                                          // has the allocation failed,
+                ::fputws(L"allocation failure!\n", stderr);
+                return sstring();
+            }
+
+            ::memset(buffer, 0U, (len + string._size) * 2);
+            ::strcpy_s(buffer, len, str); // copy string literal into ::sstring's buffer
+            ::strcpy_s(                   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                buffer + len - 1 /* start @ the null terminator of the first string */,
+                string._size,
+                string._resource
+            ); // copy ::sstring object's internal buffer
+
+            return sstring(buffer, len + string._size - 1, (len + string._size) * 2); // NOLINT(modernize-return-braced-init-list)
+        }
+
+        // operator usable only with lvalue left operands, won't work with materialized temporaries
         sstring& __cdecl operator+=(_In_ const sstring& other) __CPP11_LVALUE_AMPERSAND__ noexcept {
             print_signature();
 
@@ -347,6 +394,31 @@ class sstring
             ); // copy other's buffer
 
             _size = _size + other._size - 1; // discount the null terminator of the first string
+            delete[] _resource;
+            _resource = buffer;
+
+            return *this;
+        }
+
+        sstring& __cdecl operator+=(_In_ const std::string& other) __CPP11_LVALUE_AMPERSAND__ noexcept {
+            print_signature();
+
+            char* const buffer = new (std::nothrow) char[(_size + other.length()) * 2];
+            if (!buffer) {
+                ::fputws(L"allocation failure!\n", stderr);
+                return *this;
+            }
+            _capacity = (_size + other.length()) * 2; // use the previous state of _size before mutating it
+
+            ::memset(buffer, 0U, _capacity);
+            ::strcpy_s(buffer, _size /* older size */, _resource);
+            ::strcpy_s( // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                buffer + _size - 1 /* start @ the null terminator of the first string */,
+                other.length(),
+                other.data()
+            ); // copy other's buffer
+
+            _size = _size + other.length();
             delete[] _resource;
             _resource = buffer;
 
@@ -441,39 +513,15 @@ class sstring
         }
 
         char& __stdcall operator[](size_type& offset) noexcept {
-            assert(offset < _size);
             return _resource[offset]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
 
         const char& __stdcall operator[](size_type& offset) const noexcept {
-            assert(offset < _size);
             return _resource[offset]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        }
-
-        template<size_t len> friend ::sstring __cdecl operator+(
-            _In_ const char (&str)[len] /* compiler will accomodate the null terminator in this length */, _In_ const ::sstring& string
-        ) noexcept {
-            print_signature();
-
-            char* const buffer = new (std::nothrow) char[(len + string._size) * 2]; // has space for 2 null terminators
-            if (!buffer) {                                                          // has the allocation failed,
-                ::fputws(L"allocation failure!\n", stderr);
-                return sstring();
-            }
-
-            ::memset(buffer, 0U, (len + string._size) * 2);
-            ::strcpy_s(buffer, len, str); // copy string literal into ::sstring's buffer
-            ::strcpy_s(                   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                buffer + len - 1 /* start @ the null terminator of the first string */,
-                string._size,
-                string._resource
-            ); // copy ::sstring object's internal buffer
-
-            return sstring(buffer, len + string._size - 1, (len + string._size) * 2); // NOLINT(modernize-return-braced-init-list)
         }
 };
 
-#ifndef __CPLUSPLUS_PRE_CPP11
+#ifndef __CPLUSPLUS_PRE_STD11__
 static_assert(std::is_standard_layout<::sstring>::value); // std::is_standard_layout_v is only available with standards C++17 and later
 static_assert(sizeof(::sstring) == 24);
 #endif
@@ -482,7 +530,7 @@ static_assert(sizeof(::sstring) == 24);
     #undef noexcept
     #undef nullptr
     #undef __SSTRING_NO_MOVE_SEMANTICS__
-    #undef __CPLUSPLUS_PRE_CPP11
+    #undef __CPLUSPLUS_PRE_STD11__
 #endif
 
 #undef print_signature // trailing parenthesis is not necessary to undefine a macro
