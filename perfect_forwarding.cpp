@@ -97,6 +97,7 @@ auto main() -> int {
     rvalues::function("Anoban");         // okay, the materialized ::sstring temporary will bind as an rvalue reference
                                          //  rvalues::function(adele);            // error, an lvalue cannot bind to an rvalue reference
     rvalues::function(std::move(adele)); // okay, an xvalue can bind to an rvalue reference
+    rvalues::function(adele);            // error, an rvalue reference cannot be bound to an lvalue
 
     lvalues::function("Anoban"); // prvalue temporaries can bind to const lvalue references
     lvalues::function(adele);    // okay

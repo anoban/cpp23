@@ -22,9 +22,9 @@ static_assert(std::is_standard_layout_v<copy_only_object>);
 
 // http://www.gotw.ca/publications/mill22.htm
 
-static inline copy_only_object factory() noexcept { return copy_only_object {}; }
+[[nodiscard]] static inline copy_only_object factory() noexcept { return copy_only_object {}; }
 
-static inline copy_only_object _factory() noexcept {
+[[nodiscard]] static inline copy_only_object _factory() noexcept {
     copy_only_object temporary {};
     return temporary; // requires a valid move constructor
 }

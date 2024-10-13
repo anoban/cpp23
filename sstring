@@ -101,7 +101,7 @@ class sstring
         __cdecl sstring(_In_ char* const buffer, _In_ const size_type& size, _In_ const size_type& capacity) noexcept :
             _size(size), _capacity(capacity), _resource(buffer) {
             assert(buffer);
-            print_signature();
+            // print_signature(); // let's keep this private
         }
 
     public:
