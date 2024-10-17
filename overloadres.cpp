@@ -43,7 +43,7 @@ namespace recursion {
 auto wmain() -> int {
     constexpr float pi { M_PI };
     float           eps { M_E };
-    const float&&   rref { M_SQRT2 }; // temporary materialization
+    const float&&   rref { M_SQRT2 }; // temporary materialization, xvalues
 
     overloads::func(12.98769458); // calls the rvalue reference overload
     // clang and g++ are okay with this but MSVC overload resolution errs saying this is an ambiguous call
