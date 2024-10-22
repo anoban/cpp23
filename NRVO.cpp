@@ -6,8 +6,6 @@
 
 // named return value optimizations (NRVO) require a valid move ctor
 
-#if FALSE
-
 struct copy_only final {
         explicit copy_only(float x) noexcept : data(x) { }
 
@@ -62,8 +60,6 @@ static none nrvo_err_too() noexcept {
     return nada; // error, deleted move ctor
 }
 
-#endif
-
 int main() {
     std::cout << std::uppercase;
 
@@ -105,3 +101,7 @@ int main() {
 
     return EXIT_SUCCESS;
 }
+
+// retrun value optimization & named return value optimizations are completely at the compiler's discretion
+// if RVO or NRVO does not happen, the compiler may fall back to using copy or move semantics
+// moves are preferred over copies

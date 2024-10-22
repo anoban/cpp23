@@ -14,13 +14,11 @@ template<class _Ty> static inline constexpr _Ty vmax(_In_ const _Ty left, _In_ c
 }
 
 auto wmain() -> int {
-    constexpr auto maxx     = ::max<long double>(45, 98.7647624);              // uses the first overload
-    constexpr auto max      = ::max<long double, int, double>(45, 98.7647624); // errs when the second overload is explicitly requested
-    constexpr auto maxxx    = ::vmax(45, 98.7647624); // no implicit type conversions during template type deduction
+    constexpr auto maxx  = ::max<long double>(45, 98.7647624);              // uses the first overload
+    constexpr auto max   = ::max<long double, int, double>(45, 98.7647624); // errs when the second overload is explicitly requested
+    constexpr auto maxxx = ::vmax(45, 98.7647624);                          // no implicit type conversions during template type deduction
     // not even the trivial ones are allowed
-    constexpr auto okay     = ::vmax<double>(45, 98.7647624);
-
-    constexpr bool is_valid = (12.643L).operator<(756.54564);
+    constexpr auto okay  = ::vmax<double>(45, 98.7647624);
 
     return EXIT_SUCCESS;
 }
