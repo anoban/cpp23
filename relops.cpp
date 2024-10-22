@@ -106,6 +106,8 @@ int wmain() {
 
         const bool nope { bazz {} == royal };
 
+        // in calss bazz, operators < and == are const methods taking an lvalue reference and rvalues can bind to const lvalue references
+        // if we do not want this behaviour we need to explicitly delete those comparison operators taking rvalue references
         std::wcout << (bazz {} != foo {}) << L'\n';
         std::wcout << (bazz {} <= foo {}) << L'\n';
         std::wcout << (bazz {} > foo {}) << L'\n';
@@ -133,5 +135,6 @@ int wmain() {
         std::wcout << (what > foo {}) << L'\n';
         std::wcout << (what >= foo {}) << L'\n';
     }
+
     return EXIT_SUCCESS;
 }

@@ -91,7 +91,13 @@ template<class _Ty, class = typename std::enable_if<std::is_arithmetic<_Ty>::val
         _Ty numerator, denominator;
 
     public:
+        constexpr inline rational() noexcept;
+        constexpr inline explicit rational(_In_ const _Ty&) noexcept;
+        constexpr inline rational(_In_ const _Ty&, _In_ const _Ty&) noexcept;
 };
+
+template<class _Ty> inline rational<_Ty, typename std::enable_if<std::is_arithmetic<_Ty>::value, _Ty>::type>::rational() noexcept :
+    numerator(), denominator() {};
 
 int wmain() {
     // ::point<::sstring> invalid {};
