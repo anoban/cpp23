@@ -4,34 +4,59 @@
 namespace endian {
 
     // clang-format off
-#define _M_IX86 // needed by <intrin.h>
-#define _M_X64  // needed by <intrin.h>
-#include <mmintrin.h> // __m64
-#include <intrin.h>
+#include <intrin.h> // __m64
+// MSVC does not support _mm_shuffle_pi8 in x64 architectures
     // clang-format on
 
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     static constexpr unsigned short __stdcall ushort_from_be_bytes(_In_reads_bytes_(2) const unsigned char* const bytestream) noexcept {
-        return static_cast<unsigned short>(bytestream[0]) >> 8 | (bytestream[1]) << 8;
+        return static_cast<unsigned>(bytestream[1]) | static_cast<unsigned>(bytestream[0]) >> 8;
     }
 
     static unsigned long __stdcall ulong_from_be_bytes(_In_reads_bytes_(4) const unsigned char* const bytestream) noexcept {
-        static constexpr __m64 mask { 0b00000100'00000101'00000110'00000111'0000000'00000001'00000010'00000011 };
 #if defined(__llvm__) && defined(__clang__)
+        static constexpr __m64 mask_pi8 { 0b00000011'00000010'00000001'00000000'00000100'00000101'00000110'00000111 };
         return endian::_mm_shuffle_pi8(
-            *reinterpret_cast<const __m64*>(bytestream), mask
+            *reinterpret_cast<const __m64*>(bytestream), mask_pi8
         )[0]; // LLVM defines __m64 as a vector of 1 long long
 #elif defined(_MSC_VER) && defined(_MSC_FULL_VER)
-        return endian::_mm_shuffle_pi8(*reinterpret_cast<const __m64*>(bytestream), mask).m64_u32[0]; // MSVC defines __m64 as a union
+        const __m128i operand_epi8 {
+            .m128i_u8 {
+                       bytestream[0], bytestream[1], bytestream[2], bytestream[3], /* 12 filler zeroes */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+        };
+        static constexpr __m128i mask_epi8 {
+            .m128i_u8 { 3, 2, 1, 0, /* we don't care about the rest */ 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 }
+        };
+        // unlike LLVM, MSVC offers the intrinsic _mm_shuffle_pi8 only in x86 mode
+        return endian::_mm_shuffle_epi8(operand_epi8, mask_epi8).m128i_u32[0]; // MSVC defines __m128i as a union
 #endif
     }
 
     static unsigned long long __stdcall ullong_from_be_bytes(_In_reads_bytes_(8) const unsigned char* const bytestream) noexcept {
-        static constexpr __m64 mask { 0b0000000'00000001'00000010'00000011'00000100'00000101'00000110'00000111 };
+        static constexpr __m64 mask { 0b00000000'00000001'00000010'00000011'00000100'00000101'00000110'00000111 };
 #if defined(__llvm__) && defined(__clang__)
         return endian::_mm_shuffle_pi8(*reinterpret_cast<const __m64*>(bytestream), mask)[0];
 #elif defined(_MSC_VER) && defined(_MSC_FULL_VER)
-        return endian::_mm_shuffle_pi8(*reinterpret_cast<const __m64*>(bytestream), mask).m64_u64;
+        const __m128i operand_epi8 {
+            .m128i_u8 { bytestream[0],
+                       bytestream[1],
+                       bytestream[2],
+                       bytestream[3],
+                       bytestream[4],
+                       bytestream[5],
+                       bytestream[6],
+                       bytestream[7],
+                       0, /* 8 filler zeroes */
+                        0, 0,
+                       0, 0,
+                       0, 0,
+                       0 }
+        };
+        static constexpr __m128i mask_epi8 {
+            .m128i_u8 { 7, 6, 5, 4, 3, 2, 1, 0, /* we don't care about the rest */ 8, 9, 10, 11, 12, 13, 14, 15 }
+        };
+
+        return endian::_mm_shuffle_epi8(operand_epi8, mask_epi8).m128i_u64[0];
 #endif
     }
     // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -45,6 +70,12 @@ auto wmain() -> int {
     std::wcout << *reinterpret_cast<const unsigned short*>(bytes) << L'\n';
     std::wcout << *reinterpret_cast<const unsigned*>(bytes) << L'\n';
     std::wcout << *reinterpret_cast<const unsigned long long*>(bytes) << L'\n';
+
+    std::wcout << L"----------------------------------\n";
+
+    std::wcout << endian::ushort_from_be_bytes(bytes) << L'\n';
+    std::wcout << endian::ulong_from_be_bytes(bytes) << L'\n';
+    std::wcout << endian::ullong_from_be_bytes(bytes) << L'\n';
 
     return EXIT_SUCCESS;
 }
