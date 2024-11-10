@@ -54,7 +54,7 @@ namespace __cxx_sstring_internal_impl {
     // resorting to runtime conversion :(
     __CXX_ATTRIBUTE_SYNTAX__(
         [[maybe_unused,
-          deprecated("mixing regular ascii stdout and wide character stdout in a single programme is discouraged by Microsoft")]]
+          deprecated("mixing regular ascii stdout and wide character stdout in a single application is discouraged by Microsoft")]]
     )
     static const wchar_t* wsignature(_In_ const char* _cxx_signature) noexcept {
         static const unsigned _signature_length = 512;
@@ -102,6 +102,16 @@ class sstring
             _size(size), _capacity(capacity), _resource(buffer) {
             assert(buffer);
             print_signature(); // let's keep this private
+        }
+
+        void __stdcall __cleanup() noexcept {
+            _size = _capacity = 0;
+            _resource         = nullptr;
+        }
+
+        void __stdcall __cleanup(::sstring& other) const noexcept { // NOLINT(readability-convert-member-functions-to-static)
+            other._size = other._capacity = 0;
+            other._resource               = nullptr;
         }
 
     public:
@@ -180,7 +190,7 @@ class sstring
             _resource(new (std::nothrow) char[_capacity]) {
             print_signature();
             if (!_resource) { // has the allocation failed,
-                _capacity = _size = 0;
+                __cleanup();
                 ::fputws(L"allocation failure!\n", stderr);
                 return;
             }
@@ -189,13 +199,13 @@ class sstring
             ::strcpy_s(_resource, other.length() + 1, other.data());
         }
 
-        // use the iterator based ctor for constructing ::string objects from non-literal character arrays
+        // use the iterator based ctor for constructing ::string objects from non-literal character buffers
         template<class iterator_type>
         sstring(_In_ iterator_type beg, _In_ iterator_type end) /* noexcept(noexcept(beg++)) gets problematic with pre C++11 standards */ :
             _size(std::distance(beg, end)), _capacity(_size * 2), _resource(new (std::nothrow) char[_capacity]) {
             print_signature();
             if (!_resource) { // has the allocation failed,
-                _capacity = _size = 0;
+                __cleanup();
                 ::fputws(L"allocation failure!\n", stderr);
                 return;
             }
@@ -215,7 +225,7 @@ class sstring
             _resource = new (std::nothrow) char[_capacity];
 
             if (!_resource) { // has the allocation failed,
-                _size = _capacity = 0;
+                __cleanup();
                 ::fputws(L"allocation failure!\n", stderr);
                 return *this;
             }
@@ -229,8 +239,7 @@ class sstring
         // move ctor
         __cdecl sstring(_Inout_ sstring&& other) noexcept : _size(other._size), _capacity(other._capacity), _resource(other._resource) {
             print_signature();
-            other._resource = nullptr;
-            other._size = other._capacity = 0;
+            __cleanup(other);
         }
 
         // move assignment operator
@@ -239,12 +248,11 @@ class sstring
             if (this == &other) return *this;
 
             delete[] _resource; // give up the old buffer
-            _size           = other._size;
-            _capacity       = other._capacity;
-            _resource       = other._resource;
+            _size     = other._size;
+            _capacity = other._capacity;
+            _resource = other._resource;
 
-            other._resource = nullptr;
-            other._size = other._capacity = 0;
+            __cleanup(other);
 
             return *this;
         }
@@ -254,8 +262,7 @@ class sstring
         __cdecl ~sstring() noexcept {
             print_signature();
             delete[] _resource;
-            _resource = nullptr;
-            _size = _capacity = 0;
+            __cleanup();
         }
 
         static sstring __cdecl with_capacity(_In_ const size_type& size) noexcept { // a Rust style static ctor

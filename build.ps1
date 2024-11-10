@@ -65,7 +65,7 @@ $cflags = @(
     "/Qopt-prefetch-distance:10000",
 	"/Qpc80",
     "/Qscatter-",
-    "/Qstd:c++23",
+    "/Qstd:c++17",
     "/Qvec",
     "/Qvec-peel-loops",
     "/Qvec-threshold:0",

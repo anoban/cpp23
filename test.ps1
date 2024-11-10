@@ -44,7 +44,7 @@ $cflags = @(
     "/Ot",
     "/Qpar",
     "/Qspectre",
-    "/std:c++14",
+    "/std:c++17",
     "/TP",
     "/Wall",
     "/wd4514",      # removed unreferenced inline function
