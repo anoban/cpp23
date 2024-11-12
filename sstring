@@ -97,13 +97,6 @@ class sstring
         size_type _capacity; // at construction, capacity will usually be twice the size of the string
         char*     _resource; // string buffer
 
-        // a private, aggregate initializer like ctor
-        __cdecl sstring(_In_ char* const buffer, _In_ const size_type& size, _In_ const size_type& capacity) noexcept :
-            _size(size), _capacity(capacity), _resource(buffer) {
-            assert(buffer);
-            print_signature(); // let's keep this private
-        }
-
         void __stdcall __cleanup() noexcept {
             _size = _capacity = 0;
             _resource         = nullptr;
@@ -112,6 +105,13 @@ class sstring
         void __stdcall __cleanup(::sstring& other) const noexcept { // NOLINT(readability-convert-member-functions-to-static)
             other._size = other._capacity = 0;
             other._resource               = nullptr;
+        }
+
+        // a private, aggregate initializer like ctor
+        __cdecl sstring(_In_ char* const buffer, _In_ const size_type& size, _In_ const size_type& capacity) noexcept :
+            _size(size), _capacity(capacity), _resource(buffer) {
+            assert(buffer);
+            print_signature();
         }
 
     public:
@@ -200,9 +200,10 @@ class sstring
         }
 
         // use the iterator based ctor for constructing ::string objects from non-literal character buffers
-        template<class iterator_type>
-        sstring(_In_ iterator_type beg, _In_ iterator_type end) /* noexcept(noexcept(beg++)) gets problematic with pre C++11 standards */ :
-            _size(std::distance(beg, end)), _capacity(_size * 2), _resource(new (std::nothrow) char[_capacity]) {
+        template<class iterator_type> sstring(
+            _In_ iterator_type start, _In_ iterator_type end
+        ) /* noexcept(noexcept(beg++)) gets problematic with pre C++11 standards */ :
+            _size(std::distance(start, end)), _capacity(_size * 2), _resource(new (std::nothrow) char[_capacity]) {
             print_signature();
             if (!_resource) { // has the allocation failed,
                 __cleanup();
@@ -211,7 +212,7 @@ class sstring
             }
 
             ::memset(_resource, 0U, _capacity);
-            std::copy(beg, end, _resource);
+            std::copy(start, end, _resource);
         }
 
         // optimizations like buffer reuse are deliberately ignored :(
@@ -287,6 +288,10 @@ class sstring
         char* __cdecl c_str() noexcept { return _resource; }
 
         const char* __cdecl c_str() const noexcept { return _resource; }
+
+        char* __cdecl data() noexcept { return _resource; }
+
+        const char* __cdecl data() const noexcept { return _resource; }
 
         // operator usable for lvalues and rvalues for operands
         sstring __cdecl operator+(_In_ const sstring& other) const noexcept {
@@ -493,6 +498,11 @@ class sstring
         friend std::ostream& __cdecl operator<<(_Inout_ std::ostream& ostream, _In_ const sstring& string) noexcept {
             ostream << string.c_str();
             return ostream;
+        }
+
+        friend std::wostream& __cdecl operator<<(_Inout_ std::wostream& wostream, _In_ const sstring& string) noexcept {
+            for (auto it = string.cbegin(), end = string.cend(); it != end; ++it) wostream << static_cast<wchar_t>(*it);
+            return wostream;
         }
 
         char* __stdcall begin() noexcept { return _resource; }
