@@ -17,7 +17,6 @@ if ($unrecognized.Count -ne 0) {
 }
 
 $cflags = @(
-    "./tests/main.cpp", # contains the main() function
     "./googletest/src/gtest-all.cc", # convenience source file that bundles all the necessary gtest sources
     "/arch:AVX512",
     "/diagnostics:caret",
@@ -44,13 +43,18 @@ $cflags = @(
     "/Ot",
     "/Qpar",
     "/Qspectre",
-    "/std:c++17",
+    "/std:c++20",
     "/TP",
     "/Wall",
     "/wd4514",      # removed unreferenced inline function
+    "/wd4625",
+    "/wd4626",
+    "/wd4668",
     "/wd4710",      # not inlined
     "/wd4711",      # selected for inline expansion
     "/wd4820",      # padding
+    "/wd5026",
+    "/wd5027",
     "/Zc:__cplusplus",
     "/Zc:preprocessor",
     "/link /DEBUG:FULL"
