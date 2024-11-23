@@ -4,7 +4,7 @@ $cfiles = [System.Collections.ArrayList]::new()
 $unrecognized = [System.Collections.ArrayList]::new()
 
 foreach ($arg in $args) {
-    if ($arg -clike "*.cpp") {
+    if ($arg -clike "*.cpp" -or $arg -clike "*.cc") {
         [void]$cfiles.Add($arg.ToString().Replace(".\", ""))
     }
     else {
@@ -23,7 +23,7 @@ $cflags = @(
     "/diagnostics:caret",
     "/DNDEBUG",
     "/D_NDEBUG",
-    "/EHac",
+    "/EHa",
     "/F0x10485100",
     "-fcf-protection:full",
     "/fp:fast",
@@ -34,6 +34,8 @@ $cflags = @(
     "/guard:cf",
     "/Gw",
     "/I./",
+    "/I./googletest",
+    "/I./googletest/include",
     "/J",
     "/MT",
     "/O3",
