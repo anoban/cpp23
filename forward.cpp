@@ -41,24 +41,37 @@ namespace nstd {
 
 } // namespace nstd
 
-template<class _Ty> static inline void func(_Ty&& arg /* a universal reference in the outer template */)
+namespace forwarding {
+
+    // overload for lvalue references
+    template<typename _Ty> requires std::is_lvalue_reference_v<_Ty>
+    [[nodiscard]] constexpr _Ty&& forward(_In_ typename std::remove_reference<_Ty>::type& arg) noexcept {
+        return arg;
+    }
+    // overload for rvalue references
+    template<typename _Ty> [[nodiscard]] constexpr _Ty&& forward(_In_ typename std::remove_reference<_Ty>::type&& arg) noexcept {
+        return std::move(arg); // equivalent to return static_cast<_Ty&&>(arg);
+    }
+
+} // namespace forwarding
+
+template<class _Ty> static inline void forwarder(_Ty&& arg /* a universal reference in the outer template */)
     noexcept(noexcept(::sstring(arg))) {
     const ::sstring dummy { nstd::forward<_Ty>(arg) };
-    //
 }
 
 auto main() -> int {
-    ::func("string literal"); // receives an char array reference as argument
+    ::forwarder("string literal"); // receives an char array reference as argument
     // deduced type _Ty by ::func will be const char (&)[15]
     // inside first overload of nstd::forward this will be the type of _arg, which will return the same type
 
-    ::func(::sstring("prvalue")); // now ::func receives a prvalue temporary ::sstring object
-    // _Ty deduced by ::func will be ::sstring (a plain value type)
+    ::forwarder(::sstring("prvalue")); // now ::func receives a prvalue temporary ::sstring object
+                                       // _Ty deduced by ::func will be ::sstring (a plain value type)
     // inside the second overload of nstd::forward, the type of _arg will be ::sstring&& which will be the return type too
     // this will invoke the move ctor of the ::sstring class
 
-    ::sstring lvalue("has a name huh!");
-    ::func(lvalue); // type _Ty deduced by ::func is ::sstring&
+    const ::sstring lvalue("has a name huh!");
+    ::forwarder(lvalue); // type _Ty deduced by ::func is ::sstring&
     // the first overload of nstd::forward gets called and the return type is ::sstring& + && = ::sstring&
     // so this will invoke the copy ctor of the ::sstring class
 
