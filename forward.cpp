@@ -41,27 +41,29 @@ namespace nstd {
 
 } // namespace nstd
 
-namespace forwarding {
-
+namespace fwd {
     // overload for lvalue references
     template<typename _Ty> requires std::is_lvalue_reference_v<_Ty>
-    [[nodiscard]] constexpr _Ty&& forward(_In_ typename std::remove_reference<_Ty>::type& arg) noexcept {
-        return arg;
+    [[nodiscard]] constexpr _Ty forward(_In_ typename std::remove_reference<_Ty>::type& arg) noexcept {
+        return arg; // return the lvalue reference
     }
     // overload for rvalue references
     template<typename _Ty> [[nodiscard]] constexpr _Ty&& forward(_In_ typename std::remove_reference<_Ty>::type&& arg) noexcept {
         return std::move(arg); // equivalent to return static_cast<_Ty&&>(arg);
     }
+} // namespace fwd
 
-} // namespace forwarding
-
-template<class _Ty> static inline void forwarder(_Ty&& arg /* a universal reference in the outer template */)
-    noexcept(noexcept(::sstring(arg))) {
+template<class _Ty> static void forwarder(_Ty&& arg /* a universal reference in the outer template */) noexcept(noexcept(::sstring(arg))) {
     const ::sstring dummy { nstd::forward<_Ty>(arg) };
 }
 
+template<typename _Ty> requires std::constructible_from<::sstring, _Ty> static void forwarding(_Ty&& univref) noexcept {
+    const ::sstring temporary { fwd::forward<_Ty>(univref) };
+    ::puts(temporary.c_str());
+}
+
 auto main() -> int {
-    ::forwarder("string literal"); // receives an char array reference as argument
+    ::forwarder("string literal"); // receives a char array reference as argument
     // deduced type _Ty by ::func will be const char (&)[15]
     // inside first overload of nstd::forward this will be the type of _arg, which will return the same type
 
@@ -74,6 +76,14 @@ auto main() -> int {
     ::forwarder(lvalue); // type _Ty deduced by ::func is ::sstring&
     // the first overload of nstd::forward gets called and the return type is ::sstring& + && = ::sstring&
     // so this will invoke the copy ctor of the ::sstring class
+
+    ::sstring move { "to be moved" };
+
+    ::forwarding("literals");
+    // ::forwarding(::sstring { "pure rvalue" });
+    ::forwarding(lvalue);
+    ::forwarding(move);
+    // ::forwarding(std::move(move));
 
     return EXIT_SUCCESS;
 }
