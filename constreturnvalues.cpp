@@ -2,11 +2,11 @@
 #include <sstring>
 #include <vector>
 
-static inline const ::sstring get_greeting() noexcept { return "Hi there!"; }
+static const ::sstring get_greeting() noexcept { return "Hi there!"; }
 
-static inline ::sstring greeting() noexcept { return "Hello there!"; }
+static ::sstring greeting() noexcept { return "Hello there!"; }
 
-static inline void print(::sstring string) noexcept { ::puts(string.c_str()); }
+static void print(::sstring string) noexcept { ::puts(string.c_str()); }
 
 int wmain() {
     ::sstring              ano { "Anoban" };

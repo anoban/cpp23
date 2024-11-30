@@ -34,5 +34,7 @@ auto main() -> int {
     overloads::function(std::move(modifiable)); // should call the rvalue reference overload
     overloads::function(std::move(immutable));  // should call the const rvalue reference overload
 
+    ::recursion::append("start", ", ", 100);
+
     return EXIT_SUCCESS;
 }
