@@ -4,7 +4,7 @@
 
 template<class _Ty //, class = typename std::enable_if<std::is_same<typename std::remove_cvref<_Ty>::type, ::sstring>::value, _Ty>::type
          >
-static inline void perfect_forwarder(_Ty&& string /* ::string types */
+inline void perfect_forwarder(_Ty&& string /* ::string types */
 ) noexcept(std::is_nothrow_copy_constructible_v<typename std::remove_cvref_t<_Ty>> && std::is_nothrow_move_constructible_v<typename std::remove_cvref_t<_Ty>>) {
     // if string is a prvalue temporary, T will be deduced as ::sstring so T&& can be ::sstring&&
     // if string is an lvalue, T will be deduced as ::sstring& so T&& can be ::sstring&&
@@ -14,7 +14,7 @@ static inline void perfect_forwarder(_Ty&& string /* ::string types */
 // without perfect forwarding
 template<class _Ty //, class = typename std::enable_if<std::is_same<typename std::remove_cvref<_Ty>::type, ::sstring>::value, _Ty>::type
          >
-static inline void forwarder(_Ty&& string /* ::string types */
+inline void forwarder(_Ty&& string /* ::string types */
 ) noexcept(std::is_nothrow_copy_constructible_v<typename std::remove_cvref_t<_Ty>> && std::is_nothrow_move_constructible_v<typename std::remove_cvref_t<_Ty>>) {
     // if string is a prvalue temporary, T will be deduced as ::sstring so T&& can be ::sstring&&
     // if string is an lvalue, T will be deduced as ::sstring& so T&& can be ::sstring&&

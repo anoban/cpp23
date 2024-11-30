@@ -14,6 +14,7 @@ namespace overloads {
 } // namespace overloads
 
 namespace recursion {
+    // NOLINTNEXTLINE(misc-no-recursion)
     [[nodiscard]] static ::sstring&& append(_Inout_ ::sstring&& string, _In_ ::sstring&& annexure, _In_ const unsigned times) noexcept {
         string += annexure;
         if (!times) return std::move(string);
