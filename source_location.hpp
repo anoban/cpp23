@@ -12,8 +12,8 @@ namespace experimental {
 
     template<> struct source_location<char> final {
             [[nodiscard]] static consteval source_location current(
-                const unsigned    _Line_        = __builtin_LINE(),
-                const unsigned    _Column_      = __builtin_COLUMN(),
+                const unsigned _Line_           = __builtin_LINE(),
+                const unsigned _Column_         = __builtin_COLUMN(),
                 const char* const _File_        = __builtin_FILE(),
                 const char* const _FunctionSig_ = __builtin_FUNCSIG(),
                 const char* const _Function_    = __builtin_FUNCTION()
@@ -23,6 +23,7 @@ namespace experimental {
             }
 
             [[nodiscard]] constexpr source_location() noexcept = default;
+
             [[nodiscard]] constexpr source_location(
                 const unsigned    _Line_,
                 const unsigned    _Column_,
@@ -32,9 +33,9 @@ namespace experimental {
             ) noexcept :
                 _Line { _Line_ }, _Column { _Column_ }, _File { _File_ }, _FunctionSig { _FunctionSig_ }, _Function { _Function_ } { }
 
-            [[nodiscard]] constexpr unsigned line() const noexcept { return _Line; }
+            [[nodiscard]] constexpr unsigned    line() const noexcept { return _Line; }
 
-            [[nodiscard]] constexpr unsigned column() const noexcept { return _Column; }
+            [[nodiscard]] constexpr unsigned    column() const noexcept { return _Column; }
 
             [[nodiscard]] constexpr const char* file_name() const noexcept { return _File; }
 
@@ -52,8 +53,8 @@ namespace experimental {
 
     template<> struct source_location<wchar_t> final {
             [[nodiscard]] static consteval source_location current(
-                const unsigned       _Line_        = __builtin_LINE(),
-                const unsigned       _Column_      = __builtin_COLUMN(),
+                const unsigned _Line_              = __builtin_LINE(),
+                const unsigned _Column_            = __builtin_COLUMN(),
                 const wchar_t* const _File_        = __FILEW__,
                 const wchar_t* const _FunctionSig_ = __builtin_FUNCSIGW(),
                 const wchar_t* const _Function_    = __builtin_FUNCTIONW()
@@ -63,6 +64,7 @@ namespace experimental {
             }
 
             [[nodiscard]] constexpr source_location() noexcept = default;
+
             [[nodiscard]] constexpr source_location(
                 const unsigned       _Line_,
                 const unsigned       _Column_,
@@ -72,9 +74,9 @@ namespace experimental {
             ) noexcept :
                 _Line { _Line_ }, _Column { _Column_ }, _File { _File_ }, _FunctionSig { _FunctionSig_ }, _Function { _Function_ } { }
 
-            [[nodiscard]] constexpr unsigned line() const noexcept { return _Line; }
+            [[nodiscard]] constexpr unsigned       line() const noexcept { return _Line; }
 
-            [[nodiscard]] constexpr unsigned column() const noexcept { return _Column; }
+            [[nodiscard]] constexpr unsigned       column() const noexcept { return _Column; }
 
             [[nodiscard]] constexpr const wchar_t* file_name() const noexcept { return _File; }
 
