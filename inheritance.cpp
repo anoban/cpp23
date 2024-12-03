@@ -30,6 +30,7 @@ static_assert(base {}._public);
 class publicly_derived : public base {
     public:
         consteval publicly_derived() noexcept : base {} { }
+
         // upon construction of the derived class type, call the constructor of the base class.
         // private member of base class is not accessible through inheritance
 };
@@ -68,7 +69,8 @@ static_assert(protectedly_derived {}._public
 // for classes, the default inheritance mode is private inheritance
 // the default mode of inheritance is dictated by the deriving type, not the type that is being derived from
 
-class derived_class : base { };   // private inheritance
+class derived_class : base { }; // private inheritance
+
 struct derived_struct : base { }; // public inheritance
 
 // public inheritance is essentially an as-is inheritance
@@ -114,13 +116,13 @@ class novel : public material, public book {
 
         const std::wstring& title() const noexcept { return book::title; }
 
-        unsigned pages() const noexcept { return book::page_count; }
+        unsigned            pages() const noexcept { return book::page_count; }
 
-        unsigned stock() const noexcept { return material::quantity; }
+        unsigned            stock() const noexcept { return material::quantity; }
 
-        float price() const noexcept { return unit_price; }
+        float               price() const noexcept { return unit_price; }
 
-        float discount() const noexcept { return material::discount_prcnt; }
+        float               discount() const noexcept { return material::discount_prcnt; }
 
         ~novel() = default;
 };

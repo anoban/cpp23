@@ -44,8 +44,8 @@ template<typename _arg0_type, typename _arg1_type, typename _arg2_type, typename
 };
 
 int main() {
-    std::random_device rdev {}; // for seeding the random number engine
-    std::mt19937_64    rengine { rdev() };
+    std::random_device            rdev {}; // for seeding the random number engine
+    std::mt19937_64               rengine { rdev() };
 
     std::vector<int>              randoms(NELEMENTS);
     std::vector<int>              results(NELEMENTS);
@@ -78,13 +78,13 @@ int main() {
     constexpr auto increment = [](auto& e) consteval noexcept -> void { e++; };
     constexpr auto incr      = [](auto& e) consteval noexcept -> void { e++; };
 
-    unsigned f { 11 };
+    unsigned       f { 11 };
 
     static_assert(!std::is_same_v<decltype(increment), decltype(incr)>);
     static_assert(std::is_same_v<void, decltype(incr(f))>);
 
-    const std::function<unsigned(unsigned&)> decrement = [](unsigned& e) -> unsigned { return --e; };
-    constexpr void (*fnptr)(unsigned&) noexcept        = [](unsigned& e) constexpr noexcept -> void { --e; };
+    const std::function<unsigned(unsigned&)> decrement                    = [](unsigned& e) -> unsigned { return --e; };
+    constexpr void                           (*fnptr)(unsigned&) noexcept = [](unsigned& e) constexpr noexcept -> void { --e; };
     fnptr(f);
     std::wcout << f << L'\n';
 

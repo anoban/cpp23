@@ -41,9 +41,9 @@ template<typename T, size_t _length> requires std::is_scalar_v<T> class array {
             for (; i < _size; ++i) _buffer[i] = static_cast<value_type>(0);
         }
 
-        constexpr size_t size() const noexcept { return _size; }
+        constexpr size_t       size() const noexcept { return _size; }
 
-        constexpr bool is_empty() const noexcept { return _size != 0LLU; }
+        constexpr bool         is_empty() const noexcept { return _size != 0LLU; }
 
         constexpr pointer_type data() const noexcept { return _buffer; }
 

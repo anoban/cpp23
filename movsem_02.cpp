@@ -35,11 +35,11 @@ static __declspec(noinline) ::sstring no_time_to_die() throw() {
 
 static const size_t MiB = 1024 * 1024;
 
-int main() {               // NOLINT(bugprone-exception-escape)
+int                 main() {               // NOLINT(bugprone-exception-escape)
     const ::sstring empty; // default construction
     ::sstring       crab_style = ::sstring::with_capacity(7 * MiB);
 
-    ::sstring jbond("I've drowned and dreamt this moment.... so overdue I owe them................");
+    ::sstring       jbond("I've drowned and dreamt this moment.... so overdue I owe them................");
     std::cout << jbond << '\n';
 
     ::sstring adele;     // default construction
@@ -91,7 +91,7 @@ int main() {               // NOLINT(bugprone-exception-escape)
     const char* const leonard = "If you want it darker? Let's kill the flame";
     ::sstring         darker(leonard); // calls the sstring::sstring(const std::string &) ctor
 
-    ::sstring james_from_iterators(james.begin(), james.end());
+    ::sstring         james_from_iterators(james.begin(), james.end());
     std::cout << james_from_iterators << '\n';
 
     return EXIT_SUCCESS;

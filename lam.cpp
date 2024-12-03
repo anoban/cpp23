@@ -8,26 +8,26 @@
 #include <ranges>
 #include <vector>
 
-constexpr auto bare_minimum = [] {};
+constexpr auto      bare_minimum = [] { };
 
-constexpr auto give3        = [] { return 3; };
+constexpr auto      give3        = [] { return 3; };
 
-constexpr auto add1         = [](auto x) -> decltype(x) { return x + 1; };
+constexpr auto      add1         = [](auto x) -> decltype(x) { return x + 1; };
 
-constexpr auto add10        = [](auto x) consteval noexcept(noexcept(x + 10)) -> decltype(x) { return x + 10; };
+constexpr auto      add10        = [](auto x) consteval noexcept(noexcept(x + 10)) -> decltype(x) { return x + 10; };
 
-constexpr auto sum { ::add10(12ui32) };
+constexpr auto      sum { ::add10(12ui32) };
 
-constexpr auto increment = [](auto& x) constexpr noexcept -> void { x = add1(x); };
+constexpr auto      increment = [](auto& x) constexpr noexcept -> void { x = add1(x); };
 
 constexpr long long threshold { 2000 };
 
-int wmain() {
+int                 wmain() {
     { // scope
         constexpr auto pi { std::numbers::pi_v<float> };
 
-        auto area = [&pi](auto radius) constexpr noexcept -> decltype(std::numbers::pi_v<double>) { return 2.000 * pi * radius; };
-        auto ar { area(22) };
+        auto           area = [&pi](auto radius) constexpr noexcept -> decltype(std::numbers::pi_v<double>) { return 2.000 * pi * radius; };
+        auto           ar { area(22) };
         std::wcout << ar << std::endl;
     }
 

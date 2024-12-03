@@ -54,7 +54,7 @@ int wmain() {
     ::atexit(::SayGoodByeEx);
     ::at_quick_exit(::SayGoodByeQEx);
 
-    const auto obj { object<double> {} };
+    const auto     obj { object<double> {} };
 
     // return EXIT_SUCCESS;
 

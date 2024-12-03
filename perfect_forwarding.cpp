@@ -50,6 +50,7 @@ class user final {
 
     public:
         template<class _Ty> explicit user(const _Ty& init) noexcept : name(init) { ::puts(__FUNCSIG__); }
+
         // explicit user(::sstring&& _name) noexcept : name(std::move(_name)) /* move construction */ { ::puts(__FUNCSIG__); }
         // explicit user(::sstring&& _name) noexcept : name(_name) /* copy construction */ { ::puts(__FUNCSIG__); }
 
@@ -108,9 +109,9 @@ auto main() -> int {
     ::sstring       chamber { "Harry Potter and the Chamber of Secrets" };
     ::sstring       philosopher { "Harry Potter and the Philosopher's Stone" };
 
-    book philosophers_stone { philosopher, rowling }; // expect both to be copy constructed
+    book            philosophers_stone { philosopher, rowling }; // expect both to be copy constructed
     // book chamber_of_secrets { std::move(chamber), rowling }; // title will be move constructed, HADN'T WE DELETED THE MOVE CTOR
-    book chamber_of_secrets { chamber, rowling };
+    book            chamber_of_secrets { chamber, rowling };
 
     ::puts(".................................");
 

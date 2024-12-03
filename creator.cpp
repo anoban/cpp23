@@ -1,15 +1,15 @@
 #include <memory>
 
 template<class T> struct NewCreator { // policy class 1 based on the C++ operator new
-        typedef T  value_type;
-        typedef T* pointer_type;
+        typedef T           value_type;
+        typedef T*          pointer_type;
 
         static pointer_type create() throw() { return new T; } // allocate memory for one element of type T in heap and return the address
 };
 
 template<class T> struct MallocCreator { // policy class 2 using UCRT's malloc()
-        typedef T  value_type;
-        typedef T* pointer_type;
+        typedef T           value_type;
+        typedef T*          pointer_type;
 
         // allocate memory for one element of type T in heap and return the address
         static pointer_type create() throw() { return malloc(sizeof(T)); }
@@ -26,11 +26,12 @@ template<class T> struct PrototypeCreator { // policy class 3
 
         // the logic here is that if the inner pointer is not nullptr, return a pointer to a copy of the underlying type T else return nullptr
         pointer_type create() const throw() { return _prototype ? _prototype->clone() : nullptr; }
+
         // type T must have a clone() method defined
 
         pointer_type get_prototype() const throw() { return _prototype; }
 
-        void set_prototype(const_pointer_type Object) throw() { _prototype = Object; }
+        void         set_prototype(const_pointer_type Object) throw() { _prototype = Object; }
 
     private:
         pointer_type _prototype;

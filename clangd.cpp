@@ -33,6 +33,7 @@ template<bool, typename T> struct predicate_if;
 template<typename T> struct predicate_if<true, T> {
         using type = T;
         static constexpr bool value { true };
+
         constexpr bool        operator()() const noexcept { return value; }
 };
 

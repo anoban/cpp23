@@ -34,6 +34,7 @@ template<typename T> using is_unsigned_t                 = typename ::is_unsigne
 
 template<typename T> struct name {
         using value_type = std::enable_if<std::is_arithmetic<T>::value, T>::type;
+
         constexpr value_type operator()() const noexcept { return value; }
 
     private:

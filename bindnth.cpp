@@ -14,7 +14,7 @@ static double bsum(short s, long l) noexcept { return static_cast<double>(s + l)
 
 // std::bind_front, std::bind_back, std::bind1st & std::bind2nd do not accept placeholders
 
-const auto ___sum = std::bind(
+const auto    ___sum = std::bind(
     sum, static_cast<short>(20), 'A', 20U, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4
 );
 

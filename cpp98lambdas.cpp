@@ -12,6 +12,7 @@
 
 int main() {
     struct functor { // local class type
+
             void operator()(int x) const { std::wcout << x << L' '; }
     };
 

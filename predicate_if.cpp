@@ -24,7 +24,7 @@ consteval ::predicate_if<std::is_floating_point<T>::value && std::is_floating_po
 
 template<typename T> consteval ::predicate_if<std::is_integral_v<T>, T>::type square(const T base) noexcept { return base * base; }
 
-auto main() -> int {
+auto                                                                          main() -> int {
     constexpr auto ldb { std::numbers::pi_v<long double> };
     constexpr auto x { ::sum(ldb, 1.0002F) };
     constexpr auto y { ::sum(65.7823, 12) };

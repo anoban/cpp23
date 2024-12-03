@@ -49,12 +49,12 @@ namespace hypothetical {
 
     extern "C" struct vtable {
             std::type_info info;
-            float (*fnptr)(const hypothetical::foo&) noexcept;
+            float          (*fnptr)(const hypothetical::foo&) noexcept;
     };
 
     extern "C" float virtual_bar(const foo& object) noexcept { return object._bar; }
 
-    extern "C" void init(foo& object, const float& bar, const short& bazz) noexcept {
+    extern "C" void  init(foo& object, const float& bar, const short& bazz) noexcept {
         // initialize the member variables with the provided arguments
         object._bar  = bar;
         object._bazz = bazz;
@@ -64,7 +64,7 @@ namespace hypothetical {
         const vtable vtable_for_foo { typeid(foo), virtual_bar };
 
         // compiler creates and constructs a POD class type foo on stack (foo is not a POD type)
-        foo onstack {};
+        foo          onstack {};
         init(onstack, 23.0354, 475);
         bar(onstack);
 

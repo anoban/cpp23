@@ -23,7 +23,7 @@ template<typename T> [[nodiscard]] static constexpr typename std::enable_if_t<st
 // not a constexpr function
 static inline double getpi() noexcept { return std::is_constant_evaluated() ? M_PI : 0.000; }
 
-auto wmain() -> int {
+auto                 wmain() -> int {
     const auto pi { M_PI };
     // what happens below is the compiler frst checks whether the subexpression on the true branch can be consteval evaluated
     // if yes, uses that value to initialize the variable statically

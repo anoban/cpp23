@@ -44,7 +44,7 @@ namespace iris {
 
 auto wmain(_In_opt_ int argc, _In_opt_ wchar_t* argv[]) -> int {
     if (argc == 1 || argc > 2) ::exit(11);
-    const auto contents { iris::read_file(argv[1]) };
+    const auto                       contents { iris::read_file(argv[1]) };
 
     std::vector<iris::record<float>> records;
     size_t                           newline_caret {};

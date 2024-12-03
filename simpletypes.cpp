@@ -9,12 +9,12 @@ struct vec3d {
 
 static consteval vec3d Vec3DFactory() noexcept { return { 1.000, 1.000, 1.000 }; } // implicit construction of a vec3d object
 
-int main() {
+int                    main() {
 #pragma region INITIALIZATIONS
 
-    int    a = 1;                              // plain old C style definition, i.e declaration and initialization in one line
-    int    b { 2 };                            // list initialization
-    double c                        = { 3.0 }; // copy list initialization
+    int                        a = 1;          // plain old C style definition, i.e declaration and initialization in one line
+    int                        b { 2 };        // list initialization
+    double                     c    = { 3.0 }; // copy list initialization
 
     auto                       heap = std::make_unique<float[]>(1000); // automatic type deduction
     constexpr auto             d { Vec3DFactory() };                   // automatic type deduction through a factory function

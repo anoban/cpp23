@@ -6,6 +6,7 @@
 // signature of an array reference is T (&identifier)[length]
 
 static __declspec(noinline) double __stdcall cube(const float& x) noexcept { return x * x * x; }
+
 static __declspec(noinline) double __stdcall quad(const float& x) noexcept { return x * x * x * x; }
 
 template<class T, size_t len> static __declspec(noinline) void __stdcall quad(T (&array)[len]) noexcept {
@@ -38,7 +39,7 @@ static typename std::enable_if<std::is_arithmetic_v<_Ty0> && std::is_arithmetic_
 }
 
 auto wmain() -> int {
-    double (*const ptrcube)(const float&) noexcept = cube;
+    double   (*const ptrcube)(const float&) noexcept = cube;
     //  ptrcube = quad;
 
     unsigned array[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };

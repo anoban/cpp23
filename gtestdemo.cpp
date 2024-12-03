@@ -12,8 +12,8 @@ TEST(SUM, ZEROES) {
 
 class Fixture : public testing::Test {
     protected:
-        float _value_0;
-        float _value_1;
+        float       _value_0;
+        float       _value_1;
 
         // inline Fixture() noexcept : testing::Test(), _value_0(10.0000), _value_1(11.00000) { }
 

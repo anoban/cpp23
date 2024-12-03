@@ -89,8 +89,7 @@ template<typename T, typename = /* no member type in struct std::enable_if */>
 }
 
 // using std::enable_if<T>::type as argument types
-template<typename T>
-[[nodiscard]] static constexpr T imul(
+template<typename T> [[nodiscard]] static constexpr T imul(
     const T& x, const T& y, typename std::enable_if<is_integral<std::remove_const_t<T>>::value, T>::type = 0
     // all this just to make the argument type -> const T&
 ) noexcept {

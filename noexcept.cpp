@@ -1,9 +1,8 @@
 #include <cstdlib>
 #include <type_traits>
 
-template<typename T>
-static constexpr typename std::enable_if<std::is_scalar<T>::value, T>::type square(const T x)
-    noexcept(std::is_nothrow_default_constructible<T>::value) {
+template<typename T> static constexpr typename std::enable_if<std::is_scalar<T>::value, T>::type square(const T x
+) noexcept(std::is_nothrow_default_constructible<T>::value) {
     return x * x;
 }
 
@@ -14,15 +13,13 @@ static constexpr long double power(const T base, unsigned exp) { // no exception
     return result;
 }
 
-template<typename T>
-long double static constexpr cube(
+template<typename T> long double static constexpr cube(
     const T x, typename std::enable_if<std::is_scalar<T>::value && !std::is_floating_point<T>::value, T>::type = 0
 ) noexcept(noexcept(::power(x, 3))) {
     return ::power(x, 3);
 }
 
-template<typename T>
-typename std::enable_if<std::is_scalar<T>::value && !std::is_integral<T>::value, T>::type static consteval cube(
+template<typename T> typename std::enable_if<std::is_scalar<T>::value && !std::is_integral<T>::value, T>::type static consteval cube(
     const T x, typename std::enable_if<std::is_floating_point<T>::value, T>::type = static_cast<T>(0)
 ) noexcept {
     return x * x * x;

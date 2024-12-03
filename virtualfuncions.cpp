@@ -11,6 +11,7 @@ class base {
     public:
         // this is our virtual member function for the base class
         constexpr virtual double get() const noexcept { return b; }
+
         // virtual functions in the derived classes need to have the same name and argument types
 };
 

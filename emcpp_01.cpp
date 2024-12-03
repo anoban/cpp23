@@ -57,16 +57,19 @@ static_assert(::power_cr(2, 10) == 1024);
 // let's implement a type capturer
 template<typename T> struct _type_capture_v {
         using deduced_type = T;
+
         explicit _type_capture_v([[maybe_unused]] T _deduce_from) noexcept { }
 };
 
 template<typename T> struct _type_capture_ref {
         using deduced_type = T;
+
         explicit _type_capture_ref([[maybe_unused]] T& _deduce_from) noexcept { }
 };
 
 template<typename T> struct _type_capture_cref {
         using deduced_type = T;
+
         explicit _type_capture_cref([[maybe_unused]] const T& _deduce_from) noexcept { }
 };
 
@@ -136,8 +139,8 @@ auto wmain() -> int {
     [[maybe_unused]] decltype(_type_capture_ref { piref })::deduced_type  deduct_ref { M_PI };  // const float NOT const float&
     [[maybe_unused]] decltype(_type_capture_cref { piref })::deduced_type deduct_cref { M_PI }; // float NOT const float&
 
-    wstring name { L"BARRACUDAAAAAA" };
-    auto&   nameref { name };
+    wstring                                                               name { L"BARRACUDAAAAAA" };
+    auto&                                                                 nameref { name };
 
     static_assert(!::is_reference_v<decltype(name)>);
     static_assert(::is_reference_v<decltype(nameref)>);

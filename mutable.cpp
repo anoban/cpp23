@@ -25,7 +25,7 @@ class object {
 
         constexpr ~object() noexcept;
 
-        constexpr double& unwrap() noexcept;
+        constexpr double&       unwrap() noexcept;
 
         constexpr const double& unwrap() const noexcept;
 };
@@ -53,7 +53,7 @@ constexpr object& object::operator=(object&& other) noexcept {
 
 constexpr object::~object() noexcept { _value = 0.00; }
 
-constexpr double& object::unwrap() noexcept { return _value; }
+constexpr double&       object::unwrap() noexcept { return _value; }
 
 constexpr const double& object::unwrap() const noexcept { return _value; }
 
@@ -77,7 +77,7 @@ class mobject {
 
         constexpr double& unwrap() const noexcept;
 
-        constexpr void update(const double& value) const noexcept;
+        constexpr void    update(const double& value) const noexcept;
 };
 
 constexpr mobject::mobject() noexcept : _value {} { }
@@ -105,7 +105,7 @@ constexpr mobject::~mobject() noexcept { _value = 0.00; }
 
 constexpr double& mobject::unwrap() const noexcept { return _value; }
 
-constexpr void mobject::update(const double& value) const noexcept { _value = value; }
+constexpr void    mobject::update(const double& value) const noexcept { _value = value; }
 
 template<typename T, typename char_t>
 requires std::is_same_v<char, char_t> ||

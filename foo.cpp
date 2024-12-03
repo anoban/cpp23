@@ -21,6 +21,7 @@ template<typename T, bool = std::is_integral_v<T>> struct bar;
 template<typename T> struct bar<T, true> final {
     public:
         bar() = delete;
+
         constexpr explicit bar(const T& _value) noexcept : _rsrc { _value } { }
 
     private:
@@ -28,9 +29,11 @@ template<typename T> struct bar<T, true> final {
 };
 
 template<int I, int J> struct A { };
+
 template<int I> struct A<I + 5, I * 2> { }; // error, I is not deducible
 
 template<int I, int J, int K> struct B { };
+
 template<int I> struct B<I, I * 2, 2> { }; // OK: first parameter is deducible
 
 auto wmain() -> int {

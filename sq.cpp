@@ -21,12 +21,14 @@ static constexpr std::remove_reference<scalar_t>::type sq(scalar_t x) noexcept {
 
 // template specialization overloads for long double
 template<> static constexpr long double sq(long double x) noexcept { return x * x; }
+
 // following specialization will lead to compile time errors if our templated return type is identical to the argument's type
 // i.e scalar_t, so in order to make these work their return types should be explicitly changes to long double& and long double&&
 // which is problematic because with long double& as retun type we'll be returning a reference to an object past its lifetime
 
 // a better workaround is to remove the references from the return type with std::remove_reference_t<>
 template<> static constexpr long double sq(long double& x) noexcept { return x * x; }
+
 template<> static constexpr long double sq(long double&& x) noexcept { return x * x; }
 
 // a class type
@@ -53,13 +55,13 @@ int main() {
     constexpr auto sq { sqGenerator {} };
     double         a = sq(3.1245); // calls the operator() of object sq
 
-    double b         = ::sq(3.1245); // freestanding function
+    double         b = ::sq(3.1245); // freestanding function
 
-    double c         = ::sq<float>(3.1245); // calls the templated function
+    double         c = ::sq<float>(3.1245); // calls the templated function
 
-    double d         = ::sq(3.1245F); // calls sq<float>()
+    double         d = ::sq(3.1245F); // calls sq<float>()
 
-    double e         = ::sq(3.1245L); // calls sq<long double>() specialization
+    double         e = ::sq(3.1245L); // calls sq<long double>() specialization
 
     return 0;
 }

@@ -5,23 +5,23 @@
 
 template<typename T> struct record final {
         using value_type = T;
-        unsigned area;
-        T        perimeter;
-        T        major_axis_length;
-        T        minor_axis_length;
-        T        aspect_ratio;
-        T        eccentricity;
-        T        convex_area;
-        T        equiv_diameter;
-        T        extent;
-        T        solidity;
-        T        roundness;
-        T        compactness;
-        T        shape_factor_1;
-        T        shape_factor_2;
-        T        shape_factor_3;
-        T        shape_factor_4;
-        char     variety[10]; // max is 9 so :)
+        unsigned             area;
+        T                    perimeter;
+        T                    major_axis_length;
+        T                    minor_axis_length;
+        T                    aspect_ratio;
+        T                    eccentricity;
+        T                    convex_area;
+        T                    equiv_diameter;
+        T                    extent;
+        T                    solidity;
+        T                    roundness;
+        T                    compactness;
+        T                    shape_factor_1;
+        T                    shape_factor_2;
+        T                    shape_factor_3;
+        T                    shape_factor_4;
+        char                 variety[10]; // max is 9 so :)
 
         friend std::ostream& operator<<(_Inout_ std::ostream& ostream, _In_ const record& rcrd) noexcept {
             ostream << rcrd.area << ' ' << rcrd.perimeter << ' ' << rcrd.major_axis_length << ' ' << rcrd.minor_axis_length << ' '
@@ -41,7 +41,7 @@ template<std::floating_point T> static constexpr record<T> parse_line(_In_ const
 
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
-    size_t caret = line.find(',', 0); // the first comma
+    size_t            caret = line.find(',', 0); // the first comma
     std::from_chars(begin, cstart + caret /* this delimiter is exclusive */, temporary.area);
     begin = cstart + caret + 1; // char next to the first comma
 

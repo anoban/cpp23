@@ -51,6 +51,7 @@ constexpr int64_t MAX_ANTICIPATED_DEVICES { 4 }; // define the maximum number of
 // defaulting to 64 seems a little far fetched
 
 static_assert(sizeof(cudaDeviceProp) == 1032); // because cudaDeviceProp is a really huge struct
+
 // imagine the size 64 such structs would take up on the stack
 
 // an error handler for CUDA runtime API calls

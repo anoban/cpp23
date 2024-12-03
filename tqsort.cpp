@@ -1,8 +1,7 @@
 #include <cstdint>
 #include <type_traits>
 
-template<typename T>
-constexpr void swap(
+template<typename T> constexpr void swap(
     T* const __val0, T* const __val1, typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, T>::type = 0
 ) throw() {
     const T temp { *__val0 };
@@ -18,8 +17,7 @@ constexpr void swap(T& __val0, T& __val1) throw() {
     __val1 = temp;
 }
 
-template<typename T>
-constexpr std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, size_t>::type partition(
+template<typename T> constexpr std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, size_t>::type partition(
     T collection[], const size_t soffset, const size_t eoffset
 ) throw() {
     //

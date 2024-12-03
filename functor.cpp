@@ -6,9 +6,13 @@ class greeter {
 
     public:
         greeter() = delete;
+
         inline greeter(std::wstring msg) noexcept : greeting { std::move(msg) } { }
+
         ~greeter() = default;
+
         inline std::wstring          operator()() const noexcept { return greeting; }
+
         inline friend std::wostream& operator<<(std::wostream& ostr, const greeter& obj) noexcept {
             ostr << obj.greeting << L'\n';
             return ostr;

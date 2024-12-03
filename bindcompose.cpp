@@ -21,7 +21,7 @@ int main() {
     constexpr auto predicate_gt       = std::bind(std::greater<int> {}, std::placeholders::_1, 1000);
     constexpr auto predicate_composed = std::bind(std::logical_and<bool> {}, predicate_gt, predicate_lt);
 
-    const auto qual                   = std::count_if(a.begin(), a.end(), predicate_composed);
+    const auto     qual               = std::count_if(a.begin(), a.end(), predicate_composed);
     std::wcout << qualified << L' ' << qual << std::endl;
     return EXIT_SUCCESS;
 }

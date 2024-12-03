@@ -10,6 +10,7 @@
 
 struct printer {
         static unsigned               count;
+
         template<class T> inline void operator()(const T& e) const {
             std::wcout << e << L' ';
             count++;
@@ -18,6 +19,7 @@ struct printer {
 
 struct printerv2 {
         unsigned                      count;
+
         template<class T> inline void operator()(const T& e) {
             std::wcout << e << L' ';
             count++;
@@ -26,7 +28,7 @@ struct printerv2 {
 
 unsigned printer::count = 0;
 
-int main() {
+int      main() {
     std::vector<float> fvec(100, M_PI);
     for (std::vector<float>::const_iterator it = fvec.begin(); it != fvec.end(); it++) std::wcout << *it << L' ';
 

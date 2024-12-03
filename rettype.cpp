@@ -25,8 +25,8 @@ template<typename T, typename U> static inline constexpr auto func(const T& _sca
     return _scalar0 * _scalar1;
 }
 
-template<typename T, typename U>
-static inline constexpr auto funcc(const T& _scalar0, const U& _scalar1) noexcept requires requires { _scalar0* _scalar1; } {
+template<typename T, typename U> static inline constexpr auto funcc(const T& _scalar0, const U& _scalar1) noexcept
+    requires requires { _scalar0* _scalar1; } {
     // let the compiler figure out the rrturn type
     return _scalar0 * _scalar1;
 }

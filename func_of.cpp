@@ -50,8 +50,7 @@ namespace overloads {
     template<template<class> class predicate, class T> static consteval bool all_of() noexcept { return predicate<T>::value; }
 
     template<
-        template<class>
-        class predicate,
+        template<class> class predicate,
         class T,
         class... TList,
         // when __cxx_typelist_counter<TList...>::count is illformed, i.e when TList is empty, this overload will be SFINAEd away
@@ -64,8 +63,7 @@ namespace overloads {
     template<template<class> class predicate, class T> static consteval bool any_of() noexcept { return predicate<T>::value; }
 
     template<
-        template<class>
-        class predicate,
+        template<class> class predicate,
         class T,
         class... TList,
         // when __cxx_typelist_counter<TList...>::count is illformed, i.e when TList is empty, this overload will be SFINAEd away

@@ -20,7 +20,7 @@ struct __cpp20$$msvc15042024ucrt254_ThU202002LTtZ_printer$12__u35TiX_ {
 constexpr auto lambda_0 = [](int x, int y) constexpr noexcept -> int { return x + y; };
 constexpr auto lambda_1 = [](int x, int y) constexpr noexcept -> int { return x + y; };
 
-int main() {
+int            main() {
     const std::wstring name { L"Anoban" };
 
     printer(name);

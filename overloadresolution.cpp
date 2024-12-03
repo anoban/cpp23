@@ -7,8 +7,11 @@ namespace overloads {
 
     // inline void function([[maybe_unused]] ::sstring str) noexcept { ::puts(__FUNCSIG__); }
     inline void function([[maybe_unused]] ::sstring& str) noexcept { ::puts(__FUNCSIG__); }
+
     inline void function([[maybe_unused]] const ::sstring& str) noexcept { ::puts(__FUNCSIG__); }
+
     inline void function([[maybe_unused]] ::sstring&& str) noexcept { ::puts(__FUNCSIG__); }
+
     inline void function([[maybe_unused]] const ::sstring&& str) noexcept { ::puts(__FUNCSIG__); }
 
 } // namespace overloads

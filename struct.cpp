@@ -80,9 +80,9 @@ namespace anoban {
                 ::memset(elements, 0U, sizeof(elements));
             }
 
-            constexpr iterator begin() noexcept { return elements; }
+            constexpr iterator       begin() noexcept { return elements; }
 
-            constexpr iterator end() noexcept { return elements + __crt_countof(elements) + 1; }
+            constexpr iterator       end() noexcept { return elements + __crt_countof(elements) + 1; }
 
             constexpr const_iterator begin() const noexcept { return elements; } // for const objects
 

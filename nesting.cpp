@@ -5,7 +5,9 @@
 
 template<typename T> struct real final {
         T _value;
+
         constexpr explicit real(const T& init) noexcept : _value { init } { }
+
         // real(const T& init) : _value { init } { } // constructor cannot be redeclared :)
 };
 
@@ -27,6 +29,7 @@ template<class T, class = typename std::enable_if<std::is_integral_v<T>, T>::typ
         constexpr Integral& operator=(Integral&&)      = delete; // no move assignment operator
 
         constexpr explicit Integral(const T& init) noexcept : _value(init) { }
+
         constexpr ~Integral() = default;
 
         // conversion operator, to convert to arithmetic types
@@ -56,6 +59,7 @@ template<class T, class = typename std::enable_if<std::is_floating_point_v<T>, T
         constexpr Floating& operator=(Floating&&)      = delete; // no move assignment operator
 
         constexpr explicit Floating(const T& init) noexcept : _value(init) { }
+
         constexpr ~Floating() = default;
 
         // conversion operator
@@ -69,7 +73,7 @@ auto wmain() -> int {
     constexpr ::Integral<short>          five46 { 546 };
     [[maybe_unused]] constexpr long long fivefour6 { five46 }; // implicit invocation of the conversion operator
 
-    constexpr double pi { ::Floating { ::std::numbers::pi_v<float> } };
+    constexpr double                     pi { ::Floating { ::std::numbers::pi_v<float> } };
     return EXIT_SUCCESS;
 }
 
@@ -77,8 +81,7 @@ template<template<typename> class unary_predicate, typename... TList> struct any
         static constexpr bool value = (... || unary_predicate<TList>::value);
 };
 
-template<typename... TList>
-[[nodiscard]] long double consteval sum(
+template<typename... TList> [[nodiscard]] long double consteval sum(
     // cannot use bool here since the compiler will convert the first variadic argument to bool and use it for has_unsigned_types
     // and this will give us incorrect results since the first variadic argument will not be considered for summing
     // const bool has_unsigned_types = ::any_of<std::is_unsigned, TList...>::value,
@@ -111,8 +114,7 @@ static_assert(std::is_same_v<
               ::is_any<std::is_unsigned, float, double, long, int, long double, short, char, long long>::type,
               std::bool_constant<false>>);
 
-template<typename... TList>
-[[nodiscard]] std::enable_if_t<!::is_any<std::is_unsigned, TList...>::value, long double> consteval ssum(
+template<typename... TList> [[nodiscard]] std::enable_if_t<!::is_any<std::is_unsigned, TList...>::value, long double> consteval ssum(
     // const bool has_unsigned_types = ::any_of<std::is_unsigned, TList...>::value,
     // cannot use bool here since the compiler will implicitly convert the first variadic argument to bool and use it for has_unsigned_types
     // and this will give us incorrect results since the first variadic argument will not be considered for summing
@@ -122,6 +124,7 @@ template<typename... TList>
 }
 
 static_assert(::ssum(10, 11, 12, 13, 14, 15, 16) == 91); // :) cool
+
 // static_assert(::ssum(10, 11, 12LLU, 13Ui16, 14, 15U, 16) == 91); // SFNAEd invalid
 
 template<class T, class U> [[nodiscard]] static consteval long double product(_In_ const T& arg0, _In_ const U& arg1) noexcept {

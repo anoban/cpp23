@@ -16,6 +16,7 @@ class stationary {
 
     public:
         virtual void           huh() const noexcept { _putws(L"virtual void stationary::huh() const noexcept"); }
+
         virtual const wchar_t* name() const noexcept { return L"stationary"; }
 };
 
@@ -36,6 +37,7 @@ class mimic_stationary {
 
     public:
         virtual void           placeholder() const noexcept { _putws(L"virtual void mimic_stationary::placeholder() const noexcept"); }
+
         virtual const wchar_t* what() const noexcept { return L"mimic_stationary"; }
 };
 
@@ -45,6 +47,7 @@ class exercise_book : public stationary {
 
     public:
         virtual void           huh() const noexcept override { _putws(L"virtual void exercise_book::huh() const noexcept override"); }
+
         virtual const wchar_t* name() const noexcept override { return L"exercise_book"; }
 };
 

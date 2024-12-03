@@ -114,6 +114,7 @@ namespace __arthur_o_dwyer {
     // when T& is ill formed, the compiler will fall back to the base template
 
     template<typename T> using add_reference_t = typename impl<T, T>::type;
+
     // the problem with using = typename impl<T, T>::type; is reference types
     // when T is a reference, our result should always be T& (regardless of the type of reference T)
     // with add_reference_t<T&&>, our partial specialization will map to impl<T&&, T&&>
@@ -162,6 +163,7 @@ namespace __punned_types {
     template<typename...> using make_void = void; // our type of choice here is void
 
     static_assert(std::is_same_v<make_void<float, const int, volatile double, unsigned short&, const volatile char>, void>); // ;)
+
     // this will still not work with invalid types like void&
 
     template<typename T, typename SFINAE> struct impl { // base template, fall back for void types

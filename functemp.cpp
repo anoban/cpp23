@@ -8,12 +8,14 @@ template<class T> struct regular {
 };
 
 #pragma pack(push, 1)
+
 template<class T> struct packed {
         T     _y;
         short _w;
         float _x;
         char  _z;
 };
+
 #pragma pack(pop)
 
 static_assert(sizeof(regular<double>) == 24);

@@ -20,7 +20,7 @@ static void PrintPoint3D(const point3d& point) noexcept { ::wprintf_s(L"Point3D 
 static constexpr point3d NewPoint3D() noexcept { return point3d { 0, 0, 0 }; }
 
 // in C++, point3d is likely to be implemented as a class type (non-aggregate)
-class point3dcpp final {
+class point3dcpp         final {
     private:
         float x, y, z;
 
@@ -152,7 +152,7 @@ int wmain() {
     point3dcpp   p3 { 4, 8, 16 };
     p3.get_x();
 
-    auto&& p3z { p3.get_z() };
+    auto&&               p3z { p3.get_z() };
 
     constexpr point3dcpp p3c { 1, 4, 9 };
     p3c.get_x();

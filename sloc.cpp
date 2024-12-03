@@ -6,8 +6,7 @@
 
 #include <source_location.hpp>
 
-template<typename char_t>
-static typename std::enable_if_t<std::is_arithmetic_v<char_t>, void> logger(
+template<typename char_t> static typename std::enable_if_t<std::is_arithmetic_v<char_t>, void> logger(
     _In_ const std::source_location& _sloc = std::source_location::current()
 ) {
     std::cout << "File name :: " << _sloc.file_name() << "\nFunction name :: " << _sloc.function_name()

@@ -15,7 +15,7 @@ struct copy_only final {
         copy_only(copy_only&&)                 = delete;
         copy_only& operator=(copy_only&&)      = delete;
 
-        float data;
+        float      data;
 };
 
 static inline copy_only nrvo() noexcept {
@@ -39,7 +39,9 @@ class none final { // not copyable and not movable
 
     public:
         none() noexcept : data() { }
+
         none(const double& v) noexcept : data(v) { }
+
         none(const none&)            = delete;
         none(none&&)                 = delete;
         none& operator=(const none&) = delete;
@@ -48,6 +50,7 @@ class none final { // not copyable and not movable
 };
 
 static none _rvo() noexcept { return none { 54.0 }; } // no valid copy ctor or move ctor but this will still work :)
+
 // plain old RVO
 
 static none nrvo_err() noexcept {
@@ -81,7 +84,7 @@ int main() {
     juanita = static_cast<::sstring&&>(strings.at(2)); // move assignment
     std::cout << juanita << '\n';                      // Janelle
 
-    const auto monet { juanita + " monet" }; // move ctor
+    const auto        monet { juanita + " monet" }; // move ctor
 
     // C++ standard does not gurantee that moved from objects will be NULL or NULL equivalent
     std::string       jeremey { "Jeremey Fischer god damn make this long enough so SSO won't work here" };

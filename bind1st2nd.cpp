@@ -5,7 +5,7 @@
 
 static unsigned sum(char x, unsigned long y) noexcept { return x + y; }
 
-int main() {
+int             main() {
     const auto summ = std::bind(sum, 'd', std::placeholders::_1);
     std::wcout << summ(100L) << L'\n';
 

@@ -1,7 +1,8 @@
 #include <cstdlib>
 #include <type_traits>
 
-template<class _Type> constexpr auto declval() noexcept -> typename std::add_rvalue_reference_t<_Type>; // remember reference collapsing
+template<class _Type> constexpr auto declval() noexcept -> typename std::add_rvalue_reference_t<_Type>; // remember reference
+                                                                                                        // collapsing
 static_assert(std::is_same_v<decltype(declval<float>()), float&&>);                                     // T + && => T&&
 static_assert(std::is_same_v<decltype(declval<float&>()), float&>);                                     // T& + && => T&
 static_assert(std::is_same_v<decltype(declval<float&&>()), float&&>);                                   // T&& + && => T&&
@@ -22,8 +23,9 @@ namespace utilities {
 } // namespace utilities
 
 template<class _TyL, class _TyR, class _TySFINAE> struct is_assignable final {
-        // we need _TySFINAE to become void when the evaluated assignment operation is valid, so the compiler will opt for the specialization
-        // instead of the base template
+        // we need _TySFINAE to become void when the evaluated assignment operation is
+        // valid, so the compiler will opt for the specialization instead of the base
+        // template
         static constexpr bool value = false;
 };
 
@@ -35,8 +37,9 @@ template<class _TyL, class _TyR> struct is_assignable<_TyL, _TyR, void /* when _
 
 // or we could choose to specialize on a bool instead of a type
 template<class _TyL, class _TyR, bool is_valid> struct _is_assignable final {
-        // we need _TySFINAE to become void when the evaluated assignment operation is valid, so the compiler will opt for the specialization
-        // instead of the base template
+        // we need _TySFINAE to become void when the evaluated assignment operation is
+        // valid, so the compiler will opt for the specialization instead of the base
+        // template
         static constexpr bool value = false;
 };
 

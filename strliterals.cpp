@@ -31,7 +31,7 @@ auto main() -> int {
 
     std::ifstream file { R"(./romeojuliet.txt)", std::ios::in | std::ios::ate };
     if (!file.is_open()) return EXIT_FAILURE;
-    auto nbytes { file.tellg() - file.seekg(std::ios::beg).tellg() };
+    auto       nbytes { file.tellg() - file.seekg(std::ios::beg).tellg() };
 
     const auto fsize { std::filesystem::file_size(R"(./romeojuliet.txt)") };
     printf_s("std::ifstream %lld, std::filesystem %llu \n", nbytes, fsize); // NOLINT(cppcoreguidelines-pro-type-vararg)

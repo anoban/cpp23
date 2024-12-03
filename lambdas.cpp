@@ -50,10 +50,11 @@ struct decrementor {
 };
 
 std::size_t decrementor::ncalls {}; // static members can only be defined inside the namespaces or globally
+
 // inside functions, struct::static_member is an expression not a declaration
 // in the above definition, removing the storage class type (std::size_t) will make it an expression
 
-int main() {
+int         main() {
     auto                 x { 100 };
     std::vector<int32_t> integrals(100);
     std::iota(integrals.begin(), integrals.end(), 1);
@@ -66,7 +67,7 @@ int main() {
     std::wcout << integrals;
 
     void (*fnptr)(int&) = increment;
-    (*fnptr)(x);
+         (*fnptr)(x);
 
     auto dec { decrementor {} }; // stateful
     // invoking the callable object directly

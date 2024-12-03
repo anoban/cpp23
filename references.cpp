@@ -9,8 +9,8 @@ static void dummy() noexcept {
     // thus analogous to constant pointers
 
     // assigning to a reference overwrites the referenced object, unlike pointers where the pointer will be modified
-    short height(10);
-    auto& refto_height { height };
+    short         height(10);
+    auto&         refto_height { height };
     refto_height += 10; // height = 20 now
     auto* ptrto_height { &height };
     ptrto_height  += 10; // ptrto_height now points to a location 20 bytes right to where height is stored, height is still 10
@@ -59,6 +59,7 @@ static void months_increment() noexcept {
 
 namespace incrementenums {
     enum class DAYS : unsigned char { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY };
+
     // now we have another enum we'd like to support increment and decrement operators
     // increment and decrement perators in C and C++ behave like statements and exressions
     // they materialize in-place mutations and return the mutated value
@@ -66,10 +67,11 @@ namespace incrementenums {
     // ++x increments x by 1 and then returns the new value
 
     [[nodiscard]] constexpr DAYS operator++(DAYS x) noexcept { return static_cast<DAYS>(static_cast<unsigned>(x) + 1U); }
+
     // the caveat with the above implementation is that it operates on values, it will of course return an incremented value
     // but the in-place mutation won't be materialized
 
-    constexpr void test() noexcept {
+    constexpr void               test() noexcept {
         auto today { DAYS::SATURDAY };
         ++today;        // today is still SATURDAY
         ++DAYS::SUNDAY; // incrementation on an rvalue! this shouldn't be possible
@@ -98,9 +100,9 @@ static void rebind() noexcept {
     // AGAIN WE ARE NOT MUTATING THE REFERENCE ITSELF
 
     // IF A REFERENCE REFERS TO A CONSTANT POINTER, THIS WON'T BE POSSIBLE EVEN IF THE OBJECT IS NON-CONST
-    long        age { 45 };      // a non-const variable
-    auto&       refage { age };  // regular reference
-    const auto& crefage { age }; // const reference
+    long              age { 45 };      // a non-const variable
+    auto&             refage { age };  // regular reference
+    const auto&       crefage { age }; // const reference
 
     const auto* const cptrage { &age }; // a constant pointer to a constant long
     // we cannot modify age through cptrage, but age can be modified directly

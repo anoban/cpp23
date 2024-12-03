@@ -21,6 +21,7 @@ static_assert(std::is_same_v<decltype(lambda_0), decltype(lambda_1)>); // NOPE!
 const std::function<double(int, int)> wrapper_0 = [](int x, int y) constexpr noexcept -> double {
     return x + y;
 }; // cannot have consteval here
+
 // unlike plain lambdas, std::function has complex internal state and could even require dynamic alloction
 // hence the heftiness
 
@@ -44,7 +45,7 @@ int main() {
 
     // compiler created closure objects for stateless lambdas are just empty class types with only the operator() defined!
     std::wcout << L"sizeof(stateless) is " << sizeof(stateless) << L" bytes!\n"; // 1 byte
-    std::wcout << L"sizeof([] {}) is " << sizeof([] {}) << L" bytes!\n";         // 1 byte
+    std::wcout << L"sizeof([] {}) is " << sizeof([] { }) << L" bytes!\n";        // 1 byte
 
     std::wcout << std::boolalpha << ::is_close(lambda_0(10, 56), wrapper_0.operator()(56, 10)) << L'\n';
 

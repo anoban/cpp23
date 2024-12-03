@@ -30,7 +30,7 @@ enum class month { January, February, March, April, May, June, July, August, Sep
 
 static constexpr auto LIMIT { 48LLU }; // 4 x 12
 
-auto main() -> int {
+auto                  main() -> int {
     auto           july { month::July }, november { month::November };
     constexpr auto _november = static_cast<unsigned>(month::November); // 10
     constexpr auto _july     = static_cast<unsigned>(month::July);     // 6

@@ -14,10 +14,10 @@ template<bool pred, typename T> using predicate_if_t          = ::predicate_if<p
 template<bool pred, typename T> constexpr bool predicate_if_v = ::predicate_if<pred, T>::value;
 
 namespace numbers {
-    template<class T>
-    constexpr typename ::predicate_if<std::is_floating_point<T>::value, T>::type pi_v = static_cast<T>(3.141592653589793L);
-    template<typename T, typename ::predicate_if_t<std::is_floating_point_v<T>, T> = T(0.0)>
-    constexpr T avogadro_v = static_cast<T>(6.02214076E23L);
+    template<class T> constexpr typename ::predicate_if<std::is_floating_point<T>::value, T>::type pi_v =
+        static_cast<T>(3.141592653589793L);
+    template<typename T, typename ::predicate_if_t<std::is_floating_point_v<T>, T> = T(0.0)> constexpr T avogadro_v =
+        static_cast<T>(6.02214076E23L);
 } // namespace numbers
 
 int main() {

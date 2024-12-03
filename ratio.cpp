@@ -6,33 +6,34 @@
 // all custom std::ratio objects are templates
 // we cannot use operators on them directly, utility templates provided in <ratio> must be used to perform arithmetics on the std::ratio templates
 
-template<class char_type, int64_t numerator, int64_t denominator>
-std::basic_ostream<char_type>& operator<<(std::basic_ostream<char_type>& ostream, const std::ratio<numerator, denominator>& ratio)
-    noexcept(noexcept(ostream << ratio.num)) {
+template<class char_type, int64_t numerator, int64_t denominator> std::basic_ostream<char_type>& operator<<(
+    std::basic_ostream<char_type>& ostream, const std::ratio<numerator, denominator>& ratio
+) noexcept(noexcept(ostream << ratio.num)) {
     ostream << ratio.num << char_type('/') << ratio.den << char_type('\n');
     return ostream;
 }
 
-template<class char_type, int64_t numerator, int64_t denominator>
-std::basic_ostream<char_type>& operator<<=(std::basic_ostream<char_type>& ostream, const std::ratio<numerator, denominator>& ratio)
-    noexcept(noexcept(ostream << ratio.num)) {
+template<class char_type, int64_t numerator, int64_t denominator> std::basic_ostream<char_type>& operator<<=(
+    std::basic_ostream<char_type>& ostream, const std::ratio<numerator, denominator>& ratio
+) noexcept(noexcept(ostream << ratio.num)) {
     ostream << static_cast<double>(ratio.num) / ratio.den << char_type('\n');
     return ostream;
 }
 
 inline namespace { // handrolled std::ratio alternative
+
     template<__int64 _rnumer, __int64 _rdenom> struct ratio final {
-            static constexpr __int64 num { _rnumer };
-            static constexpr __int64 den { _rdenom };
+            static constexpr __int64                                                     num { _rnumer };
+            static constexpr __int64                                                     den { _rdenom };
 
             // NOLINTNEXTLINE(google-explicit-constructor) - enable implicit conversion to real types
             template<typename T> requires std::floating_point<T> [[nodiscard]] constexpr operator T() const noexcept {
                 return static_cast<T>(num) / static_cast<T>(den);
             }
 
-            template<typename char_t>
-            friend std::basic_ostream<char_t>& operator<<(_In_ const ratio& fraction, _Inout_ std::basic_ostream<char_t>& ostr)
-                noexcept(noexcept(ostr << num)) {
+            template<typename char_t> friend std::basic_ostream<char_t>& operator<<(
+                _In_ const ratio& fraction, _Inout_ std::basic_ostream<char_t>& ostr
+            ) noexcept(noexcept(ostr << num)) {
                 ostr << fraction.num << char_t('/') << fraction.den << char_t('\n');
                 return ostr;
             }

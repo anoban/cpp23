@@ -43,17 +43,17 @@ template<typename T, typename = std::is_scalar<T>::type> class comparable {
 
         constexpr explicit comparable(const T& _init) noexcept : value { _init } { }
 
-        constexpr ~comparable()                                 = default;
+        constexpr ~comparable()                                                = default;
 
         // deliberately deleting copy and move ctors and copy and move assignment operators
 
-        constexpr comparable(comparable& other)                 = delete;
+        constexpr comparable(comparable& other)                                = delete;
 
-        constexpr comparable(comparable&& other)                = delete;
+        constexpr comparable(comparable&& other)                               = delete;
 
-        constexpr comparable operator=(const comparable& other) = delete;
+        constexpr comparable                operator=(const comparable& other) = delete;
 
-        constexpr comparable operator=(comparable&& other)      = delete;
+        constexpr comparable                operator=(comparable&& other)      = delete;
 
         template<typename U> constexpr bool operator<(const comparable<U>& other) const noexcept { return value < other.get(); }
 
@@ -100,14 +100,14 @@ int wmain() {
     [[maybe_unused]] constexpr auto forty { ::max(12, 40) };
     [[maybe_unused]] constexpr auto ten { ::max(1.546562, 10.00000) };
 
-    constexpr unsigned x { 11 };
-    constexpr unsigned y { 33 };
+    constexpr unsigned              x { 11 };
+    constexpr unsigned              y { 33 };
 
     [[maybe_unused]] constexpr auto thirtythree { ::max(x, y) };
 
-    constexpr auto five { ::comparable(5) };
-    constexpr auto fifty { ::comparable(50) };
-    constexpr auto seven { ::comparable(7.00F) };
+    constexpr auto                  five { ::comparable(5) };
+    constexpr auto                  fifty { ::comparable(50) };
+    constexpr auto                  seven { ::comparable(7.00F) };
 
     ::max(five, seven);
     ::max(five, fifty);

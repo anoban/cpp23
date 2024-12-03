@@ -47,6 +47,7 @@ namespace fwd {
     [[nodiscard]] constexpr _Ty forward(_In_ typename std::remove_reference<_Ty>::type& arg) noexcept {
         return arg; // return the lvalue reference
     }
+
     // overload for rvalue references
     template<typename _Ty> [[nodiscard]] constexpr _Ty&& forward(_In_ typename std::remove_reference<_Ty>::type&& arg) noexcept {
         return std::move(arg); // equivalent to return static_cast<_Ty&&>(arg);

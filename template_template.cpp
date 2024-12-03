@@ -32,14 +32,13 @@ namespace __cxx_trait_helpers { // not using sizeof...()
 
 } // namespace __cxx_trait_helpers
 
-template<template<class> class _cxx_predicate, class T>
-[[nodiscard]] static consteval bool all_of_v() noexcept requires requires { _cxx_predicate<T>::value; } {
+template<template<class> class _cxx_predicate, class T> [[nodiscard]] static consteval bool all_of_v() noexcept
+    requires requires { _cxx_predicate<T>::value; } {
     return _cxx_predicate<T>::value;
 }
 
 template<
-    template<class>
-    class _cxx_predicate,
+    template<class> class _cxx_predicate,
     class T,
     class... TList,
     typename = std::enable_if<__cxx_trait_helpers::__cxx_paramater_pack_counter<TList...>::value != 0, T>::type>

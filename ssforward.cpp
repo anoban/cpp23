@@ -25,9 +25,9 @@ class member final {
 };
 
 auto main() -> int {
-    ::sstring    Jennifer { "Jennifer" };
-    const member Julia { "Julia", "Smithson", 32, false, 450000 };
-    const member Roberts { std::move(Jennifer), "Ivanovick", 29, true, 589200 };
+    ::sstring             Jennifer { "Jennifer" };
+    const member          Julia { "Julia", "Smithson", 32, false, 450000 };
+    const member          Roberts { std::move(Jennifer), "Ivanovick", 29, true, 589200 };
 
     std::vector<::member> members {};
     members.emplace_back("Nathan", "Williams", 47, false, 78897.56497);

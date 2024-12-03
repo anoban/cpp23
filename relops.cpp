@@ -41,22 +41,27 @@ class bar final {
     public:
         // operators only usable with rvalues
         constexpr bool operator==(_In_ [[maybe_unused]] const foo& other) const&& noexcept { return false; }
+
         constexpr bool operator<(_In_ [[maybe_unused]] const foo& other) const&& noexcept { return false; }
 };
 
 static __declspec(noinline) constexpr bool func(_In_ const bar& b, _In_ const foo& f) noexcept { return b < f; }
+
 static __declspec(noinline) constexpr bool func(_In_ bar&& b, _In_ foo&& f) noexcept { return b < f; }
 
-struct bazz final {
+struct bazz                                final {
         // operators usable with lvalues and rvalues
         constexpr bool operator==(_In_ [[maybe_unused]] const foo& other) const& noexcept { return true; }
+
         constexpr bool operator<(_In_ [[maybe_unused]] const foo& other) const& noexcept { return true; }
 };
 
 struct wow final {
         // operators only usable with lvalues
         constexpr bool operator==(_In_ [[maybe_unused]] const foo& other) const& noexcept { return true; }
+
         constexpr bool operator<(_In_ [[maybe_unused]] const foo& other) const& noexcept { return true; }
+
         // because we've explicitly deleted the rvalue overloads
         constexpr bool operator==(_In_ [[maybe_unused]] const foo& other) const&& noexcept = delete;
         constexpr bool operator<(_In_ [[maybe_unused]] const foo& other) const&& noexcept  = delete;
@@ -86,8 +91,8 @@ int wmain() {
         std::wcout << (bar {} > foo {}) << L'\n';
         std::wcout << (bar {} >= foo {}) << L'\n';
 
-        auto&& xvref_bar { bar {} };
-        auto&& xvref_foo { foo {} };
+        auto&&     xvref_bar { bar {} };
+        auto&&     xvref_foo { foo {} };
 
         const bool okay { xvref_bar <= xvref_foo };  // xvalues - lvalues with a type signature of rvalue references
         const bool mhmmm { xvref_bar == xvref_foo }; // because xvalues are not rvalues
@@ -98,8 +103,8 @@ int wmain() {
     {
         using namespace derived_comparisons;
 
-        foo  royal {};
-        bazz what {};
+        foo        royal {};
+        bazz       what {};
 
         const bool valid { what == royal };
         const bool valid_too { what < royal };
@@ -117,8 +122,8 @@ int wmain() {
     {
         using namespace derived_comparisons;
 
-        foo royal {};
-        wow what {};
+        foo        royal {};
+        wow        what {};
 
         const bool valid { what == royal };
         const bool valid_too { what < royal };

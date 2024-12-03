@@ -9,6 +9,7 @@ struct object {
         std::wstring  name; // 32 bytes
 
         virtual ~object() = default;
+
         virtual void greet() const { std::wcout << L"Hello!\n"; }
 };
 
@@ -32,7 +33,7 @@ namespace dummies {
                 const char* _UndecoratedName;
                 const char  _DecoratedName[1];
 
-                __std_type_info_data() noexcept : _UndecoratedName(nullptr), _DecoratedName() {};
+                __std_type_info_data() noexcept : _UndecoratedName(nullptr), _DecoratedName() { };
                 __std_type_info_data(const __std_type_info_data&)            = default;
                 __std_type_info_data(__std_type_info_data&&)                 = default;
 
@@ -72,6 +73,7 @@ auto wmain() -> int {
     // the only private data member of std::type_info is a struct __std_type_info_data
 
     static_assert(std::is_standard_layout<__std_type_info_data>::value); // woohoo :)
+
     // __std_type_info_data has all its ctors an assignment operators deleted explicitly
 
     struct __std_type_info_data {

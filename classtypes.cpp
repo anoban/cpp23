@@ -7,7 +7,7 @@ template<typename T> struct type {
 
         constexpr explicit type(T init) noexcept : _value { init } { }
 
-        constexpr T& get() noexcept { return _value; }
+        constexpr T&       get() noexcept { return _value; }
 
         constexpr const T& get() const noexcept { return _value; }
 
