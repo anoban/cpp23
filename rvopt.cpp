@@ -38,5 +38,7 @@ auto wmain() -> int {
     const auto nada { ::ccget() }; // NRVO
     std::wcout << nada << L'\n';
 
+    std::wcout << std::endl;
+
     return EXIT_SUCCESS;
 }
