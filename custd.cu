@@ -23,8 +23,12 @@ static void __global__ custdsum(_In_ const double* const array, _In_ const unsig
 template<typename _TyDeviceIterator> static
     typename std::enable_if<std::is_arithmetic<typename _TyDeviceIterator::value_type>::value, void>::type __global__
     cudastdsum(_In_ _TyDeviceIterator _begin, _In_ _TyDeviceIterator _end, _Inout_ typename _TyDeviceIterator::value_type* const result) {
-    const auto sum { cuda::std::reduce(_begin, _end, _TyDeviceIterator::value_type {}, cuda::std::plus {}) };
-    *result = sum;
+    *result = cuda::std::reduce(
+        _begin,
+        _end,
+        static_cast<typename _TyDeviceIterator::value_type>(0) /* _TyDeviceIterator::value_type {} seems problematic here WTF?? */,
+        cuda::std::plus<typename _TyDeviceIterator::value_type> {}
+    );
 }
 
 int main() {
@@ -55,6 +59,8 @@ int main() {
     std::cout << std::setw(30) << "thrust::reduce " << dsum << '\n';
     std::cout << std::setw(30) << "kernel " << ksum << '\n';
     std::cout << std::setw(30) << "cuda::std::reduce " << custdsum << '\n';
+
+    auto x { 10.00 + long double {} };
 
     return EXIT_SUCCESS;
 }
