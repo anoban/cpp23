@@ -5,30 +5,56 @@
 #include <cuda_runtime.h>
 
 #include <cuda/std/numeric>
+#include <thrust/device_vector.h>
+#include <thrust/reduce.h>
 
-static void __global__ csum(_Inout_ double* const slice, _In_ const unsigned size) {
+static void __global__ csum(_Inout_ double* const array, _In_ const unsigned size) {
     double sum {};
-    for (unsigned i {}; i < size; ++i) sum += slice[i];
-    slice[0] = sum;
+#pragma unroll
+    for (unsigned i {}; i < size; ++i) sum += array[i];
+    array[0] = sum;
 }
 
-template<typename _IteratorType> static // NOLINTNEXTLINE(modernize-use-constraints)
-    typename std::enable_if<!std::is_same<typename _IteratorType::value_type, void>::value, void>::type __global__
-    cppsum(_Inout_ _IteratorType _begin, _IteratorType _end) {
-    *_begin = cuda::std::accumulate(_begin, _end, _IteratorType::value_type {}, cuda::std::sum {});
+static void __global__ custdsum(_In_ const double* const array, _In_ const unsigned size, _Inout_ double* const res) {
+    const auto sum { cuda::std::reduce(array, array + size, 0.0L) };
+    *res = sum;
+}
+
+template<typename _TyDeviceIterator> static
+    typename std::enable_if<std::is_arithmetic<typename _TyDeviceIterator::value_type>::value, void>::type __global__
+    cudastdsum(_In_ _TyDeviceIterator _begin, _In_ _TyDeviceIterator _end, _Inout_ typename _TyDeviceIterator::value_type* const result) {
+    const auto sum { cuda::std::reduce(_begin, _end, _TyDeviceIterator::value_type {}, cuda::std::plus {}) };
+    *result = sum;
 }
 
 int main() {
-    std::vector<double>                    randoms(1'000'000'000);
-    std::knuth_b                           rengine { std::chrono::high_resolution_clock::now().time_since_epoch().count() };
-    std::uniform_real_distribution<double> urdist { -100.0, 1000.0 };
+    std::vector<double> randoms(1'000'000);
+    std::knuth_b        rengine { static_cast<unsigned>(std::chrono::high_resolution_clock::now().time_since_epoch().count()) };
+    std::uniform_real_distribution<double> urdist { -10.0, 100.0 };
 
     std::generate(randoms.begin(), randoms.end(), [&rengine, &urdist]() noexcept -> auto { return urdist(rengine); });
-    const auto hsum { std::reduce(randoms.cbegin(), randoms.cend(), 0.0L) };
-    double *   drandoms {}, dsum {};
-    ::cudaMalloc(&drandoms, randoms.size() * sizeof(double));
+    const auto                    hsum { std::reduce(randoms.cbegin(), randoms.cend(), 0.0L) };
 
-    ::cudaFree(drandoms);
+    thrust::device_vector<double> drandoms { randoms.cbegin(), randoms.cend() };
+    const auto                    dsum { thrust::reduce(drandoms.cbegin(), drandoms.cend(), 0.000L) };
+
+    double *                      sum {}, custdsum {}, ksum {};
+
+    cudaMalloc(&sum, sizeof(double));
+    // ::custdsum<<<1, 1>>>(drandoms.data().get(), drandoms.size(), sum);
+    ::cudastdsum<<<1, 1>>>(drandoms.cbegin(), drandoms.cend(), sum);
+    ::cudaMemcpy(&custdsum, sum, sizeof(double), cudaMemcpyKind::cudaMemcpyDeviceToHost);
+
+    ::csum<<<1, 1>>>(drandoms.data().get(), drandoms.size()); // destructive
+    ::cudaMemcpy(&ksum, drandoms.data().get(), sizeof(double), cudaMemcpyKind::cudaMemcpyDeviceToHost);
+
+    ::cudaThreadSynchronize();
+    ::cudaFree(sum);
+
+    std::cout << std::setw(30) << std::setprecision(20) << "std::reduce " << hsum << '\n';
+    std::cout << std::setw(30) << "thrust::reduce " << dsum << '\n';
+    std::cout << std::setw(30) << "kernel " << ksum << '\n';
+    std::cout << std::setw(30) << "cuda::std::reduce " << custdsum << '\n';
 
     return EXIT_SUCCESS;
 }
