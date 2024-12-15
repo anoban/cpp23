@@ -23,8 +23,8 @@ template<class char_type, int64_t numerator, int64_t denominator> std::basic_ost
 inline namespace { // handrolled std::ratio alternative
 
     template<__int64 _rnumer, __int64 _rdenom> struct ratio final {
-            static constexpr __int64                                                     num { _rnumer };
-            static constexpr __int64                                                     den { _rdenom };
+            static constexpr __int64 num { _rnumer };
+            static constexpr __int64 den { _rdenom };
 
             // NOLINTNEXTLINE(google-explicit-constructor) - enable implicit conversion to real types
             template<typename T> requires std::floating_point<T> [[nodiscard]] constexpr operator T() const noexcept {

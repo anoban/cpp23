@@ -55,13 +55,13 @@ template<class T> requires std::is_arithmetic_v<T> template<std::floating_point 
 
 template<std::floating_point T> static constexpr T e_v = static_cast<T>(2.71828182845905L);
 
-[[nodiscard]] static inline constexpr double       pi() noexcept { return 3.14159265358979; }
+[[nodiscard]] static inline constexpr double pi() noexcept { return 3.14159265358979; }
 
-auto                                               wmain() -> int {
+auto wmain() -> int {
     // try binding a eps to a double&
     // double&            invalid = eps;
     // but eps can be bound to a const type& as the compiler can create a type casted temporarya and bind it to the reference
-    const long double& valid { eps }; // okay, but this reference does not point to the object eps!!!
+    const long double& valid { eps };   // okay, but this reference does not point to the object eps!!!
     long long&&        valid_too = eps; // cannot use a braced initializer here because of narrowing :(
 
     std::wcout << std::hex << std::uppercase;
@@ -77,9 +77,9 @@ auto                                               wmain() -> int {
 
     const unsigned short& truncation = std::numbers::pi_v<double>;
 
-    const float*          ptr        = &std::numbers::pi_v<float>; // works
+    const float*       ptr           = &std::numbers::pi_v<float>; // works
     // const double*      _ptr          = &2.71828182845905;          //  error: cannot take the address of an rvalue of type 'double'
-    const long double*    __ptr = &::e_v<long double>; // works, seems like we can take the address of constexpr'd variable templates
+    const long double* __ptr         = &::e_v<long double>; // works, seems like we can take the address of constexpr'd variable templates
 
     // const double* _pi                = &::pi(); // WOW
 
@@ -91,10 +91,10 @@ auto                                               wmain() -> int {
     const ::wrapper<double>        should_not_be_okay { ui32pi }; // call to a deleted ctor
 
     // binding an rvalue reference T&& to a prvalue of type T triggers a temporary materialization!
-    [[maybe_unused]] unsigned&&    rvref { 87245 };
+    [[maybe_unused]] unsigned&& rvref { 87245 };
 
     // we could also have a const rvalue reference, but it is not something that's particularly useful
-    const std::wstring&&           crvref { L"What can I do with this?" }; // this might as well have been a const std::wstring object
+    const std::wstring&& crvref { L"What can I do with this?" }; // this might as well have been a const std::wstring object
 
     return EXIT_SUCCESS;
 }

@@ -25,13 +25,13 @@ template<class _Ty> requires(std::is_arithmetic_v<_Ty>) class point final {
         inline value_type y() const noexcept;
         inline value_type z() const noexcept;
 
-        inline reference  x() noexcept;
-        inline reference  y() noexcept;
-        inline reference  z() noexcept;
+        inline reference x() noexcept;
+        inline reference y() noexcept;
+        inline reference z() noexcept;
 
-        inline void       x(_In_ const _Ty&) noexcept;
-        inline void       y(_In_ const _Ty&) noexcept;
-        inline void       z(_In_ const _Ty&) noexcept;
+        inline void x(_In_ const _Ty&) noexcept;
+        inline void y(_In_ const _Ty&) noexcept;
+        inline void z(_In_ const _Ty&) noexcept;
 };
 
 template<class _Ty> requires(std::is_arithmetic_v<_Ty>) inline point<_Ty>::point() noexcept : _x(), _y(), _z() { }
@@ -78,17 +78,17 @@ template<class _Ty> requires(std::is_arithmetic_v<_Ty>) inline point<_Ty>::value
 
 template<class _Ty> requires(std::is_arithmetic_v<_Ty>) inline point<_Ty>::value_type point<_Ty>::z() const noexcept { return _z; }
 
-template<class _Ty> requires(std::is_arithmetic_v<_Ty>) inline point<_Ty>::reference  point<_Ty>::x() noexcept { return _x; }
+template<class _Ty> requires(std::is_arithmetic_v<_Ty>) inline point<_Ty>::reference point<_Ty>::x() noexcept { return _x; }
 
-template<class _Ty> requires(std::is_arithmetic_v<_Ty>) inline point<_Ty>::reference  point<_Ty>::y() noexcept { return _y; }
+template<class _Ty> requires(std::is_arithmetic_v<_Ty>) inline point<_Ty>::reference point<_Ty>::y() noexcept { return _y; }
 
-template<class _Ty> requires(std::is_arithmetic_v<_Ty>) inline point<_Ty>::reference  point<_Ty>::z() noexcept { return _z; }
+template<class _Ty> requires(std::is_arithmetic_v<_Ty>) inline point<_Ty>::reference point<_Ty>::z() noexcept { return _z; }
 
-template<class _Ty> requires(std::is_arithmetic_v<_Ty>) inline void                   point<_Ty>::x(_In_ const _Ty& x) noexcept { _x = x; }
+template<class _Ty> requires(std::is_arithmetic_v<_Ty>) inline void point<_Ty>::x(_In_ const _Ty& x) noexcept { _x = x; }
 
-template<class _Ty> requires(std::is_arithmetic_v<_Ty>) inline void                   point<_Ty>::y(_In_ const _Ty& y) noexcept { _y = y; }
+template<class _Ty> requires(std::is_arithmetic_v<_Ty>) inline void point<_Ty>::y(_In_ const _Ty& y) noexcept { _y = y; }
 
-template<class _Ty> requires(std::is_arithmetic_v<_Ty>) inline void                   point<_Ty>::z(_In_ const _Ty& z) noexcept { _z = z; }
+template<class _Ty> requires(std::is_arithmetic_v<_Ty>) inline void point<_Ty>::z(_In_ const _Ty& z) noexcept { _z = z; }
 
 template<class _Ty, class = typename std::enable_if<std::is_arithmetic<_Ty>::value, _Ty>::type> class rational final {
     public:

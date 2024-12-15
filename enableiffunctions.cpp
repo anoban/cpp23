@@ -7,13 +7,13 @@
 // if std::enable_if<condition>::type evaluates to nothing, function definition will fail as it will lack a valid return type
 template<typename T> [[nodiscard]] static consteval std::enable_if<std::is_integral_v<T>, T>::type square(T x) noexcept { return x * x; }
 
-template<typename T> [[nodiscard]] static consteval long long                                      power(
-                                         long base,
-                                         T    exponent,
-                                         typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value, T>::type =
-                                             0 // third optional type with a default value
-                                         // when std::enable_if fails, function definition will become invalid as the type of the third argument will disappear!
-                                     ) noexcept {
+template<typename T> [[nodiscard]] static consteval long long power(
+    long base,
+    T    exponent,
+    typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value, T>::type =
+        0 // third optional type with a default value
+    // when std::enable_if fails, function definition will become invalid as the type of the third argument will disappear!
+) noexcept {
     long long result { 1 };
     for (unsigned i = 0; i < exponent; ++i) result *= base;
     return result;

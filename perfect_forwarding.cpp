@@ -109,9 +109,9 @@ auto main() -> int {
     ::sstring       chamber { "Harry Potter and the Chamber of Secrets" };
     ::sstring       philosopher { "Harry Potter and the Philosopher's Stone" };
 
-    book            philosophers_stone { philosopher, rowling }; // expect both to be copy constructed
+    book philosophers_stone { philosopher, rowling }; // expect both to be copy constructed
     // book chamber_of_secrets { std::move(chamber), rowling }; // title will be move constructed, HADN'T WE DELETED THE MOVE CTOR
-    book            chamber_of_secrets { chamber, rowling };
+    book chamber_of_secrets { chamber, rowling };
 
     ::puts(".................................");
 

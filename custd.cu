@@ -37,12 +37,12 @@ int main() {
     std::uniform_real_distribution<double> urdist { -10.0, 100.0 };
 
     std::generate(randoms.begin(), randoms.end(), [&rengine, &urdist]() noexcept -> auto { return urdist(rengine); });
-    const auto                    hsum { std::reduce(randoms.cbegin(), randoms.cend(), 0.0L) };
+    const auto hsum { std::reduce(randoms.cbegin(), randoms.cend(), 0.0L) };
 
     thrust::device_vector<double> drandoms { randoms.cbegin(), randoms.cend() };
     const auto                    dsum { thrust::reduce(drandoms.cbegin(), drandoms.cend(), 0.000L) };
 
-    double *                      sum {}, custdsum {}, ksum {};
+    double *sum {}, custdsum {}, ksum {};
 
     cudaMalloc(&sum, sizeof(double));
     // ::custdsum<<<1, 1>>>(drandoms.data().get(), drandoms.size(), sum);

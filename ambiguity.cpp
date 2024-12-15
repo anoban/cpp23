@@ -14,7 +14,7 @@ class T {
 
 static constexpr int a = 87, b { 54 }; //globals
 
-int                  main() {
+int main() {
     T(a);        // declaration of avariable a of type T, equivalent to T a;
     double(527); // function style cast
     T          v;
@@ -27,8 +27,8 @@ int                  main() {
     // or as an argument of type T, with a redundant parenthesis around it, i.e T p(T b);
 
     // if the intention is to declare an object of type T, use an explicit static cast
-    T          P(static_cast<T>(b));
-    T          Q { b }; // or use the braced initializer
+    T P(static_cast<T>(b));
+    T Q { b }; // or use the braced initializer
 
     std::wcout << LINE(__LINE__) << std::endl;
     PRINT(89);

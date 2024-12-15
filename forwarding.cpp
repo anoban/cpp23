@@ -62,7 +62,7 @@ int wmain() {
     constexpr auto       y    = 8 [_ptr];
     constexpr unsigned   array[10] { 11, 10, 9, 8, 7, 6, 5, 4, 3, 2 };
 
-    constexpr auto       what = 7 [array];
+    constexpr auto what = 7 [array];
 
     return EXIT_SUCCESS;
 }

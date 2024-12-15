@@ -5,17 +5,17 @@
 
 class bclass {
     public:
-        short           _pushort { 11 };
+        short _pushort { 11 };
 
         constexpr short getpus() const noexcept { return _pushort; }
 
     protected:
-        short           _prshort { 22 };
+        short _prshort { 22 };
 
         constexpr short _getprs() const noexcept { return _prshort; }
 
     private:
-        short           _pvshort { 33 };
+        short _pvshort { 33 };
 
         constexpr short _getpvs() const noexcept { return _pvshort; }
 };
@@ -29,7 +29,7 @@ class dclass : public bclass {
     public:
         constexpr short getprs() const noexcept { return _getprs(); }
 
-        short           getpvs() const noexcept { return *(reinterpret_cast<const short*>(this) + 2); } // crude and delicate but works :)
+        short getpvs() const noexcept { return *(reinterpret_cast<const short*>(this) + 2); } // crude and delicate but works :)
 };
 
 auto wmain() -> int {

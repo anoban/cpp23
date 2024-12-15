@@ -55,13 +55,13 @@ int main() {
     constexpr auto sq { sqGenerator {} };
     double         a = sq(3.1245); // calls the operator() of object sq
 
-    double         b = ::sq(3.1245); // freestanding function
+    double b         = ::sq(3.1245); // freestanding function
 
-    double         c = ::sq<float>(3.1245); // calls the templated function
+    double c         = ::sq<float>(3.1245); // calls the templated function
 
-    double         d = ::sq(3.1245F); // calls sq<float>()
+    double d         = ::sq(3.1245F); // calls sq<float>()
 
-    double         e = ::sq(3.1245L); // calls sq<long double>() specialization
+    double e         = ::sq(3.1245L); // calls sq<long double>() specialization
 
     return 0;
 }

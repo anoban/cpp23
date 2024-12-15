@@ -11,7 +11,7 @@ class greeter {
 
         ~greeter() = default;
 
-        inline std::wstring          operator()() const noexcept { return greeting; }
+        inline std::wstring operator()() const noexcept { return greeting; }
 
         inline friend std::wostream& operator<<(std::wostream& ostr, const greeter& obj) noexcept {
             ostr << obj.greeting << L'\n';

@@ -8,22 +8,22 @@
 // [closure captures](arguments) specifiers -> return type { function body };
 
 // the simplest form of lambda
-const auto  bare_minimum    = [] { }; // argument paranthesis is not mandatory
+const auto bare_minimum    = [] { }; // argument paranthesis is not mandatory
 // unless there are qualifiers like mutable, constexpr, consteval, noexcept involved the argument parenthesis is deemed optional
 
-const auto  add_10          = [](int x) { return x + 10; }; // remember the trailing return type is optional
+const auto add_10          = [](int x) { return x + 10; }; // remember the trailing return type is optional
 // the above is equivalent to
-const auto  add_10_explicit = [](int x) -> int { return x + 10; };
+const auto add_10_explicit = [](int x) -> int { return x + 10; };
 
 // noexcept qualified lambda
-const auto  increment       = [](int& x) noexcept -> void { x++; };
+const auto increment       = [](int& x) noexcept -> void { x++; };
 
 // constexpr lambdas
-const auto  decrement       = [](int& x) constexpr noexcept -> void { --x; };
-const auto  decrement2      = [](int& x) consteval noexcept -> int { return x - 2; };
-const auto  decrementconst  = [](const int& x) consteval noexcept -> int { return x - 2; };
+const auto decrement       = [](int& x) constexpr noexcept -> void { --x; };
+const auto decrement2      = [](int& x) consteval noexcept -> int { return x - 2; };
+const auto decrementconst  = [](const int& x) consteval noexcept -> int { return x - 2; };
 
-const auto  printer         = [](const auto& o) { std::print("{}", o); }; // std::print requires C++23
+const auto printer         = [](const auto& o) { std::print("{}", o); }; // std::print requires C++23
 
 static void captures() noexcept {
     // lambdas can capture variables from their environment
@@ -35,7 +35,7 @@ static void captures() noexcept {
     // the mutable keyword is essential if a lambda is to mutate its capture!
     // however if variables are passed in as arguments, mutable qualifier is not necessary!
     // cannot use const here as age is not const qualified
-    auto                   grow = [&age]() mutable noexcept -> void { age++; };
+    auto grow = [&age]() mutable noexcept -> void { age++; };
     grow(); // takes in age as a closure capture
 
     const auto degrow = [](size_t& x) constexpr noexcept -> void { x--; };

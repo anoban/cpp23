@@ -14,7 +14,7 @@ template<typename T> struct enable_if<false, T> { // partial specialization of e
 
 template<typename T> static consteval ::enable_if<std::is_integral<T>::value, T>::type isum(T a, T b) noexcept { return a + b; }
 
-int                                                                                    main() {
+int main() {
     constexpr double x { 2.0000 }, pi { std::numbers::pi };
     constexpr short  p { 12 }, q { 78 };
 

@@ -6,7 +6,7 @@ constexpr float pi(long double& inout) noexcept { return static_cast<float>(inou
 
 constexpr float Z(long double& inout) noexcept { return static_cast<float>(inout = 'Z'); }
 
-struct record   final {
+struct record final {
         unsigned      a;
         float         b;
         long double   c;

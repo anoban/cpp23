@@ -62,7 +62,7 @@ class object { // let's create an expensive to copy class
 int main() {
     std::vector<object> objvector {};
 
-    auto                obj_0 {
+    auto obj_0 {
         object { 5.5F, 78, 121 }
     },
         obj_1 { object { 4.5F, 12, 134 } };

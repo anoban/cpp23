@@ -34,7 +34,7 @@ template<typename T> struct predicate_if<true, T> {
         using type = T;
         static constexpr bool value { true };
 
-        constexpr bool        operator()() const noexcept { return value; }
+        constexpr bool operator()() const noexcept { return value; }
 };
 
 template<typename T, typename = typename ::predicate_if<::is_unsigned<T>::value, T>::type>

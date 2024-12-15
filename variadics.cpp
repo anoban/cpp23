@@ -65,13 +65,13 @@ static_assert(constexprif::all_of<std::is_floating_point, float, double, long do
 static_assert(!constexprif::all_of<std::is_floating_point, char, float, double, long double>::operator()());
 
 // using recursion and specializations
-template<class T> [[nodiscard]] static constexpr long double                 sum(const T& tail) noexcept { return tail; }
+template<class T> [[nodiscard]] static constexpr long double sum(const T& tail) noexcept { return tail; }
 
 template<class T, class... TList> [[nodiscard]] static constexpr long double sum(const T& head, const TList&... rest) noexcept {
     return head + ::sum(rest...);
 }
 
-template<class T> [[nodiscard]] static constexpr long double                 mul(const T& tail) noexcept { return tail; }
+template<class T> [[nodiscard]] static constexpr long double mul(const T& tail) noexcept { return tail; }
 
 template<class T, class... TList> [[nodiscard]] static constexpr long double mul(const T& head, const TList&... rest) noexcept {
     return head * ::mul(rest...);

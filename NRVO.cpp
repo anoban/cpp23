@@ -15,7 +15,7 @@ struct copy_only final {
         copy_only(copy_only&&)                 = delete;
         copy_only& operator=(copy_only&&)      = delete;
 
-        float      data;
+        float data;
 };
 
 static inline copy_only nrvo() noexcept {
@@ -84,7 +84,7 @@ int main() {
     juanita = static_cast<::sstring&&>(strings.at(2)); // move assignment
     std::cout << juanita << '\n';                      // Janelle
 
-    const auto        monet { juanita + " monet" }; // move ctor
+    const auto monet { juanita + " monet" }; // move ctor
 
     // C++ standard does not gurantee that moved from objects will be NULL or NULL equivalent
     std::string       jeremey { "Jeremey Fischer god damn make this long enough so SSO won't work here" };

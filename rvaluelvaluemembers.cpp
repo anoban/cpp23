@@ -27,7 +27,7 @@ class wrapper {
 
 constexpr auto dummy { 7.24564F };
 
-auto           wmain() -> int {
+auto wmain() -> int {
     //
     constexpr auto pi = wrapper { dummy }.unwrap(); // 3.1415927F
     constexpr auto wrapped { wrapper(dummy) };
@@ -37,7 +37,7 @@ auto           wmain() -> int {
     const auto&& const_rvalue { wrapper(std::numbers::sqrt3) };
     const auto   whatsthat = const_rvalue.unwrap();
 
-    auto         mutablewrapper { wrapper { std::numbers::egamma } };
+    auto mutablewrapper { wrapper { std::numbers::egamma } };
     mutablewrapper.unwrap() *= 2.000;
 
     return EXIT_SUCCESS;

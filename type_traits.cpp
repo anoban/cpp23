@@ -12,9 +12,9 @@
 
 template<typename _Ty, _Ty _value> requires std::integral<_Ty> struct integral_constant {
         using value_type = _Ty;
-        static inline constexpr value_type        value { _value };
+        static inline constexpr value_type value { _value };
 
-        [[nodiscard]] constexpr inline explicit   operator value_type() const noexcept { return _value; }
+        [[nodiscard]] constexpr inline explicit operator value_type() const noexcept { return _value; }
 
         [[nodiscard]] constexpr inline value_type operator()() const noexcept { return value; }
 };

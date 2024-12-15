@@ -15,12 +15,12 @@ class functor {
 static constexpr double sumd(int x, int y) noexcept { return static_cast<double>(x) + y; }
 
 // an equivalent lambda
-constexpr auto          lambda = [](int x, int y) constexpr noexcept -> double { return static_cast<double>(x) + y; };
+constexpr auto lambda = [](int x, int y) constexpr noexcept -> double { return static_cast<double>(x) + y; };
 
 // type signature of both functions is essentially => constexpr double (int, int) noexcept;
 
-int                     main() {
-    constexpr auto                  x { 11 }, y { -1 };
+int main() {
+    constexpr auto x { 11 }, y { -1 };
 
     std::function<double(int, int)> wrapper = sumd;
     // std::function wrapper requires the type signature of the function as template arguments

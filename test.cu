@@ -14,7 +14,7 @@ static constexpr auto NELEMENTS_PER_KERNEL { NRANDS / NKERNELS };
 
 // launch a 1,000 kernels to sum this vector in parallel, each kernel will have to sum 100,000 doubles
 
-void __global__       sum(_Inout_ double* const vector) {
+void __global__ sum(_Inout_ double* const vector) {
     const auto index { threadIdx.x + threadIdx.y + threadIdx.z }; // will range from 0 to 999
     const auto start_offset { index * NELEMENTS_PER_KERNEL };
     double     sum {};
@@ -45,7 +45,7 @@ auto wmain() -> int {
     const auto  host_sum { std::reduce(randoms.get(), randoms.get() + NRANDS, 0.000L) };
     long double device_sum {};
 
-    double*     device_vector {};
+    double* device_vector {};
     ::cudaMalloc(&device_vector, NRANDS * sizeof(decltype(randoms)::element_type));
     ::cudaMemcpy(device_vector, randoms.get(), NRANDS * sizeof(decltype(randoms)::element_type), ::cudaMemcpyHostToDevice);
 

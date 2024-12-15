@@ -22,7 +22,7 @@ static constexpr auto Dell { to_wstring("DELL") };
 
 static constexpr decltype(auto) signature() noexcept { return FUNC_FULL_NAME; }
 
-auto                            wmain() -> int {
+auto wmain() -> int {
     ::_putws(Anoban);
     ::_putws(Dell);
 

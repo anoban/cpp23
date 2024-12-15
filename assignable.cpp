@@ -1,6 +1,6 @@
 #include <type_traits>
 
-template<typename _Ty> static constexpr typename std::add_rvalue_reference<_Ty>::type            declval() noexcept;
+template<typename _Ty> static constexpr typename std::add_rvalue_reference<_Ty>::type declval() noexcept;
 
 template<typename _TyLeftOperand, typename _TyRightOperand, typename> struct is_valid_assignment final {
         static constexpr bool value = false;

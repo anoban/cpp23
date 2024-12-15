@@ -29,9 +29,9 @@ template<typename T /* template parameter to specify the node type */> class lis
             return list_iterator(_node);
         }
 
-        constexpr list_iterator& operator--()    = delete; // cannot move backwards
+        constexpr list_iterator& operator--()   = delete; // cannot move backwards
 
-        constexpr list_iterator  operator--(int) = delete; // cannot move backwards
+        constexpr list_iterator operator--(int) = delete; // cannot move backwards
 
     private:
         pointer _node {};

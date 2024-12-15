@@ -18,11 +18,11 @@ static_assert(factorial<1>::value == 1);
 template<class... TList> struct user { };
 
 user<unsigned, char, wchar_t, unsigned long, const float, const volatile double>
-       julia {}; // templated struct user instantiated with a parameter pack
+    julia {}; // templated struct user instantiated with a parameter pack
 
 user<> empty {}; // okay to instantiate a class type template with an empty template argument list
 
-template<class... TList> static constexpr unsigned          func(const TList&... arg_pack) noexcept; // just the declaration
+template<class... TList> static constexpr unsigned func(const TList&... arg_pack) noexcept; // just the declaration
 
 // func<>(); // won't work because to deduce TList the compiler needs an argument pack or an explicit type list
 // since none of that are here, this will not be interpreted as a template instantiation at all
@@ -32,8 +32,8 @@ template<class... TList_0, class... TList_1> constexpr void function() noexcept 
 
 // func<unsigned, const float&, volatile double&&>();
 
-const auto                                                  result { func() };
-const auto                                                  _result { func(47, 5.012, 0.765743f) };
+const auto result { func() };
+const auto _result { func(47, 5.012, 0.765743f) };
 
 namespace using_fold_expressions {
     template<typename... TList> [[nodiscard]] consteval double sum(const TList&... args) noexcept {
@@ -49,13 +49,13 @@ namespace using_overloads {
 
     // the order of the declaration of these two template overloads matter
     // the overload taking a single scalar must precede the overload with the argument pack
-    template<class T> [[nodiscard]] consteval double                 sum(const T& val) throw() { return val; }
+    template<class T> [[nodiscard]] consteval double sum(const T& val) throw() { return val; }
 
     template<class T, class... TList> [[nodiscard]] consteval double sum(const T& start, const TList&... rest) throw() {
         return start + using_overloads::sum(rest...); // NOLINT(cppcoreguidelines-narrowing-conversions)
     }
 
-    template<class T> [[nodiscard]] consteval double                 mul(const T& val) throw() { return val; }
+    template<class T> [[nodiscard]] consteval double mul(const T& val) throw() { return val; }
 
     template<class T, class... TList> [[nodiscard]] consteval double mul(const T& head, const TList&... rest) throw() {
         return head * using_overloads::mul(rest...); // NOLINT(cppcoreguidelines-narrowing-conversions)

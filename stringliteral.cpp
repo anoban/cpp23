@@ -4,7 +4,7 @@
 int main() {
     const char* const name { "Anoban" }; // string literal in .rdata, pointer non-modifiable
 
-    auto* const       home { R"(C\Users\Natalie\Documents\Misc)" }; // pointer non-modifiable
+    auto* const home { R"(C\Users\Natalie\Documents\Misc)" }; // pointer non-modifiable
 
     puts(name);
     puts(home);
@@ -13,8 +13,8 @@ int main() {
     refto_name = "Jhonathan";  // Error: expression must be a modifiable lvalue
     refto_name = home;         // Error: expression must be a modifiable lvalue
 
-    auto  laptop { L"MSI" };     // wide string literal in .rdata, pointer non const qualified
-    auto  mobile { L"SAMSUNG" }; // wide string literal in .rdata, pointer non const qualified
+    auto laptop { L"MSI" };     // wide string literal in .rdata, pointer non const qualified
+    auto mobile { L"SAMSUNG" }; // wide string literal in .rdata, pointer non const qualified
 
     auto& refto_laptop { laptop }; // reference to a modifiable pointer to a constant wchar_t
     refto_laptop =
@@ -30,7 +30,7 @@ int main() {
     const char* const cstackoverflow { "It seems as if I have actually succeeded in reassigning a reference. Is that true?" };
     // cstackoverflow is a constant pointer to constant string literal in the .rdata section
 
-    const auto*       What_you_did { stackoverflow }; // we capture the address where this string literal is stored
+    const auto* What_you_did { stackoverflow }; // we capture the address where this string literal is stored
     stackoverflow = "Stack overflow is the most toxic place one could go to seek help with programming questions!";
     // what happened above is that we created a new constant string literal in .rdata and assigned it to the pointer stackoverflow
     // we did not overwrite "What you did is modify i through the reference ri. Print i after, and you'll see this." !!!!

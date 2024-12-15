@@ -97,25 +97,25 @@ auto wmain() -> int {
     [[maybe_unused]] constexpr auto _sum { fpair + ::pair<unsigned char> { 3 } }; // left operand const lvalue, right operand rvalue
     [[maybe_unused]] constexpr auto _sum_ { fpair + fpair };                      // both operands are const lvalues
 
-    constexpr auto                  error { fpair - ::pair<float> {} }; // won't work because the left operand is const but operator-
+    constexpr auto error { fpair - ::pair<float> {} }; // won't work because the left operand is const but operator-
     // takes an non-const ::pair<T>& as the left operand
 
-    constexpr auto                  error_too { ::pair<double> { std::numbers::pi } -
+    constexpr auto error_too { ::pair<double> { std::numbers::pi } -
                                ::pair<float> {} }; // will not work because the left operand of operator-
     // has to be an non const lvalue pair<T>& but the argument we provided is an rvalue
 
-    constexpr auto                  wontcompile { fpair / ::pair<double> { 1.000 } };
+    constexpr auto wontcompile { fpair / ::pair<double> { 1.000 } };
     // left operand is const pair<T>& (const lvalue reference) but operator/ expects a non-const rvalue reference
     // non const method cannot operate on const lvalues
 
-    const auto                      wontcompile_either { q / ::pair<double> { 1.000 } }; // left operand is non const but an lvalue
+    const auto wontcompile_either { q / ::pair<double> { 1.000 } }; // left operand is non const but an lvalue
     // operator/ expects an rvalue for left operand, hence the error
 
     [[maybe_unused]] constexpr auto okay { ::pair<float> { std::numbers::pi_v<float> } / fpair };
     ::pair<double>                  egamma { std::numbers::egamma }; // non const lvalue
     [[maybe_unused]] const auto     okay_too { ::pair<float> { egamma - fpair } };
 
-    const auto                      x { ::func(2.000) };
+    const auto x { ::func(2.000) };
 
     return EXIT_SUCCESS;
 }
@@ -128,16 +128,16 @@ auto wmain() -> int {
 static void __declspec(noinline) __stdcall function() noexcept {
     const ::pair<double> invsqrtpi { std::numbers::inv_sqrtpi };
 
-    ::pair<float>&&      temp { invsqrtpi }; // this is a materialization of a converting constructed temporary
+    ::pair<float>&&     temp { invsqrtpi }; // this is a materialization of a converting constructed temporary
     // FIRST WE CONSTRUCT A TEMPORARY OF TYPE ::pair<float> FROM AN LVALUE OF TYPE const ::pair<double>
     // THEN WE BIND THAT TEMPORARY TO THE IDENTIFIER `temp`
-    const ::pair<char>&  _temp { invsqrtpi }; // same
+    const ::pair<char>& _temp { invsqrtpi }; // same
     // temp and _temp are xvalues that will be destroyed at the end of this function scope
     // BUT FOR CLASS TYPES BOTH TEMPORARIES AND LVALUES HAVE A MEMORY LOCATION
 
     /// since ::pair<T> is a class type, their rvalues were already occupying storage before we captured them with T&& or const T&
     // CONSIDER PRIMITIVE TYPES
-    const long double&   value { 0.276334587145 }; // here the literal 0.276334587145 does not have a memory address
+    const long double& value { 0.276334587145 }; // here the literal 0.276334587145 does not have a memory address
     // but the temporary materialized from it does!
     // value is an xvalue while the literal is an rvalue
 }

@@ -73,7 +73,7 @@ auto wmain() -> int {
     constexpr ::Integral<short>          five46 { 546 };
     [[maybe_unused]] constexpr long long fivefour6 { five46 }; // implicit invocation of the conversion operator
 
-    constexpr double                     pi { ::Floating { ::std::numbers::pi_v<float> } };
+    constexpr double pi { ::Floating { ::std::numbers::pi_v<float> } };
     return EXIT_SUCCESS;
 }
 

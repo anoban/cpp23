@@ -13,7 +13,7 @@ const auto negate_ge          = std::bind(std::logical_not<bool>(), predicate_ge
 // composed predicate - !(x >= 73.00) && (x < 100.00)
 const auto composed_predicate = std::bind(std::logical_and<bool>(), negate_ge, predicate_lt, std::placeholders::_1);
 
-int        main() {
+int main() {
     double x { 50.00 };
     std::wcout << std::boolalpha;
     for (int i = 0; i < 100; i += 15)

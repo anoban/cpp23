@@ -28,7 +28,7 @@ auto wmain() -> int {
     constexpr double   three { 3.00000 };
     constexpr unsigned five { 5 };
 
-    const auto         what { ::power(three, five) };
+    const auto what { ::power(three, five) };
     ::wprintf_s(L"%.5lf\n", what);
 
     const auto nine { ::cube(three) };

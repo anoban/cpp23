@@ -7,15 +7,15 @@ template<typename T> [[nodiscard]] static T add(const T& a, const T& b) { return
 // in addition to std::enable_if<> and concepts, there is a crude way to impose type restrictions on templated entities
 // declare the templated entity without providing a definition and then implement specializations to support only the types you want
 
-template<typename T> constexpr T            sum(T x, T y) noexcept; // declaration
+template<typename T> constexpr T sum(T x, T y) noexcept; // declaration
 
-template<> constexpr int                    sum(int x, int y) noexcept { return x + y; } // specialization for int
+template<> constexpr int sum(int x, int y) noexcept { return x + y; } // specialization for int
 
-template<> constexpr short                  sum(short x, short y) noexcept { return static_cast<short>(x + y); } // specialization for short
+template<> constexpr short sum(short x, short y) noexcept { return static_cast<short>(x + y); } // specialization for short
 
 // sum will not work with any types besides the ones the specializations are provided for.
 
-template<typename T> constexpr T            power(T value, unsigned char exp) noexcept {
+template<typename T> constexpr T power(T value, unsigned char exp) noexcept {
     T result { value };
     for (unsigned i = 0; i < exp; ++i) result *= result;
     return result;
@@ -30,10 +30,10 @@ int main() {
 
     // here the signature T add(const T&, const T&) gets translated into std::wstring add(const std::wstring&, const std::wstring&)
     // practically all T placeholders get substituted with a concrete type
-    const auto         full { add(name, father) };
+    const auto full { add(name, father) };
 
-    constexpr auto     s  = sum(54, 87345);     // okay int
-    constexpr auto     ss = sum(656I16, 54I16); // okay short
+    constexpr auto s  = sum(54, 87345);     // okay int
+    constexpr auto ss = sum(656I16, 54I16); // okay short
 
     // link time errors - 6 unresolved externals
     sum(9.546325F, 98.785675F); // float

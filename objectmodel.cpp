@@ -45,10 +45,10 @@ class cylinder {
         virtual ~cylinder() = default;
 
         // non-static member function
-        constexpr float        area() const noexcept { return M_PI * _radius * _radius + _radius * _height; }
+        constexpr float area() const noexcept { return M_PI * _radius * _radius + _radius * _height; }
 
         // non-static member function
-        constexpr float        volume() const noexcept { return M_PI * _radius * _radius * _height; }
+        constexpr float volume() const noexcept { return M_PI * _radius * _radius * _height; }
 
         // static member function, static member functions are not associated with class instances
         // but with the class definition
@@ -63,7 +63,7 @@ class cylinder {
 
 #pragma pack(pop)
 
-short    cylinder::_statmember = std::numeric_limits<short>::max();
+short cylinder::_statmember = std::numeric_limits<short>::max();
 
 cylinder static_initialization;
 
@@ -72,7 +72,7 @@ cylinder static_initialization;
 // this means somewhere inside the main() the compiler will squeeze in the ctor call to this object to make it valid before its first use!
 // where this happens is often at the discretion of the compilers
 
-int      wmain() {
+int wmain() {
     cylinder       object;
     constexpr auto pi { ::cylinder::pi() };
     // but static member functions can also be accessed through class instances

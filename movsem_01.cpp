@@ -45,11 +45,11 @@ class f64
 
         inline ~f64() throw() { _value = 0.00L; }
 
-        f64          operator+(const f64& other) const throw() { return f64(_value + other._value); }
+        f64 operator+(const f64& other) const throw() { return f64(_value + other._value); }
 
         long double& unwrap() throw() { return _value; }
 
-        long double  unwrap() const throw() { return _value; }
+        long double unwrap() const throw() { return _value; }
 };
 
 static inline std::vector<f64> test() throw() {

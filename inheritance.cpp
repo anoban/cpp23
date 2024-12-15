@@ -116,13 +116,13 @@ class novel : public material, public book {
 
         const std::wstring& title() const noexcept { return book::title; }
 
-        unsigned            pages() const noexcept { return book::page_count; }
+        unsigned pages() const noexcept { return book::page_count; }
 
-        unsigned            stock() const noexcept { return material::quantity; }
+        unsigned stock() const noexcept { return material::quantity; }
 
-        float               price() const noexcept { return unit_price; }
+        float price() const noexcept { return unit_price; }
 
-        float               discount() const noexcept { return material::discount_prcnt; }
+        float discount() const noexcept { return material::discount_prcnt; }
 
         ~novel() = default;
 };

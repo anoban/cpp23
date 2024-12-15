@@ -11,12 +11,12 @@ template<unsigned V> struct tricky {
         [[nodiscard]] consteval unsigned funcv2(unsigned i = 0) noexcept { return i / V; }
 
         // this will result in a compile time error without the need to be made consteval or constexpr
-        [[nodiscard]] unsigned           funcv3() noexcept { return V / V; }
+        [[nodiscard]] unsigned funcv3() noexcept { return V / V; }
 };
 
 template<size_t N> static size_t func() { return N / N; }
 
-auto                             main() -> int {
+auto main() -> int {
     tricky<100> hundred {};
     tricky<0>   zero {};
 

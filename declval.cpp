@@ -73,7 +73,7 @@ static_assert(std::is_same_v<typename ::assignment_result<long, long>::type, voi
 static_assert(std::is_same_v<typename ::assignment_result<long&&, long>::type, void>); // LHT must be a modifiable lvalue reference
 
 auto wmain() -> int {
-    const auto      empty { ::declval<std::wstring>() }; // this will compile but will err at link time!
+    const auto empty { ::declval<std::wstring>() }; // this will compile but will err at link time!
 
     // decltype() with expressions do not actually materialize the evaluated results of the expressions
     // decltype() expressions are hypothetically evaluated without realizing the effects of that expression

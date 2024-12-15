@@ -33,9 +33,9 @@ namespace experimental {
             ) noexcept :
                 _Line { _Line_ }, _Column { _Column_ }, _File { _File_ }, _FunctionSig { _FunctionSig_ }, _Function { _Function_ } { }
 
-            [[nodiscard]] constexpr unsigned    line() const noexcept { return _Line; }
+            [[nodiscard]] constexpr unsigned line() const noexcept { return _Line; }
 
-            [[nodiscard]] constexpr unsigned    column() const noexcept { return _Column; }
+            [[nodiscard]] constexpr unsigned column() const noexcept { return _Column; }
 
             [[nodiscard]] constexpr const char* file_name() const noexcept { return _File; }
 
@@ -74,9 +74,9 @@ namespace experimental {
             ) noexcept :
                 _Line { _Line_ }, _Column { _Column_ }, _File { _File_ }, _FunctionSig { _FunctionSig_ }, _Function { _Function_ } { }
 
-            [[nodiscard]] constexpr unsigned       line() const noexcept { return _Line; }
+            [[nodiscard]] constexpr unsigned line() const noexcept { return _Line; }
 
-            [[nodiscard]] constexpr unsigned       column() const noexcept { return _Column; }
+            [[nodiscard]] constexpr unsigned column() const noexcept { return _Column; }
 
             [[nodiscard]] constexpr const wchar_t* file_name() const noexcept { return _File; }
 

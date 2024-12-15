@@ -91,7 +91,7 @@ template<typename scalar_t> class random_access_iterator final { // unchecked it
             return _start != other._start || _offset != other._offset;
         }
 
-        constexpr reference       operator*() noexcept { return _start[_offset]; }
+        constexpr reference operator*() noexcept { return _start[_offset]; }
 
         constexpr const_reference operator*() const noexcept { return _start[_offset]; }
 };
@@ -157,17 +157,17 @@ template<typename scalar_t> requires std::is_arithmetic_v<scalar_t> class vector
             return *this;
         }
 
-        inline size_type      size() const noexcept { return _size; }
+        inline size_type size() const noexcept { return _size; }
 
-        inline pointer        data() noexcept { return _buffer; }
+        inline pointer data() noexcept { return _buffer; }
 
-        inline const_pointer  data() const noexcept { return _buffer; }
+        inline const_pointer data() const noexcept { return _buffer; }
 
-        inline iterator       begin() noexcept { return { _buffer, _size }; }
+        inline iterator begin() noexcept { return { _buffer, _size }; }
 
         inline const_iterator begin() const noexcept { return { _buffer, _size, 0 }; }
 
-        inline iterator       end() noexcept { return { _buffer, _size, _size }; }
+        inline iterator end() noexcept { return { _buffer, _size, _size }; }
 
         inline const_iterator end() const noexcept { return { _buffer, _size, _size }; }
 
@@ -199,7 +199,7 @@ auto wmain() -> int {
 
     constexpr ::vector<float>::value_type x { std::numbers::pi_v<decltype(x)> };
 
-    ::vector<double>                      nums(100);
+    ::vector<double> nums(100);
     std::iota(nums.begin(), nums.end(), 1);
     for (unsigned i {}; const decltype(nums)::value_type& e : nums) std::wcout << L'(' << i++ << L") " << e << L' ';
     for (decltype(nums)::const_iterator it = nums.cbegin(), end = nums.cend(); it != end; ++it) std::wcout << *it << L'\n';

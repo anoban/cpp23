@@ -4,11 +4,11 @@
 
 static const ::sstring get_greeting() noexcept { return "Hi there!"; }
 
-static ::sstring       greeting() noexcept { return "Hello there!"; }
+static ::sstring greeting() noexcept { return "Hello there!"; }
 
-static void            print(::sstring string) noexcept { ::puts(string.c_str()); }
+static void print(::sstring string) noexcept { ::puts(string.c_str()); }
 
-int                    wmain() {
+int wmain() {
     ::sstring              ano { "Anoban" };
     std::vector<::sstring> strings;
 

@@ -6,7 +6,7 @@
 int main() {
     [[maybe_unused]] constexpr auto value { 54I16 };
 
-    std::vector<int32_t>            randoms {};
+    std::vector<int32_t> randoms {};
     randoms.resize(100);
     std::iota(randoms.begin(), randoms.end(), 0);
 

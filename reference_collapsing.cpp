@@ -15,8 +15,8 @@ template<typename T> using add_rvalue_reference_t = T&&;
 auto wmain() -> int {
     //
 
-    int   hundred { 100 };
-    int&  refhundred { hundred }; // reference to int
+    int  hundred { 100 };
+    int& refhundred { hundred }; // reference to int
 
     // trying to declare a reference to int&
     int&& refrefhundred {

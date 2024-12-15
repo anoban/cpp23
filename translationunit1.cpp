@@ -8,7 +8,7 @@
 
 [[nodiscard]] double sum(const std::vector<int>& collection) noexcept; // defined in translationunit0.cpp
 
-int                  main() {
+int main() {
     std::vector<int>   randoms(1000);
     std::random_device seeder {};
     std::knuth_b       rengine { seeder() };

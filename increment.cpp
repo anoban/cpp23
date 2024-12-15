@@ -90,7 +90,7 @@ template<typename scalar_t, typename = std::enable_if<std::is_scalar_v<scalar_t>
             return number { value + 1 };
         }
 
-        constexpr value_type                                         operator()() const noexcept { return value; }
+        constexpr value_type operator()() const noexcept { return value; }
 
         template<typename char_t> friend std::basic_ostream<char_t>& operator<<(std::basic_ostream<char_t>& ostream, const number& num) {
             ostream << num.value << ::newline<char_t>;
@@ -121,7 +121,7 @@ static constexpr const wchar_t* const _wmonths[] { L"January", L"February", L"Ma
 
 static constexpr const wchar_t* const _wdays[] { L"Monday", L"Tuesday", L"Wednesday", L"Thursday", L"Friday", L"Saturday", L"Sunday" };
 
-static std::wostream&                 operator<<(std::wostream& wostr, days& day) {
+static std::wostream& operator<<(std::wostream& wostr, days& day) {
     wostr << _wdays[static_cast<uint8_t>(day)] << L'\n';
     return wostr;
 }
@@ -141,7 +141,7 @@ template<typename T> requires std::is_scalar_v<T> [[nodiscard]] static constexpr
 // takes two mutable references
 template<typename T> requires std::is_scalar_v<T> [[nodiscard]] static constexpr T func(T& _x, T& _y) noexcept { return _x + _y; }
 
-int                                                                                wmain() {
+int wmain() {
     auto nine { ::number(9) };
     // std::wcout << nineteen;
 
@@ -174,9 +174,9 @@ int                                                                             
     unsigned           a { 11 }, b { 19 };
     constexpr unsigned c { 12 }, d { 18 };
 
-    constexpr auto     v { ::func(12, 34) };
-    constexpr auto     vv { ::func(a, b) };
-    constexpr auto     vvv { ::func(c, d) };
+    constexpr auto v { ::func(12, 34) };
+    constexpr auto vv { ::func(a, b) };
+    constexpr auto vvv { ::func(c, d) };
 
     return EXIT_SUCCESS;
 }

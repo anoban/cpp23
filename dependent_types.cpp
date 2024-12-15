@@ -3,7 +3,7 @@
 
 template<bool predicate, class T> struct enablde_if final { };
 
-template<class T> struct enablde_if<true, T>        final {
+template<class T> struct enablde_if<true, T> final {
         static constexpr bool value { true };
         using type = T;
 };

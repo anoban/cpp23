@@ -16,9 +16,9 @@ static std::basic_ostream<char_t>& operator<<(std::basic_ostream<char_t>& ostr, 
     return ostr;
 }
 
-static void                func(const float& a) noexcept { ::wprintf_s(L"a = %f\n", a); }
+static void func(const float& a) noexcept { ::wprintf_s(L"a = %f\n", a); }
 
-static void                func2args(short a, long b) noexcept { ::wprintf_s(L"a = %hd, b = %ld\n", a, b); }
+static void func2args(short a, long b) noexcept { ::wprintf_s(L"a = %hd, b = %ld\n", a, b); }
 
 [[nodiscard]] static float func3args(float a, float b, float c) noexcept {
     ::wprintf_s(L"a = %f, b = %f, c = %f\n", a, b, c);
@@ -44,7 +44,7 @@ auto main() -> int {
     constexpr float y { 8.764571 };
 
     // to make a std::bind object constant, all it's non-value type arguments needs to be constants
-    const auto      f1 = std::bind(func, y);
+    const auto f1 = std::bind(func, y);
     f1();
 
     const auto f2 = std::bind(func2args, 34I16, std::placeholders::_1);

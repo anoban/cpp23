@@ -34,7 +34,7 @@ int main() {
     const test<float>::f32* const        atpi  = &pi; // variable definition, test<float>::f32 evaluates to float
     const test<float>::value_type* const atpi2 = &pi; // same thing
 
-    plain::i32                           value = num; // WOW
+    plain::i32 value                           = num; // WOW
     // using the scope resolution operator :: to access typedefs works for plain non-templated class types too.
 
     testest<int>::how_about_now; //  error: 'typename test<int>::f32' names 'const long int test<int>::f32', which is not a type
