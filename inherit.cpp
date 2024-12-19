@@ -69,7 +69,10 @@ class child final : public parent {
         // }
 
         // child& operator=(_In_ const child&) noexcept = default;
-        ~child() noexcept { }
+        ~child() noexcept {
+            // EVEN WITH A USER DEFINED DTOR IN THE DERIVED CLASS, A CALL TO THE BASE CLASS'S DTOR WILL BE EMPLACED BY THE COMPILER
+            ::_putws(L"" __FUNCSIG__);
+        }
 };
 
 auto wmain() -> int {
