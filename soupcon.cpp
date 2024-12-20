@@ -90,16 +90,28 @@ template<typename _TyCandidate, typename... _TyList> static consteval bool is_in
 static_assert(!::is_in<double&&, float&, const int, volatile long, double&, const double&&>());
 static_assert(::is_in<double&&, float&, const int, volatile long, double&, const double&&, double&&>()); // yeehaw
 
+template<typename _TyCandidate, typename _TyLast> static consteval bool is_in_recursive() noexcept {
+    return std::is_same_v<_TyCandidate, _TyLast>;
+}
+
+template<typename _TyCandidate, typename _TyFirst, typename... _TyRest>
+static consteval typename std::enable_if<sizeof...(_TyRest) != 0, bool>::type is_in_recursive() noexcept {
+    return std::is_same_v<_TyCandidate, _TyFirst> || ::is_in_recursive<_TyCandidate, _TyRest...>();
+}
+
+static_assert(!::is_in_recursive<double&&, float&, const int, volatile long, double&, const double&&, volatile double&&>());
+static_assert(::is_in_recursive<double&&, float&, const int, volatile long, double&, const double&&, double&&>()); // yeehaw
+
 static_assert(std::is_assignable_v<double&, float>);
 
 template<typename _Ty> static typename std::add_rvalue_reference<_Ty>::type declval() noexcept;
 
-// static_assert(::declval<double>() == 0.00); // won't work because our implementation lacks the function definition
-// declval<T>() isn't meant to be used in such situations
+// static_assert(::::declval<double>() == 0.00); // won't work because our implementation lacks the function definition
+// ::declval<T>() isn't meant to be used in such situations
 
 // the problem with this implementation is when the _TyLeft is a const reference, the decltype() expression cannot be evaluated at compile time
 // we'll get a hard compile time error
-template<typename _TyLeft, typename _TyRight, typename _TyResult = decltype(declval<_TyLeft>() = declval<_TyRight>())>
+template<typename _TyLeft, typename _TyRight, typename _TyResult = decltype(::declval<_TyLeft>() = ::declval<_TyRight>())>
 struct is_assignable {
         static constexpr bool value { false };
 };
@@ -116,14 +128,14 @@ static_assert(::is_assignable_v<double&, const float&>);
 static_assert(::is_assignable_v<double&, volatile long long&&>);
 static_assert(!::is_assignable_v<
               const unsigned&,
-              unsigned>); // ERROR becaue decltype(declval<const unsigned&>() = declval<unsigned>()) assignment is illegal
+              unsigned>); // ERROR becaue decltype(::declval<const unsigned&>() = ::declval<unsigned>()) assignment is illegal
 
 template<typename _TyLeft, typename _TyRight> struct is_assignable_refined {
         static constexpr bool value {
             (!std::is_const_v<_TyLeft>) &&
             // if _TyLeft is const, short circuiting WILL NOT prevent the second subexpression from being evaluated,
             // WE STILL GET COMPILE TIME ERRORS
-            std::is_same_v<decltype(declval<_TyLeft>() = declval<_TyRight>()), _TyLeft>
+            std::is_same_v<decltype(::declval<_TyLeft>() = ::declval<_TyRight>()), _TyLeft>
         };
 };
 
@@ -132,9 +144,68 @@ static_assert(::is_assignable_refined<double&, const float&>::value);
 static_assert(::is_assignable_refined<double&, volatile long long&&>::value);
 static_assert(!::is_assignable_refined<const unsigned&, unsigned>::value);
 
+// PRESUMING THE THE CONSTRUCTION OF THE CONSTEXPR VALUE LEADS TO THE EVALUATION OF THE SECOND SUBEXPRESSION THAT CAN BE ERONEOUS WHEN THE
+// LEFT OPERAND TYPE IS CONST, TRIED LEVERAGING A FUNCTION WHERE SHORTCIRCUITING COULD HELP US BUT IT DID NOT
 template<typename _TyLeft, typename _TyRight> static consteval bool is_assignable_func() noexcept {
     return !std::is_const_v<_TyLeft> &&
            // if _TyLeft is const, short circuiting will prevent the second subexpression from being evaluated,
            // so hopefully we won't get compile time errors
-           std::is_same_v<decltype(declval<_TyLeft>() = declval<_TyRight>()), _TyLeft>;
+           std::is_same_v<decltype(::declval<_TyLeft>() = ::declval<_TyRight>()), _TyLeft>;
 };
+
+static_assert(!::is_assignable_func<const unsigned&, unsigned>()); // STILL ERRS :(
+
+template<typename _TyLeft, typename _TyRight> struct is_assignable_ternary {
+        static constexpr bool value { std::is_const_v<_TyLeft> ?
+                                          false :
+                                          std::is_same_v<decltype(::declval<_TyLeft>() = ::declval<_TyRight>()), _TyLeft> };
+};
+
+// THIS ERRS TOO :(
+static_assert(::is_assignable_ternary<double&, float>::value);
+static_assert(::is_assignable_ternary<double&, const float&>::value);
+static_assert(::is_assignable_ternary<double&, volatile long long&&>::value);
+static_assert(!::is_assignable_ternary<const unsigned&, unsigned>::value);
+
+template<typename _TyLeft, typename _TyRight, typename = void> struct _is_assignable final {
+        static constexpr bool value { false };
+};
+
+template<typename _TyLeft, typename _TyRight> // partial class template specialization
+struct _is_assignable<_TyLeft, _TyRight, decltype(::declval<_TyLeft>() = ::declval<_TyRight>())> final {
+        static constexpr bool value { true };
+};
+
+static_assert(::_is_assignable<double&, float>::value);
+static_assert(::_is_assignable<double&, const float&>::value);
+static_assert(::_is_assignable<double&, volatile long long&&>::value);
+static_assert(!::_is_assignable<const unsigned&, unsigned>::value);
+
+// THE CURRENT SEMANTIC COULD ALSO ERR WHEN THE OPERAND TYPES ARE INCOMPATIBLE IN ADDITION TO THE CONST SITUATION
+// WE NEED TO ADDRESS THESE TWO SITUATIONS
+
+namespace nstd {
+
+    template<typename _TyLeftOperand, typename _TyRightOperand, typename = _TyLeftOperand> struct is_valid_assignment final {
+            static constexpr bool value { false };
+    };
+
+    template<typename _TyLeftOperand, typename _TyRightOperand>
+    struct is_valid_assignment<_TyLeftOperand, _TyRightOperand, decltype(::declval<_TyLeftOperand>() = ::declval<_TyRightOperand>())>
+        final {
+            static constexpr bool value { true };
+    };
+
+    template<typename _TyLeftOperand, typename _TyRightOperand> static constexpr bool is_assignable_v =
+        nstd::is_valid_assignment<_TyLeftOperand, _TyRightOperand>::value;
+
+} // namespace nstd
+
+static_assert(nstd::is_assignable_v<double&, float>);
+static_assert(nstd::is_assignable_v<double&, const float&>);
+static_assert(nstd::is_assignable_v<double&, volatile long long&&>);
+static_assert(!nstd::is_assignable_v<const unsigned&, unsigned>);
+static_assert(!nstd::is_assignable_v<double*, float>);
+static_assert(!nstd::is_assignable_v<unsigned, const float&>);
+static_assert(!nstd::is_assignable_v<volatile double*, volatile long long&&>);
+static_assert(!nstd::is_assignable_v<const void*, unsigned>);
