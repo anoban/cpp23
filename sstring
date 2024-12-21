@@ -51,6 +51,7 @@ namespace __cxx_sstring_internal_impl {
         [[maybe_unused,
           deprecated("mixing regular ascii stdout and wide character stdout in a single application is discouraged by Microsoft")]]
     )
+
     static const wchar_t* wsignature(_In_ const char* _cxx_signature) noexcept {
         static const unsigned _signature_length = 512;
         static wchar_t        _signature[_signature_length]; // NOLINT(modernize-avoid-c-arrays)
@@ -146,6 +147,7 @@ class sstring
         __CXX_ATTRIBUTE_SYNTAX__(
             [[deprecated("use the more efficient templated version when using string literals to construct a ::sstring object!")]]
         )
+
         explicit __cdecl sstring(_In_ const char* const string) noexcept :
             _size(::strlen(string) + 1 /* + 1 for the null terminator */),
             _capacity(_size * 2),
@@ -208,6 +210,14 @@ class sstring
 
             ::memset(_resource, 0U, _capacity);
             std::copy(start, end, _resource);
+        }
+
+        sstring& swap(_Inout_ sstring& other) noexcept {
+            if (this == &other) return *this;
+            std::swap(_size, other._size);
+            std::swap(_capacity, other._capacity);
+            std::swap(_resource, other._resource);
+            return *this;
         }
 
         // optimizations like buffer reuse are deliberately ignored :(

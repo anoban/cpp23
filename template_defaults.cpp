@@ -3,55 +3,56 @@
 
 template<class _Type> constexpr auto declval() noexcept -> typename std::add_rvalue_reference_t<_Type>; // remember reference
                                                                                                         // collapsing
-static_assert(std::is_same_v<decltype(declval<float>()), float&&>);                                     // T + && => T&&
-static_assert(std::is_same_v<decltype(declval<float&>()), float&>);                                     // T& + && => T&
-static_assert(std::is_same_v<decltype(declval<float&&>()), float&&>);                                   // T&& + && => T&&
+static_assert(std::is_same_v<decltype(::declval<float>()), float&&>);                                   // T + && => T&&
+static_assert(std::is_same_v<decltype(::declval<float&>()), float&>);                                   // T& + && => T&
+static_assert(std::is_same_v<decltype(::declval<float&&>()), float&&>);                                 // T&& + && => T&&
 
 static_assert(std::is_same_v<decltype(.54564F), float>);
+static_assert(std::is_same_v<decltype((.54564F)), float>);
+static float global {};
+static_assert(std::is_same_v<decltype(global), float>);
+static_assert(std::is_same_v<decltype((global)), float&>);
 
-namespace utilities {
-    template<class _TyL, class _TyR, _TyL&& _VAssign = {}> struct void_if_assignment_is_valid final {
-            static constexpr bool value = false;
-    };
-
-    template<class _TyL, class _TyR>
-    struct void_if_assignment_is_valid<_TyL, _TyR, declval<decltype(::declval<_TyL>() = declval<_TyR>())>()> final {
-            static constexpr bool value = true;
-    };
-
-    static_assert(void_if_assignment_is_valid<float&&, double>::value);
-} // namespace utilities
-
-template<class _TyL, class _TyR, class _TySFINAE> struct is_assignable final {
-        // we need _TySFINAE to become void when the evaluated assignment operation is
-        // valid, so the compiler will opt for the specialization instead of the base
-        // template
+// A DEFAULT TEMPLATE ARGUMENT IN THE PRIMARY TEMPLATE WILL ALWAYS BE EAGERLY EVALUATED DURING TEMPLATE INSTANTIATION
+template<class _TyL, class _TyR, class _TySFINAE = bool> struct is_assignable final {
+        // we need _TySFINAE to become void when the evaluated assignment operation is valid,
+        // so the compiler will opt for the specialization instead of the base template
         static constexpr bool value = false;
 };
 
 template<class _TyL, class _TyR> struct is_assignable<_TyL, _TyR, void /* when _TySFINAE = void */> final {
-        using left_operand_type     = _TyL;
-        using right_operand_type    = _TyR;
         static constexpr bool value = true;
 };
 
-// or we could choose to specialize on a bool instead of a type
-template<class _TyL, class _TyR, bool is_valid> struct _is_assignable final {
-        // we need _TySFINAE to become void when the evaluated assignment operation is
-        // valid, so the compiler will opt for the specialization instead of the base
-        // template
-        static constexpr bool value = false;
+template<typename _TyLeftOperand, typename _TyRightOperand> static constexpr bool is_assignable_v =
+    ::is_assignable<_TyLeftOperand, _TyRightOperand>::value;
+
+static_assert(::);
+
+template<typename _TyCandidate, typename _TyStripped = typename std::remove_cv_t<_TyCandidate>> struct add_rvalue_reference final {
+        using type = _TyCandidate&&;
 };
 
-template<class _TyL, class _TyR> struct _is_assignable<_TyL, _TyR, true /* when is_valid = true */> final {
-        using left_operand_type     = _TyL;
-        using right_operand_type    = _TyR;
-        static constexpr bool value = true;
+template<typename _TyCandidate> struct add_rvalue_reference<_TyCandidate, void> final {
+        using type = void;
 };
 
-auto wmain() -> int {
-    int&& materialized_temporary { 11 };
-    materialized_temporary = 12.05;
+template<typename _TyCandidate> using add_rvalue_reference_t = typename ::add_rvalue_reference<_TyCandidate>::type;
 
-    return EXIT_SUCCESS;
-}
+static_assert(std::is_same_v<::add_rvalue_reference_t<float&>, float&>);
+static_assert(!std::is_same_v<::add_rvalue_reference_t<float&&>, float&>);
+static_assert(std::is_same_v<::add_rvalue_reference_t<float&&>, float&&>);
+static_assert(std::is_same_v<::add_rvalue_reference_t<float>, float&&>);
+static_assert(std::is_same_v<::add_rvalue_reference_t<const long&>, const long&>);
+static_assert(std::is_same_v<::add_rvalue_reference_t<const void>, void>);
+static_assert(std::is_same_v<::add_rvalue_reference_t<const volatile void>, void>);
+
+template<typename _Ty0, typename _Ty1> struct dummy {
+        using type = _Ty0;
+};
+
+// A PARTIAL SPECILIZATION MUST BE CONSISTENT WITH ITS PRIMARY TEMPLATE
+template<typename _Ty0 = bool /* WE CANNOT OVERRIDE A TEMPLATE DEFAULT DEFINED IN THE PRIMARY TEMPLATE IN A SPECILIZATION*/>
+struct dummy<_Ty0, int> {
+        using type = _Ty0;
+};

@@ -109,8 +109,8 @@ template<typename _Ty> static typename std::add_rvalue_reference<_Ty>::type decl
 // static_assert(::::declval<double>() == 0.00); // won't work because our implementation lacks the function definition
 // ::declval<T>() isn't meant to be used in such situations
 
-// the problem with this implementation is when the _TyLeft is a const reference, the decltype() expression cannot be evaluated at compile time
-// we'll get a hard compile time error
+// the problem with this implementation is when the assignment expression inside decltype() is invalid, we'll get a hard compile time error
+// as this doesn't happen in a context where there's a fall back, THIS IS THE PRIMARY TEMPLATE!!
 template<typename _TyLeft, typename _TyRight, typename _TyResult = decltype(::declval<_TyLeft>() = ::declval<_TyRight>())>
 struct is_assignable {
         static constexpr bool value { false };
@@ -144,10 +144,10 @@ static_assert(::is_assignable_refined<double&, const float&>::value);
 static_assert(::is_assignable_refined<double&, volatile long long&&>::value);
 static_assert(!::is_assignable_refined<const unsigned&, unsigned>::value);
 
-// PRESUMING THE THE CONSTRUCTION OF THE CONSTEXPR VALUE LEADS TO THE EVALUATION OF THE SECOND SUBEXPRESSION THAT CAN BE ERONEOUS WHEN THE
-// LEFT OPERAND TYPE IS CONST, TRIED LEVERAGING A FUNCTION WHERE SHORTCIRCUITING COULD HELP US BUT IT DID NOT
+// PRESUMING THE THE INITIALIZATION OF THE STATIC CONSTEXPR BOOLEAN VALUE LEADS TO THE EVALUATION OF THE SECOND SUBEXPRESSION THAT CAN POTENTIALLY BE ERONEOUS WHEN THE
+// TRIED LEVERAGING A FUNCTION WHERE SHORTCIRCUITING COULD HELP US BUT IT DID NOT
 template<typename _TyLeft, typename _TyRight> static consteval bool is_assignable_func() noexcept {
-    return !std::is_const_v<_TyLeft> &&
+    return !std::is_const_v<_TyLeft> && // !!!!! CONST LEFT OPERAND IS NOT THE ONLY CASE WHERE THE ASSIGNMENT EXPRESSION WILL BE INVALID
            // if _TyLeft is const, short circuiting will prevent the second subexpression from being evaluated,
            // so hopefully we won't get compile time errors
            std::is_same_v<decltype(::declval<_TyLeft>() = ::declval<_TyRight>()), _TyLeft>;
@@ -156,8 +156,8 @@ template<typename _TyLeft, typename _TyRight> static consteval bool is_assignabl
 static_assert(!::is_assignable_func<const unsigned&, unsigned>()); // STILL ERRS :(
 
 template<typename _TyLeft, typename _TyRight> struct is_assignable_ternary {
-        static constexpr bool value { std::is_const_v<_TyLeft> ?
-                                          false :
+        static constexpr bool value { std::is_const_v<_TyLeft> ? false :
+                                                                 // EAGER EVALUATION
                                           std::is_same_v<decltype(::declval<_TyLeft>() = ::declval<_TyRight>()), _TyLeft> };
 };
 
@@ -185,8 +185,9 @@ static_assert(!::_is_assignable<const unsigned&, unsigned>::value);
 // WE NEED TO ADDRESS THESE TWO SITUATIONS
 
 namespace nstd {
-
-    template<typename _TyLeftOperand, typename _TyRightOperand, typename = _TyLeftOperand> struct is_valid_assignment final {
+    // https://stackoverflow.com/questions/18700558/default-template-argument-and-partial-specialization
+    template<typename _TyLeftOperand, typename _TyRightOperand, typename _TyAssignmentResult = _TyLeftOperand>
+    struct is_valid_assignment final {
             static constexpr bool value { false };
     };
 
@@ -209,3 +210,27 @@ static_assert(!nstd::is_assignable_v<double*, float>);
 static_assert(!nstd::is_assignable_v<unsigned, const float&>);
 static_assert(!nstd::is_assignable_v<volatile double*, volatile long long&&>);
 static_assert(!nstd::is_assignable_v<const void*, unsigned>);
+
+namespace nstd {
+    template<typename _TyCandidate, typename _TyMayBeVoid> struct __is_void_helper final {
+            using type = _TyCandidate&;
+    };
+
+    template<typename _TyCandidate> struct __is_void_helper<_TyCandidate, void> final {
+            using type = _TyCandidate;
+    };
+
+    template<typename _TyCandidate> struct add_lvalue_reference final {
+            using type = typename __is_void_helper<_TyCandidate, std::remove_cv<_TyCandidate>::type>::type;
+    };
+
+    template<typename _TyCandidate> using add_lvalue_reference_t = typename add_lvalue_reference<_TyCandidate>::type;
+}
+
+static_assert(std::is_same_v<void, nstd::add_lvalue_reference_t<void>>);
+static_assert(std::is_same_v<const void, nstd::add_lvalue_reference_t<const void>>);
+static_assert(std::is_same_v<volatile void, nstd::add_lvalue_reference_t<volatile void>>);
+static_assert(std::is_same_v<const volatile void, nstd::add_lvalue_reference_t<const volatile void>>);
+static_assert(std::is_same_v<long&, nstd::add_lvalue_reference_t<long>>);
+static_assert(std::is_same_v<volatile double&, nstd::add_lvalue_reference_t<volatile double&&>>);
+static_assert(std::is_same_v<const float&, nstd::add_lvalue_reference_t<const float>>);
