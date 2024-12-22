@@ -3,17 +3,17 @@
 
 namespace nstd {
 
-    template<class _TyFrom, class _TyFrom, class... _TyArgList> struct is_static_castable final {
+    template<class _TyCandidate, class _TyConstructed, class... _TyArgList> struct is_static_castable final {
             static constexpr bool value = false;
     };
 
-    template<class _TyFrom, class... _TyArgList>
-    struct is_static_castable<_TyFrom, decltype(_TyFrom(std::declval<_TyArgList>()...)), _TyArgList...> final {
+    template<class _TyCandidate, class... _TyArgList>
+    struct is_static_castable<_TyCandidate, decltype(_TyCandidate(std::declval<_TyArgList>()...)), _TyArgList...> final {
             static constexpr bool value = true;
     };
 
-    template<class _TyFrom, class... _TyArgList> static constexpr bool is_constructible_from_v =
-        is_static_castable<_TyFrom, _TyFrom, _TyArgList...>::value;
+    template<class _TyCandidate, class... _TyArgList> static constexpr bool is_constructible_from_v =
+        is_static_castable<_TyCandidate, _TyCandidate, _TyArgList...>::value;
 
 }
 
