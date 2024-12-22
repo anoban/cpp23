@@ -22,7 +22,7 @@ static_assert(std::is_same_v<approach_01::add_rvalue_reference_t<long double&>, 
 static_assert(std::is_same_v<approach_01::add_rvalue_reference_t<float&&>, float&&>);
 static_assert(std::is_same_v<approach_01::add_rvalue_reference_t<const short&&>, const short&&>);
 
-namespace approach_02 {
+namespace approach_02 { // using a template type parameter to redirect void variants to the partial specialization
 
     template<class _TyCandidate, class _TyMayBeVoid> struct add_rvalue_reference final {
             using type = _TyCandidate&&;
@@ -44,7 +44,7 @@ static_assert(std::is_same_v<approach_02::add_rvalue_reference_t<long double&>, 
 static_assert(std::is_same_v<approach_02::add_rvalue_reference_t<float&&>, float&&>);
 static_assert(std::is_same_v<approach_02::add_rvalue_reference_t<const short&&>, const short&&>);
 
-namespace approach_03 {
+namespace approach_03 { // using a template type paramater as a predicate
 
     template<class _TyCandidate, class _TyMayBeVoid> struct add_rvalue_reference final {
             using type = _TyCandidate;
@@ -56,6 +56,7 @@ namespace approach_03 {
 
     template<class _TyCandidate> using add_rvalue_reference_t =
         typename add_rvalue_reference<_TyCandidate, std::remove_reference_t<_TyCandidate>>::type;
+
 }
 
 static_assert(std::is_same_v<approach_03::add_rvalue_reference_t<void>, void>);
