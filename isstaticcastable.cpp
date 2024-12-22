@@ -3,16 +3,16 @@
 
 namespace nstd {
 
-    template<class _TyTo, class __TyFrom, class _TyResult> struct is_static_castable final {
+    template<class _TyTo, class _TyFrom, class _TyResult> struct is_static_castable final {
             static constexpr bool value = false;
     };
 
-    template<class _TyTo, class __TyFrom>
-    struct is_static_castable<_TyTo, __TyFrom, decltype(static_cast<_TyTo>(std::declval<__TyFrom>()))> final {
+    template<class _TyTo, class _TyFrom>
+    struct is_static_castable<_TyTo, _TyFrom, decltype(static_cast<_TyTo>(std::declval<_TyFrom>()))> final {
             static constexpr bool value = true;
     };
 
-    template<class _TyTo, class __TyFrom> static constexpr bool is_static_castable_v = is_static_castable<_TyTo, __TyFrom, _TyTo>::value;
+    template<class _TyTo, class _TyFrom> static constexpr bool is_static_castable_v = is_static_castable<_TyTo, _TyFrom, _TyTo>::value;
 
 }
 
