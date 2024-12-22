@@ -29,15 +29,15 @@ template<typename _TyLeftOperand, typename _TyRightOperand> static constexpr boo
 
 static_assert(::);
 
-template<typename _TyCandidate, typename _TyStripped = typename std::remove_cv_t<_TyCandidate>> struct add_rvalue_reference final {
-        using type = _TyCandidate&&;
+template<typename _TyFrom, typename _TyStripped = typename std::remove_cv_t<_TyFrom>> struct add_rvalue_reference final {
+        using type = _TyFrom&&;
 };
 
-template<typename _TyCandidate> struct add_rvalue_reference<_TyCandidate, void> final {
+template<typename _TyFrom> struct add_rvalue_reference<_TyFrom, void> final {
         using type = void;
 };
 
-template<typename _TyCandidate> using add_rvalue_reference_t = typename ::add_rvalue_reference<_TyCandidate>::type;
+template<typename _TyFrom> using add_rvalue_reference_t = typename ::add_rvalue_reference<_TyFrom>::type;
 
 static_assert(std::is_same_v<::add_rvalue_reference_t<float&>, float&>);
 static_assert(!std::is_same_v<::add_rvalue_reference_t<float&&>, float&>);
