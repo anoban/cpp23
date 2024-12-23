@@ -1,7 +1,7 @@
 #include <sstring>
 #include <type_traits>
 
-namespace nstd {
+namespace approach_00 {
 
     // primary template that will be used when _TyCandidate is not constructible from the provided types
     // or may throw during construction from the provided types
@@ -32,16 +32,16 @@ struct may_throw final {
         explicit may_throw(const double& v) noexcept : value(v) { } // a non-throwing ctor
 };
 
-static_assert(nstd::is_nothrow_constructible_from_v<::sstring>);
-static_assert(nstd::is_nothrow_constructible_from_v<::sstring, const char (&)[100]>);
-static_assert(nstd::is_nothrow_constructible_from_v<::sstring, std::string>);
-static_assert(!nstd::is_nothrow_constructible_from_v<::may_throw>);
-static_assert(nstd::is_nothrow_constructible_from_v<::may_throw, double>);
-static_assert(nstd::is_nothrow_constructible_from_v<::may_throw, const long&>);
-static_assert(!nstd::is_nothrow_constructible_from_v<::may_throw, const ::sstring>);
-static_assert(nstd::is_nothrow_constructible_from_v<::may_throw, double&&>);
+static_assert(approach_00::is_nothrow_constructible_from_v<::sstring>);
+static_assert(approach_00::is_nothrow_constructible_from_v<::sstring, const char (&)[100]>);
+static_assert(approach_00::is_nothrow_constructible_from_v<::sstring, std::string>);
+static_assert(!approach_00::is_nothrow_constructible_from_v<::may_throw>);
+static_assert(approach_00::is_nothrow_constructible_from_v<::may_throw, double>);
+static_assert(approach_00::is_nothrow_constructible_from_v<::may_throw, const long&>);
+static_assert(!approach_00::is_nothrow_constructible_from_v<::may_throw, const ::sstring>);
+static_assert(approach_00::is_nothrow_constructible_from_v<::may_throw, double&&>);
 
-namespace sstd {
+namespace approach_01 {
 
     // primary template that will be chosen when _TyCandidate is not constructible from the provided types
     template<typename _TyCandidate, typename _TyConstructed, typename... TyArgList> struct is_nothrow_constructible_from final {
@@ -59,11 +59,37 @@ namespace sstd {
 
 }
 
-static_assert(sstd::is_nothrow_constructible_from_v<::sstring>);
-static_assert(sstd::is_nothrow_constructible_from_v<::sstring, const char (&)[100]>);
-static_assert(sstd::is_nothrow_constructible_from_v<::sstring, std::string>);
-static_assert(!sstd::is_nothrow_constructible_from_v<::may_throw>);
-static_assert(sstd::is_nothrow_constructible_from_v<::may_throw, double>);
-static_assert(sstd::is_nothrow_constructible_from_v<::may_throw, const long&>);
-static_assert(!sstd::is_nothrow_constructible_from_v<::may_throw, const ::sstring>);
-static_assert(sstd::is_nothrow_constructible_from_v<::may_throw, double&&>);
+static_assert(approach_01::is_nothrow_constructible_from_v<::sstring>);
+static_assert(approach_01::is_nothrow_constructible_from_v<::sstring, const char (&)[100]>);
+static_assert(approach_01::is_nothrow_constructible_from_v<::sstring, std::string>);
+static_assert(!approach_01::is_nothrow_constructible_from_v<::may_throw>);
+static_assert(approach_01::is_nothrow_constructible_from_v<::may_throw, double>);
+static_assert(approach_01::is_nothrow_constructible_from_v<::may_throw, const long&>);
+static_assert(!approach_01::is_nothrow_constructible_from_v<::may_throw, const ::sstring>);
+static_assert(approach_01::is_nothrow_constructible_from_v<::may_throw, double&&>);
+
+namespace approach_02 {
+
+    template<typename _TyCandidate, bool _is_construction_noexcept, typename... TyArgList> struct is_nothrow_constructible_from final {
+            static constexpr bool value = false;
+    };
+
+    // this specialization will only be chosen when _TyCandidate is constructible from the provided types AND the construction in non throwing
+    template<typename _TyCandidate, typename... _TyArgList>
+    struct is_nothrow_constructible_from<_TyCandidate, noexcept(_TyCandidate(std::declval<_TyArgList>()...)), _TyArgList...> final {
+            static constexpr bool value = true;
+    };
+
+    template<typename _TyCandidate, typename... _TyArgList> static constexpr bool is_nothrow_constructible_from_v =
+        is_nothrow_constructible_from<_TyCandidate, true, _TyArgList...>::value;
+
+}
+
+static_assert(approach_02::is_nothrow_constructible_from_v<::sstring>);
+static_assert(approach_02::is_nothrow_constructible_from_v<::sstring, const char (&)[100]>);
+static_assert(approach_02::is_nothrow_constructible_from_v<::sstring, std::string>);
+static_assert(approach_02::is_nothrow_constructible_from_v<::may_throw, double&&>);
+static_assert(approach_02::is_nothrow_constructible_from_v<::may_throw, double>);
+static_assert(approach_02::is_nothrow_constructible_from_v<::may_throw, const long&>);
+static_assert(!approach_02::is_nothrow_constructible_from_v<::may_throw>);
+static_assert(!approach_02::is_nothrow_constructible_from_v<::may_throw, const ::sstring>);
