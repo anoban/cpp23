@@ -24,8 +24,13 @@ namespace nstd {
 
 } // namespace nstd
 
+template<typename _TyChar> requires ::is_isotreambuffer_compatible<_TyChar>
+using ostream_manipulator_type = std::basic_ostream<_TyChar> & (*) (std::basic_ostream<_TyChar>&);
+
+static_assert(std::is_same_v<decltype(&nstd::endl<wchar_t>), ostream_manipulator_type<wchar_t>>);
+
 int wmain() {
-    std::wcout << L"Hello there!" << nstd::endl; // this is not an object but a function pointer
+    std::wcout << L"Hello there!" << nstd::endl;
     std::wcout << L"Did that print a newline??\n";
 
     for (const auto& e : L"It was an ordinary day....") std::wcout << e << nstd::comma << nstd::wspace;

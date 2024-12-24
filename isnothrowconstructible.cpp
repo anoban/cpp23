@@ -23,7 +23,7 @@ namespace approach_00 {
     template<typename _TyCandidate, typename... _TyArgList> struct is_nothrow_constructible_from<
         _TyCandidate,
         typename std::
-            enable_if_t<noexcept(_TyCandidate(std::declval<_TyArgList>()...)), decltype(_TyCandidate(std::declval<_TyArgList>()...))>,
+            enable_if<noexcept(_TyCandidate(std::declval<_TyArgList>()...)), decltype(_TyCandidate(std::declval<_TyArgList>()...))>::type,
         _TyArgList...>
         final {
             static constexpr bool value = true;
