@@ -68,7 +68,9 @@ static_assert(approach_01::is_nothrow_constructible_from_v<::may_throw, const lo
 static_assert(!approach_01::is_nothrow_constructible_from_v<::may_throw, const ::sstring>);
 static_assert(approach_01::is_nothrow_constructible_from_v<::may_throw, double&&>);
 
-#ifdef __llvm__
+static_assert(std::is_nothrow_constructible<int, int&&>::value);
+
+// #ifdef __llvm__
 
 namespace approach_02 {
 
@@ -83,7 +85,8 @@ namespace approach_02 {
     // SPECIFIER INSTEAD OF A BOOLEAN, THIS LEADS TO A TYPE CONFLICT FOR THE SECOND TEMPLATE PARAMETER
     // AND MSVC ERRS COMPLAINING THAT A NON-TYPE TEMPLATE ARGUMENT HAPPENS TO BE DEPENDENT ON A TYPE ARGUMENT OF THE PARTIAL SPECIALIZATION,
     // WHICH IS NOT ACCEPTABLE
-    struct is_nothrow_constructible_from<_TyCandidate, noexcept(_TyCandidate(std::declval<_TyArgList>()...)), _TyArgList...> final {
+    struct is_nothrow_constructible_from<_TyCandidate, noexcept(noexcept(_TyCandidate(std::declval<_TyArgList>()...))), _TyArgList...>
+        final {
             static constexpr bool value = true;
     };
 
@@ -101,4 +104,4 @@ static_assert(approach_02::is_nothrow_constructible_from_v<::may_throw, const lo
 static_assert(!approach_02::is_nothrow_constructible_from_v<::may_throw>);
 static_assert(!approach_02::is_nothrow_constructible_from_v<::may_throw, const ::sstring>);
 
-#endif
+// #endif
