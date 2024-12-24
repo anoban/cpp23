@@ -21,10 +21,11 @@ namespace nstd {
         ostream << _Ty(' ');
         return ostream;
     }
+
 } // namespace nstd
 
 int wmain() {
-    std::wcout << L"Hello there!" << nstd::endl;
+    std::wcout << L"Hello there!" << nstd::endl; // this is not an object but a function pointer
     std::wcout << L"Did that print a newline??\n";
 
     for (const auto& e : L"It was an ordinary day....") std::wcout << e << nstd::comma << nstd::wspace;
