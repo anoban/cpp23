@@ -3,10 +3,10 @@
 
 template<class _Ty> class unique_ptr final {
     public:
-        using value_type = _Ty;
-        using pointer    = _Ty*;
-        using reference  = _Ty&;
-        using size_type  = unsigned long long;
+        using value_type    = _Ty;
+        using pointer       = _Ty*;
+        using const_pointer = const _Ty*;
+        using size_type     = unsigned long long;
 
     private:
         pointer   _resource;
@@ -36,6 +36,8 @@ template<class _Ty> class unique_ptr final {
         }
 
         pointer get() noexcept { return _resource; }
+
+        const_pointer get() const noexcept { return _resource; }
 };
 
 auto wmain() -> int {
