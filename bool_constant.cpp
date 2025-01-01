@@ -115,15 +115,15 @@ static_assert(std::is_same_v<volatile long long&, alternative_01::add_lvalue_ref
 
 namespace alternative_02 {
 
-    template<typename _Ty, typename _TyReferrable> struct helper final {
+    template<typename _Ty, typename _TyNotReferable> struct helper final {
             using type = _Ty;
     };
 
     // will be chosen when the type can accept an lvalue reference
-    template<typename _Ty> struct helper<_Ty, typename std::add_lvalue_reference<typename std::remove_reference<_Ty>::type>::type> final {
+    template<typename _Ty> struct helper<_Ty, typename std::remove_reference<_Ty&>::type> final {
             using type = _Ty&;
     };
 
-    template<typename _Ty> using add_lvalue_reference_t = typename _lvalue_reference_helper<_Ty>::type;
+    template<typename _Ty> using add_lvalue_reference_t = typename helper<_Ty, _Ty>::type;
 
 } // namespace alternative_02

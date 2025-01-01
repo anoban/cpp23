@@ -14,11 +14,33 @@ struct foo {
 static_assert(!::is_default_construction_noexcept<::foo>());
 
 [[maybe_unused]] static constexpr bool nope          = noexcept(foo());
+[[maybe_unused]] static constexpr bool okay          = noexcept(971 + 10);
+[[maybe_unused]] static constexpr bool not_evaluated = noexcept(1 / 0);
+// true, because operator/(int, int) is implicitly noexcept
+// if evaluated, this will be a compile time error
 
-[[maybe_unused]] static constexpr bool not_evaluated = noexcept(1 / 0); // if evaluated, this will be a compile time error
+static constexpr auto error { 12 / 0.00 };
 
-static constexpr auto error { 12 / 0 };
-
+// may throw
 constexpr bool faalse { noexcept(std::declval<std::wstring>().replace(0, 9, L"..")) };
 constexpr bool ffalse { noexcept(std::declval<std::wstring>().clear()) };
 constexpr bool yyess { noexcept(std::declval<std::wstring>().empty()) };
+
+// noexcept
+constexpr bool uhuh { noexcept(std::declval<std::wstring>().resize(122)) };
+constexpr bool noppe { noexcept(std::declval<std::wstring>().reserve(1226)) };
+
+// ways to specify a non-throwing function
+// noexcept
+// noexcept(true)
+// throw()
+
+// exception specification for a potentially throwing  function
+// noexcept(false)
+// nothing
+
+template<typename _Ty> struct complicated final {
+        _Ty _value; // a type that's constructed from a multiple arguments of different types
+
+        template<typename... _TyList> explicit complicated(_TyList&&... args) : _value(std::forward<_TyList>(args)...) { }
+};
