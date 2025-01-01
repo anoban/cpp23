@@ -69,3 +69,11 @@ static consteval long double prod(const _TyList&... _arguments) noexcept((noexce
 
 static_assert(::prod(1, 2, 3, 4, 5, 6, 7, 8, 9, 10) == 3628800);
 static_assert(noexcept(::prod(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
+
+// cannot overload the noexcept operator
+
+struct dummy { };
+
+static constexpr unsigned operator+(const dummy& left, const dummy& right) noexcept { return 122; }
+
+static_assert(dummy {} + dummy {} == 122);
