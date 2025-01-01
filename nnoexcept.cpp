@@ -2,7 +2,7 @@
 
 [[maybe_unused]] static constexpr bool yes = noexcept(true);
 
-template<class _Ty> static consteval bool is_default_construction_noexcept() noexcept { return noexcept(_Ty {}); }
+template<class _Ty> [[maybe_unused]] static consteval bool is_default_construction_noexcept() noexcept { return noexcept(_Ty {}); }
 
 static_assert(::is_default_construction_noexcept<float>());
 static_assert(::is_default_construction_noexcept<std::string>());
