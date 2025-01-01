@@ -40,7 +40,32 @@ constexpr bool noppe { noexcept(std::declval<std::wstring>().reserve(1226)) };
 // nothing
 
 template<typename _Ty> struct complicated final {
-        _Ty _value; // a type that's constructed from a multiple arguments of different types
+        _Ty _value; // a type that's constructed from multiple arguments of different types
 
-        template<typename... _TyList> explicit complicated(_TyList&&... args) : _value(std::forward<_TyList>(args)...) { }
+        // this constructor will be noexcept when _Ty can be constructed from _TyList&& without throwing an exception
+        template<typename... _TyList> explicit complicated(_TyList&&... args) noexcept(noexcept(_value(std::forward<_TyList>(args)...))) :
+            _value(std::forward<_TyList>(args)...) { }
 };
+
+template<typename _Ty> requires std::is_arithmetic_v<_Ty> static constexpr double square(const _Ty& _val) noexcept { return _val * _val; }
+
+template<typename _TyFirst, typename... _TyList>
+static consteval long double sum(const _TyFirst& _first, const _TyList&... _arguments) noexcept(noexcept(::square(_first))) {
+    if constexpr (!sizeof...(_TyList))
+        return _first;
+    else
+        return _first + ::sum(_arguments...);
+}
+
+static_assert(::sum(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10) == 55);
+static_assert(noexcept(::square(978)));
+
+constexpr bool must_be_true = noexcept(::square(787547)) && noexcept(::square('A')) && noexcept(::square(1254.04654));
+
+template<typename... _TyList> // fold expression inside a noexcept() operator
+static consteval long double prod(const _TyList&... _arguments) noexcept((noexcept(::square(_arguments)) && ...)) {
+    return (_arguments * ...);
+}
+
+static_assert(::prod(1, 2, 3, 4, 5, 6, 7, 8, 9, 10) == 3628800);
+static_assert(noexcept(::prod(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
