@@ -115,7 +115,7 @@ static_assert(std::is_same_v<volatile long long&, alternative_01::add_lvalue_ref
 
 namespace alternative_02 {
 
-    template<typename _Ty, typename _TyNotReferable> struct helper final {
+    template<typename _Ty, typename _TyNotReferableFallBack> struct helper final {
             using type = _Ty;
     };
 
@@ -127,3 +127,11 @@ namespace alternative_02 {
     template<typename _Ty> using add_lvalue_reference_t = typename helper<_Ty, _Ty>::type;
 
 } // namespace alternative_02
+
+static_assert(std::is_same_v<void, alternative_02::add_lvalue_reference_t<void>>);
+static_assert(std::is_same_v<const void, alternative_02::add_lvalue_reference_t<const void>>);
+static_assert(std::is_same_v<volatile void, alternative_02::add_lvalue_reference_t<volatile void>>);
+static_assert(std::is_same_v<const volatile void, alternative_02::add_lvalue_reference_t<const volatile void>>);
+static_assert(std::is_same_v<float&, alternative_02::add_lvalue_reference_t<float&&>>);
+static_assert(std::is_same_v<const float&, alternative_02::add_lvalue_reference_t<const float>>);
+static_assert(std::is_same_v<volatile long long&, alternative_02::add_lvalue_reference_t<volatile long long&>>);

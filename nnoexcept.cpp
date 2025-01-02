@@ -80,7 +80,9 @@ static constexpr unsigned operator+([[maybe_unused]] const dummy& left, [[maybe_
 static_assert(dummy {} + dummy {} == 122);
 
 template<typename... _TyList> static consteval bool sqsum(const _TyList&... _arguments) noexcept {
+    // maps the function ::square while expanding the argument pack when it is passed to ::sum
     const auto expand = ::sum(::square(_arguments)...);
+    // uses fold expression to sum the ::square of the argument pack
     const auto fold   = (::square(_arguments) + ...);
     return expand == fold;
 }
