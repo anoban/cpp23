@@ -1,3 +1,4 @@
+#include <cassert>
 #include <string>
 
 [[maybe_unused]] static constexpr bool yes = noexcept(true);
@@ -74,6 +75,14 @@ static_assert(noexcept(::prod(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
 
 struct dummy { };
 
-static constexpr unsigned operator+(const dummy& left, const dummy& right) noexcept { return 122; }
+static constexpr unsigned operator+([[maybe_unused]] const dummy& left, [[maybe_unused]] const dummy& right) noexcept { return 122; }
 
 static_assert(dummy {} + dummy {} == 122);
+
+template<typename... _TyList> static consteval bool sqsum(const _TyList&... _arguments) noexcept {
+    const auto expand = ::sum(::square(_arguments)...);
+    const auto fold   = (::square(_arguments) + ...);
+    return expand == fold;
+}
+
+static_assert(::sqsum(0, 1, 2, 3, 4, 5));
