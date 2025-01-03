@@ -2,25 +2,23 @@
 
 class base {
     public:
-        unsigned _value;
-
-        virtual constexpr const wchar_t* const str() const noexcept { return L"base"; }
+        virtual constexpr const wchar_t* str() const noexcept { return L"base"; }
 
         void greet() const noexcept { ::_putws(L"Hi from base!"); }
 };
 
 class derived : public base {
     public:
-        double pay;
-
-        constexpr const wchar_t* const str() const noexcept override { return L"derived"; }
+        constexpr const wchar_t* str() const noexcept override { return L"derived"; }
 
         void greet() const noexcept { ::_putws(L"Hi from derived!"); }
 };
 
 struct last : derived {
-        constexpr const wchar_t* const str() const noexcept override { return L"last"; }
+        constexpr const wchar_t* str() const noexcept override { return L"last"; }
 };
+
+static_assert(sizeof(last) == 8); // because of the vptr
 
 auto wmain() -> int {
     const derived object {};
@@ -33,6 +31,12 @@ auto wmain() -> int {
 
     const last example {};
     std::wcout << static_cast<const base*>(&example)->str() << '\n';
+
+    base dummy {};
+    std::wcout << static_cast<last*>(&dummy)->str() << '\n'; // downcasting
+    // update the vptr of a base class instance to the vptr of the derived class instance
+    *reinterpret_cast<uintptr_t*>(&dummy) = *reinterpret_cast<const uintptr_t*>(&object);
+    std::wcout << static_cast<last*>(&dummy)->str() << '\n'; // ????
 
     return EXIT_SUCCESS;
 }
