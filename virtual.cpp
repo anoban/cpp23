@@ -32,7 +32,10 @@ template<class _Ty> requires std::is_arithmetic_v<_Ty> class simple_wrapper fina
 
         virtual void greet() const noexcept { ::_putws(L"Hi from simple_wrapper"); }
 
+        // return the address of the virtual function table
         uintptr_t vptr() const noexcept { return *reinterpret_cast<const uintptr_t*>(this); }
+
+        _Ty value() const noexcept { return _wrapped_value; }
 };
 
 auto wmain() -> int {
@@ -65,6 +68,13 @@ auto wmain() -> int {
     std::wcout << std::all_of(collection.cbegin(), collection.cend(), [&vptr](const auto& wrapped) noexcept -> bool {
         return wrapped.vptr() == vptr;
     }) << L'\n';
+
+    // all should be identical
+    for (unsigned i = 0; i < 100; ++i) std::wcout << *reinterpret_cast<uintptr_t*>(&collection.at(i)) << L'\n';
+    // print out the random values
+    for (unsigned i = 0; i < 100; ++i) std::wcout << *(reinterpret_cast<double*>(&collection.at(i)) + 1) << L'\n';
+
+    std::wcout << L'\n' << collection.back().value() << L'\n';
 
     return EXIT_SUCCESS;
 }
