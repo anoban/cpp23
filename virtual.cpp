@@ -1,4 +1,7 @@
+#include <algorithm>
 #include <iostream>
+#include <ranges>
+#include <vector>
 
 class base {
     public:
@@ -20,7 +23,21 @@ struct last : derived {
 
 static_assert(sizeof(last) == 8); // because of the vptr
 
+template<class _Ty> requires std::is_arithmetic_v<_Ty> class simple_wrapper final {
+    private:
+        _Ty _wrapped_value;
+
+    public:
+        explicit constexpr simple_wrapper(const _Ty& init) noexcept : _wrapped_value(init) { }
+
+        virtual void greet() const noexcept { ::_putws(L"Hi from simple_wrapper"); }
+
+        uintptr_t vptr() const noexcept { return *reinterpret_cast<const uintptr_t*>(this); }
+};
+
 auto wmain() -> int {
+    ::srand(::time(nullptr));
+
     const derived object {};
 
     std::wcout << object.str() << '\n';                             // derived
@@ -37,6 +54,17 @@ auto wmain() -> int {
     // update the vptr of a base class instance to the vptr of the derived class instance
     *reinterpret_cast<uintptr_t*>(&dummy) = *reinterpret_cast<const uintptr_t*>(&object);
     std::wcout << static_cast<last*>(&dummy)->str() << '\n'; // ????
+
+    std::vector<::simple_wrapper<double>> collection;
+    for (const auto& _ : std::ranges::views::iota(0, 100)) collection.emplace_back(::rand() / static_cast<double>(RAND_MAX));
+
+    std::wcout << std::boolalpha;
+    const auto vptr = collection.at(0).vptr();
+    std::wcout << std::hex << std::uppercase << vptr << L'\n';
+
+    std::wcout << std::all_of(collection.cbegin(), collection.cend(), [&vptr](const auto& wrapped) noexcept -> bool {
+        return wrapped.vptr() == vptr;
+    }) << L'\n';
 
     return EXIT_SUCCESS;
 }
