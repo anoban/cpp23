@@ -88,3 +88,19 @@ template<typename... _TyList> static consteval bool sqsum(const _TyList&... _arg
 }
 
 static_assert(::sqsum(0, 1, 2, 3, 4, 5));
+
+template<class _Ty> [[nodiscard]] static consteval long double factorial(
+    _In_ const _Ty&                                                                                    _value,
+    [[maybe_unused]] _In_opt_ const typename std::enable_if<std::is_integral<_Ty>::value, bool>::type& _is_integral = false
+) noexcept {
+    if (!_value) return 1.0000;
+    long double result = _value;
+    for (unsigned long i = 1; i < _value; ++i) result *= i;
+    return result;
+}
+
+static_assert(::factorial(3) == 6);
+static_assert(::factorial(0) == 1.000);
+static_assert(::factorial(1) == 1.000);
+static_assert(::factorial(10) == 3628800);
+static_assert(::factorial(10.0) == 3628800);
