@@ -103,4 +103,5 @@ static_assert(::factorial(3) == 6);
 static_assert(::factorial(0) == 1.000);
 static_assert(::factorial(1) == 1.000);
 static_assert(::factorial(10) == 3628800);
-static_assert(::factorial(10.0) == 3628800);
+
+static_assert(::factorial(10.0) == 3628800); // great :)
