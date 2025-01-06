@@ -27,8 +27,8 @@ static_assert(!::is_assignment_valid<volatile unsigned* const, volatile unsigned
 static_assert(::is_assignment_valid<const unsigned*&, const unsigned*>);
 
 int main() {
-    [[maybe_unused]] constexpr unsigned value { 785776 }, dummy { 7676 };
-    auto*                               ptr { &value };
+    [[maybe_unused]] constexpr unsigned value { 785776 }, dummy { 7676 }; // NOLINT
+    [[maybe_unused]] const auto*        ptr { &value };
     ptr = &dummy;
 
     auto&&         rvref { 657.0354 };
