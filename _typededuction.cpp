@@ -14,8 +14,8 @@ template<typename _Ty> static void references_only([[maybe_unused]] _Ty& _argume
 template<typename _Ty> static void reference_types_only([[maybe_unused]] _Ty&& _univref) noexcept {
     if constexpr (std::is_lvalue_reference_v<_Ty>)
         ::_putws(L"_Ty is an lvalue reference");
-    else if constexpr (std::is_rvalue_reference_v<_Ty>)
-        ::_putws(L"_Ty is an rvalue reference");
+    else if constexpr (!std::is_reference_v<_Ty>)
+        ::_putws(L"_Ty is not a reference");
 }
 
 int wmain() {
@@ -30,6 +30,11 @@ int wmain() {
     ::references_only(value);
     ::references_only(lvalue_reference);
     ::references_only(rvalue_reference);
+
+    ::reference_types_only(5 - 971);
+    ::reference_types_only(value);
+    ::reference_types_only(lvalue_reference);
+    ::reference_types_only(rvalue_reference);
 
     return EXIT_SUCCESS;
 }
