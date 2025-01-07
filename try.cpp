@@ -34,6 +34,9 @@ static_assert(::factorial(10) == 3628800);
 }
 
 auto main() -> int {
-    for (long i = 23; i < 100; ++i) std::cout << ::caller(i) << '\n';
+    for (long i = 23; i < 450; ++i) {
+        std::cout << ::caller(i) << '\n';
+        std::cout << ::invoke(i) << '\n';
+    }
     return EXIT_SUCCESS;
 }
