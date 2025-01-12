@@ -18,6 +18,11 @@ template<typename _Ty> static void reference_types_only([[maybe_unused]] _Ty&& _
         ::_putws(L"_Ty is not a reference");
 }
 
+// incorrect
+template<typename... _TyList> static constexpr void universal(_TyList&&... _arglist) noexcept {
+    return ::reference_types_only(_arglist)...;
+}
+
 int wmain() {
     constexpr auto value { std::numbers::pi_v<float> };
     const auto&    lvalue_reference { value };
