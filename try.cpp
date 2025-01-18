@@ -38,5 +38,18 @@ auto main() -> int {
         std::cout << ::caller(i) << '\n';
         std::cout << ::invoke(i) << '\n';
     }
+
     return EXIT_SUCCESS;
 }
+
+template<typename _Ty> requires std::is_arithmetic_v<_Ty>
+[[nodiscard]] static constexpr long double power(const _Ty& _mantissa, unsigned long _exponent) noexcept(false) {
+    long double init { 1.0000 };
+    while (_exponent) {
+        init *= _mantissa;
+        _exponent--;
+    }
+    return init;
+}
+
+static_assert(::power(4.6564, 73)); // must be 5.8569360348248E+48
