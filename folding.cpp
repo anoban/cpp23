@@ -6,6 +6,15 @@ template<template<typename _Ty> class _UnaryPredicate, typename... _TyCandidateL
     return (_UnaryPredicate<_TyCandidateList>::value && ...);
 }
 
+template<template<typename _Ty> class _UnaryPredicate, typename _TyFirst> [[nodiscard]] static consteval bool any_of() noexcept {
+    return _UnaryPredicate<_TyFirst>::value;
+}
+
+template<template<typename _Ty> class _UnaryPredicate, typename _TyFirst, typename... _TyList>
+[[nodiscard]] static consteval bool any_of() noexcept {
+    return _UnaryPredicate<_TyFirst>::value || ::any_of<_UnaryPredicate, _TyList...>();
+}
+
 static_assert(::all_of<std::is_integral, int, short, unsigned, long, long long, unsigned char, char>());
 static_assert(!::all_of<std::is_integral, int, short, unsigned, long, long long, unsigned char, char, float>());
 static_assert(::all_of<std::is_floating_point, double, float, long double>());
@@ -25,7 +34,17 @@ static constexpr long double right_fold(const _TyList&... _arguments) noexcept {
 }
 
 int main() {
-    ::left_fold(12, 87, 654.98, 0.7467356F, 'A', L'Q');
-    ::right_fold(12, 87, 654.98, 0.7467356F, 'A', L'Q');
+    const auto left  = ::left_fold(12, 87, 654.98, 0.7467356F, 'A', L'Q');
+    const auto right = ::right_fold(12, 87, 654.98, 0.7467356F, 'A', L'Q');
+
+    ::printf_s( // NOLINT(cppcoreguidelines-pro-type-vararg)
+        "Sums are %.5Lf, %.5Lf\n",
+        ::left_fold(12, 87, 654.98, 0.7467356F, 'A', L'Q'),
+        right
+    );
     return EXIT_SUCCESS;
 }
+
+static_assert(::any_of<std::is_integral, int, short, unsigned, long, long long, unsigned char, char>());
+static_assert(::any_of<std::is_floating_point, int, short, unsigned, long, long long, unsigned char, char, float>());
+static_assert(::any_of<std::is_floating_point, double, float, long double>());
