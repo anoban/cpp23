@@ -11,7 +11,8 @@ template<template<typename _Ty> class _UnaryPredicate, typename _TyFirst> [[nodi
 }
 
 template<template<typename _Ty> class _UnaryPredicate, typename _TyFirst, typename... _TyList>
-[[nodiscard]] static consteval bool any_of() noexcept {
+[[nodiscard]] static consteval typename std::enable_if<sizeof...(_TyList) != 0, bool>::type any_of( // NOLINT(modernize-use-constraints)
+) noexcept {
     return _UnaryPredicate<_TyFirst>::value || ::any_of<_UnaryPredicate, _TyList...>();
 }
 
@@ -23,19 +24,17 @@ static_assert(::all_of<std::is_floating_point, double, float, long double>());
 
 template<class... _TyList> requires(::all_of<std::is_arithmetic, _TyList...>())
 static constexpr long double left_fold(const _TyList&... _arguments) noexcept {
-    ::puts(__FUNCSIG__); // NOLINT
     return (... + _arguments);
 }
 
 template<class... _TyList> requires(::all_of<std::is_arithmetic, _TyList...>())
 static constexpr long double right_fold(const _TyList&... _arguments) noexcept {
-    ::puts(__FUNCSIG__); // NOLINT
-    return (_arguments + ...);
+    return (_arguments + ...); // NOLINT(cppcoreguidelines-narrowing-conversions)
 }
 
 int main() {
-    const auto left  = ::left_fold(12, 87, 654.98, 0.7467356F, 'A', L'Q');
-    const auto right = ::right_fold(12, 87, 654.98, 0.7467356F, 'A', L'Q');
+    [[maybe_unused]] constexpr auto left  = ::left_fold(12, 87, 654.98, 0.7467356F, 'A', L'Q');
+    constexpr auto                  right = ::right_fold(12, 87, 654.98, 0.7467356F, 'A', L'Q');
 
     ::printf_s( // NOLINT(cppcoreguidelines-pro-type-vararg)
         "Sums are %.5Lf, %.5Lf\n",
