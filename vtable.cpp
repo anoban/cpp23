@@ -2,22 +2,24 @@
 
 struct base {
         // vtable ptr
+        unsigned long  _fourbytes_taken;
+        unsigned short _fillthe_gap;
+
         virtual void hello() const noexcept(true) { ::puts("Hello from base!"); }
 
-        void hi() const noexcept { ::puts("Hi from base!"); }
+        void hi() const noexcept { ::puts("Hi from base!"); } // NOLINT(readability-convert-member-functions-to-static)
 };
 
 struct derived : public base {
         // base subobject, which is practically empty here since the vtable ptr is not inherited
         // vtable ptr
-
         void hello() const noexcept override { ::puts("Hello from derived!"); }
 
-        void hi() const noexcept { ::puts("Hi from derived!"); }
+        void hi() const noexcept { ::puts("Hi from derived!"); } // NOLINT(readability-convert-member-functions-to-static)
 };
 
-static_assert(sizeof(base) == 8); // woohooo
-static_assert(sizeof(derived) == 8);
+static_assert(sizeof(base) == 16); // woohooo
+static_assert(sizeof(derived) == 16);
 
 int main() {
     const derived     dobject {};
