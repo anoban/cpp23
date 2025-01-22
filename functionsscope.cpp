@@ -15,7 +15,7 @@ int wmain() {
 
     double random {};
 
-    std::wcout << L"square of " << (random = ::rand() / RMAX) << L" is " << ::fnptr(random) << L'\n';
+    std::wcout << L"square of " << (random = ::rand() / RMAX) << L" is " << (*::fnptr)(random) << L'\n';
 
     return EXIT_SUCCESS;
 }
