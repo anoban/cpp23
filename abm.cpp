@@ -1,5 +1,7 @@
 // practicing agent based modelling
 
+#include <algorithm>
+#include <array>
 #include <iostream>
 #include <random>
 #include <ranges>
@@ -35,22 +37,26 @@ class person final {
         ~person() noexcept               = default;
 };
 
-static constexpr unsigned long population_size { 8'000'000 }, max_iterations { 30'000 };
+static constexpr unsigned long population_size { 8'000'000 }, max_iterations { 30'000 }, n_days { 21 }, max_contacts { 18 };
 
 auto wmain() -> int {
     std::mt19937_64                         rengine { std::random_device {}() };
     std::uniform_int_distribution<unsigned> randint { 0, population_size - 1 };
     const person                            dumbass { L"There are aliens in area 51, my brother's friend in CIA told me!!" };
 
-    std::vector<person> population(population_size);
+    std::vector<person>        population(population_size);
+    std::vector<unsigned char> daily_changes(n_days);
+
     population.at(0).listen(dumbass); // the first point of contact
 
     // simulate subsequent contacts
-    unsigned random_selection {};
-    for (const auto& _ : std::ranges::views::iota(0U, max_iterations)) {
-        //
-        random_selection = randint(rengine);
+    unsigned                           random_selection {};
+    std::array<unsigned, max_contacts> contacs {};
+    for (const auto& _ : std::ranges::views::iota(0U, n_days)) {
+        for (const auto& _ : std::ranges::views::iota(0U, max_iterations)) {
+            //
+            random_selection = randint(rengine);
+        }
     }
-
     return EXIT_SUCCESS;
 }
