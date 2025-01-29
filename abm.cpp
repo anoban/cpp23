@@ -1,8 +1,9 @@
-// practicing agent based modelling
+// practicing agent based modelling https://caam37830.github.io/book/09_computing/agent_based_models.html
 
 #include <algorithm>
 #include <array>
 #include <iostream>
+#include <numeric>
 #include <random>
 #include <ranges>
 #include <vector>
@@ -52,11 +53,17 @@ auto wmain() -> int {
     // simulate subsequent contacts
     unsigned                           random_selection {};
     std::array<unsigned, max_contacts> contacs {};
-    for (const auto& _ : std::ranges::views::iota(0U, n_days)) {
+
+    for (const auto& d : std::ranges::views::iota(0U, n_days)) {
         for (const auto& _ : std::ranges::views::iota(0U, max_iterations)) {
             //
             random_selection = randint(rengine);
         }
+        daily_changes.at(d) =
+            std::sum(population.cbegin(), population.cend(), 0LU, [](const person& _this, const person& _next) noexcept -> unsigned long {
+                return _this.has_rumour() + _next.has_rumour();
+            });
     }
+
     return EXIT_SUCCESS;
 }
