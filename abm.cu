@@ -1,12 +1,8 @@
-// practicing agent based modelling https://caam37830.github.io/book/09_computing/agent_based_models.html
-
 #include <iostream>
 #include <numeric>
 #include <random>
 #include <ranges>
 #include <vector>
-
-// let's model how a rumour/gossip might spread in a population
 
 class person final {
     private:
