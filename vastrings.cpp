@@ -15,5 +15,6 @@ static void inoculate(_In_ [[maybe_unused]] const unsigned long long& _populatio
 auto wmain() -> int {
     ::print(L"Hi!", L"Hello", L"Howdy!", L"How was your day?");
     ::inoculate(100, L"Hi!", L"Hello", L"Howdy!", L"How was your day?");
+
     return EXIT_SUCCESS;
 }
