@@ -23,8 +23,30 @@ static_assert(::is_static_castable_v<float*, const float*>);
 static_assert(::is_static_castable_v<const float*, float*>);
 static_assert(::is_static_castable_v<float&, const float&>);
 
+template<typename... _TyList> requires(std::is_integral_v<_TyList> && ...)
+[[nodiscard]] static constexpr long double isum(const _TyList&... args) noexcept {
+    return (args + ...);
+}
+
+template<typename _TyReal>
+static constexpr typename std::enable_if_t<std::is_floating_point_v<_TyReal>, double> rsum( // NOLINT(modernize-use-constraints)
+    const _TyReal& _arg
+) noexcept {
+    return _arg;
+}
+
+template<typename _TyFirst, typename... _TyList>
+static constexpr typename std::enable_if_t<std::is_floating_point_v<_TyFirst>, double> rsum( // NOLINT(modernize-use-constraints)
+    const _TyFirst& _farg,
+    const _TyList&... _rarg
+) noexcept {
+    return _farg + ::rsum(_rarg...);
+}
+
 int main() {
     //
     [[maybe_unused]] auto is_it = static_cast<const double>(21567);
+    constexpr auto        sum { ::isum(0, 5746L, 847LLU, 8964U, 'A', L'P', 2.5469) };
+    constexpr auto        fsum { ::rsum(0.000, 5.746L, 84.080977, 89640, 2.5469) };
     return EXIT_SUCCESS;
 }
