@@ -32,11 +32,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// This sample queries the properties of the CUDA devices present in the system via CUDA Runtime API.
+// this queries the properties of the CUDA devices present in the system via the CUDA Runtime API.
 
 #include <array>
 #include <cassert>
 #include <cstdio>
+#include <cstdlib>
 
 #include <cuda_runtime.h>
 
