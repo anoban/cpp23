@@ -1,9 +1,9 @@
+import argparse
 import json
-import os
 from typing import Any
 
 
-def open_vscode_settings_dot_json(path: os.PathLike) -> str:
+def open_vscode_settings_dot_json(path: str) -> str:
     """ """
 
     try:
@@ -22,6 +22,11 @@ def parse_settings(settings: str) -> dict[str, Any]:
         return parsed_settings
     except json.decoder.JSONDecodeError as jsn_dcd_error:
         raise RuntimeError("") from jsn_dcd_error
+
+
+def __parse_commandline_arguments() -> None:
+    parser = argparse.ArgumentParser()
+    pass
 
 
 def sort_settings(settings: dict[str, Any]) -> dict[str, Any]:
