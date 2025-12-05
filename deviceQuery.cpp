@@ -245,7 +245,7 @@ int main() {
 
         ::wprintf_s(
             L"  Concurrent copy and kernel execution:          %s with %d copy engine(s)\n",
-            (deviceProp.deviceOverlap ? L"Yes" : L"No"),
+            deviceProp.deviceOverlap ? L"Yes" : L"No",
             deviceProp.asyncEngineCount
         );
 
