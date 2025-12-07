@@ -30,11 +30,14 @@
  */
 
 // includes, system
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
 #include <cuda.h>
-#include <helper_cuda_drvapi.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+
+#include <helper_cuda_drvapi.hpp>
+#pragma comment(lib, "cuda.lib") // required for the driver API calls
 
 ////////////////////////////////////////////////////////////////////////////////
 // Program main

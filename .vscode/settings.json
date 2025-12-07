@@ -103,5 +103,6 @@
         "sstring": "cpp",
         "gspan": "cpp",
         "gbyte": "cpp"
-    }
+    },
+    "chat.agent.enabled": false
 }

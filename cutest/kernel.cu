@@ -5,11 +5,11 @@
 #include <ranges>
 #include <type_traits>
 
-#include "cuda_runtime.h"
-#include "device_launch_parameters.h"
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
 
 template<typename _TyNumeric> requires std::is_arithmetic_v<_TyNumeric>
-__global__ static void addKernel(_Inout_ _TyNumeric* res, _In_ const _TyNumeric* inp_01, _In_ const _TyNumeric* inp_02) {
+__global__ static void addKernel(_Inout_ _TyNumeric* const res, _In_ const _TyNumeric* const inp_01, _In_ const _TyNumeric* const inp_02) {
     const unsigned i = threadIdx.x;
     res[i]           = inp_01[i] + inp_02[i];
 }
@@ -30,49 +30,49 @@ template<typename _TyNumeric, unsigned long long _Size> static inline
     // Choose which GPU to run on, change this on a multi-GPU system.
     cudaStatus = ::cudaSetDevice(0);
     if (cudaStatus != cudaSuccess) {
-        ::fprintf(stderr, "cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");
+        ::fputws(L"cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?", stderr);
         goto Error;
     }
 
     // Allocate GPU buffers for three vectors (two input, one output)    .
     cudaStatus = ::cudaMalloc((void**) &dev_results, _Size * sizeof(_TyNumeric));
     if (cudaStatus != cudaSuccess) {
-        ::fprintf(stderr, "cudaMalloc failed!");
+        ::fputws(L"cudaMalloc failed!", stderr);
         goto Error;
     }
 
     cudaStatus = ::cudaMalloc((void**) &dev_inputs_01, _Size * sizeof(_TyNumeric));
     if (cudaStatus != cudaSuccess) {
-        ::fprintf(stderr, "cudaMalloc failed!");
+        ::fputws(L"cudaMalloc failed!", stderr);
         goto Error;
     }
 
     cudaStatus = ::cudaMalloc((void**) &dev_inputs_02, _Size * sizeof(_TyNumeric));
     if (cudaStatus != cudaSuccess) {
-        ::fprintf(stderr, "cudaMalloc failed!");
+        ::fputws(L"cudaMalloc failed!", stderr);
         goto Error;
     }
 
     // Copy input vectors from host memory to GPU buffers.
     cudaStatus = ::cudaMemcpy(dev_inputs_01, input_01.data(), _Size * sizeof(_TyNumeric), cudaMemcpyHostToDevice);
     if (cudaStatus != cudaSuccess) {
-        ::fprintf(stderr, "cudaMemcpy failed!");
+        ::fputws(L"cudaMemcpy failed!", stderr);
         goto Error;
     }
 
     cudaStatus = ::cudaMemcpy(dev_inputs_02, input_02.data(), _Size * sizeof(_TyNumeric), cudaMemcpyHostToDevice);
     if (cudaStatus != cudaSuccess) {
-        ::fprintf(stderr, "cudaMemcpy failed!");
+        ::fputws(L"cudaMemcpy failed!", stderr);
         goto Error;
     }
 
     // Launch a kernel on the GPU with one thread for each element.
-    ::addKernel<<<1, size>>>(dev_results, dev_inputs_01, dev_inputs_02);
+    ::addKernel<<<1, _Size>>>(dev_results, dev_inputs_01, dev_inputs_02);
 
     // Check for any errors launching the kernel
     cudaStatus = ::cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
-        ::fprintf(stderr, "addKernel launch failed: %s\n", ::cudaGetErrorString(cudaStatus));
+        ::fwprintf_s(stderr, L"addKernel launch failed: %S\n", ::cudaGetErrorString(cudaStatus));
         goto Error;
     }
 
@@ -80,14 +80,14 @@ template<typename _TyNumeric, unsigned long long _Size> static inline
     // any errors encountered during the launch.
     cudaStatus = ::cudaDeviceSynchronize();
     if (cudaStatus != cudaSuccess) {
-        ::fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching addKernel!\n", cudaStatus);
+        ::fwprintf_s(stderr, L"cudaDeviceSynchronize returned error code %d after launching addKernel!\n", cudaStatus);
         goto Error;
     }
 
     // Copy output vector from GPU buffer to host memory.
     cudaStatus = ::cudaMemcpy(results.data(), dev_results, _Size * sizeof(_TyNumeric), cudaMemcpyDeviceToHost);
     if (cudaStatus != cudaSuccess) {
-        ::fprintf(stderr, "cudaMemcpy failed!");
+        ::fputws(L"cudaMemcpy failed!", stderr);
         goto Error;
     }
 
@@ -99,8 +99,8 @@ Error:
     return cudaStatus;
 }
 
-int main() {
-    constexpr unsigned long long        ARRAY_LENGTH { 25'000 };
+int wmain() {
+    constexpr unsigned long long        ARRAY_LENGTH { 250 };
     std::array<long long, ARRAY_LENGTH> left {}, right {}, sums {};
 
     std::mt19937_64 randeng { std::random_device {}() };
@@ -111,18 +111,18 @@ int main() {
     // Add vectors in parallel.
     cudaError_t cudaStatus = ::addWithCuda(sums, left, right);
     if (cudaStatus != cudaSuccess) {
-        ::fprintf(stderr, "addWithCuda failed!");
+        ::fputws(L"addWithCuda failed!", stderr);
         return EXIT_FAILURE;
     }
 
     for (const auto& i : std::ranges::views::iota(0LLU, ARRAY_LENGTH))
-        ::printf_s("%LLU + %LLU = %LLU\n", left.at(i), right.at(i), sums.at(i));
+        ::wprintf_s(L"%LLU + %LLU = %LLU\n", left.at(i), right.at(i), sums.at(i));
 
     // cudaDeviceReset must be called before exiting in order for profiling and
     // tracing tools such as Nsight and Visual Profiler to show complete traces.
     cudaStatus = ::cudaDeviceReset();
     if (cudaStatus != cudaSuccess) {
-        ::fprintf(stderr, "cudaDeviceReset failed!");
+        ::fwprintf_s(stderr, L"cudaDeviceReset failed!");
         return EXIT_FAILURE;
     }
 
