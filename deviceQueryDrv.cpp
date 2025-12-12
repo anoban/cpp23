@@ -39,37 +39,45 @@
 #include <helper_cuda_drvapi.hpp>
 #pragma comment(lib, "cuda.lib") // required for the driver API calls
 
+static __forceinline void checkCudaErrors(
+    _In_ const CUresult& error, _In_ const wchar_t* file = __FILEW__, _In_ const long& line = __LINE__
+) noexcept {
+    if (cudaError_enum::CUDA_SUCCESS != error) {
+        const char* error_string {};
+        ::cuGetErrorString(error, &error_string);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        fwprintf(stderr, L"checkCudaErrors() Driver API error = %04d \"%S\" from file <%s>, line %d.\n", error, error_string, file, line);
+        ::exit(EXIT_FAILURE);
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Program main
 ////////////////////////////////////////////////////////////////////////////////
-int main(int argc, char** argv) {
-    CUdevice dev;
-    int      major = 0, minor = 0;
-    int      deviceCount = 0;
-    char     deviceName[256];
-
-    printf("%s Starting...\n\n", argv[0]);
+int wmain() {
+    CUdevice    device {};
+    long        major {}, minor {}, device_count {}; // NOLINT(readability-isolate-declaration)
+    std::string device_name(256, ' ');
 
     // note your project will need to link with cuda.lib files on windows
-    printf("CUDA Device Query (Driver API) statically linked version \n");
+    ::_putws(L"CUDA Device Query (Driver API) statically linked version");
 
-    checkCudaErrors(cuInit(0));
-
-    checkCudaErrors(cuDeviceGetCount(&deviceCount));
+    ::checkCudaErrors(::cuInit(0));
+    ::checkCudaErrors(::cuDeviceGetCount(reinterpret_cast<int*>(&device_count)));
 
     // This function call returns 0 if there are no CUDA capable devices.
-    if (deviceCount == 0)
-        printf("There are no available device(s) that support CUDA\n");
+    if (!device_count)
+        ::_putws(L"There are no available device(s) that support CUDA");
     else
-        printf("Detected %d CUDA Capable device(s)\n", deviceCount);
+        ::wprintf_s(L"Detected %d CUDA Capable device(s)\n", device_count); // NOLINT(cppcoreguidelines-pro-type-vararg)
 
-    for (dev = 0; dev < deviceCount; ++dev) {
-        checkCudaErrors(cuDeviceGetAttribute(&major, CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR, dev));
-        checkCudaErrors(cuDeviceGetAttribute(&minor, CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MINOR, dev));
+    for (device = 0; device < device_count; ++device) {
+        checkCudaErrors(cuDeviceGetAttribute(&major, CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR, device));
+        checkCudaErrors(cuDeviceGetAttribute(&minor, CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MINOR, device));
 
-        checkCudaErrors(cuDeviceGetName(deviceName, 256, dev));
+        checkCudaErrors(cuDeviceGetName(device_name, 256, device));
 
-        printf("\nDevice %d: \"%s\"\n", dev, deviceName);
+        printf("\nDevice %d: \"%s\"\n", device, device_name);
 
         int driverVersion = 0;
         checkCudaErrors(cuDriverGetVersion(&driverVersion));
@@ -77,7 +85,7 @@ int main(int argc, char** argv) {
         printf("  CUDA Capability Major/Minor version number:    %d.%d\n", major, minor);
 
         size_t totalGlobalMem;
-        checkCudaErrors(cuDeviceTotalMem(&totalGlobalMem, dev));
+        checkCudaErrors(cuDeviceTotalMem(&totalGlobalMem, device));
 
         char msg[256];
         SPRINTF(
@@ -90,7 +98,7 @@ int main(int argc, char** argv) {
         printf("%s", msg);
 
         int multiProcessorCount;
-        getCudaAttribute<int>(&multiProcessorCount, CU_DEVICE_ATTRIBUTE_MULTIPROCESSOR_COUNT, dev);
+        getCudaAttribute<int>(&multiProcessorCount, CU_DEVICE_ATTRIBUTE_MULTIPROCESSOR_COUNT, device);
 
         printf(
             "  (%2d) Multiprocessors, (%3d) CUDA Cores/MP:     %d CUDA Cores\n",
@@ -100,7 +108,7 @@ int main(int argc, char** argv) {
         );
 
         int clockRate;
-        getCudaAttribute<int>(&clockRate, CU_DEVICE_ATTRIBUTE_CLOCK_RATE, dev);
+        getCudaAttribute<int>(&clockRate, CU_DEVICE_ATTRIBUTE_CLOCK_RATE, device);
         printf(
             "  GPU Max Clock rate:                            %.0f MHz (%0.2f "
             "GHz)\n",
@@ -108,23 +116,23 @@ int main(int argc, char** argv) {
             clockRate * 1e-6f
         );
         int memoryClock;
-        getCudaAttribute<int>(&memoryClock, CU_DEVICE_ATTRIBUTE_MEMORY_CLOCK_RATE, dev);
+        getCudaAttribute<int>(&memoryClock, CU_DEVICE_ATTRIBUTE_MEMORY_CLOCK_RATE, device);
         printf("  Memory Clock rate:                             %.0f Mhz\n", memoryClock * 1e-3f);
         int memBusWidth;
-        getCudaAttribute<int>(&memBusWidth, CU_DEVICE_ATTRIBUTE_GLOBAL_MEMORY_BUS_WIDTH, dev);
+        getCudaAttribute<int>(&memBusWidth, CU_DEVICE_ATTRIBUTE_GLOBAL_MEMORY_BUS_WIDTH, device);
         printf("  Memory Bus Width:                              %d-bit\n", memBusWidth);
         int L2CacheSize;
-        getCudaAttribute<int>(&L2CacheSize, CU_DEVICE_ATTRIBUTE_L2_CACHE_SIZE, dev);
+        getCudaAttribute<int>(&L2CacheSize, CU_DEVICE_ATTRIBUTE_L2_CACHE_SIZE, device);
 
         if (L2CacheSize) printf("  L2 Cache Size:                                 %d bytes\n", L2CacheSize);
 
         int maxTex1D, maxTex2D[2], maxTex3D[3];
-        getCudaAttribute<int>(&maxTex1D, CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE1D_WIDTH, dev);
-        getCudaAttribute<int>(&maxTex2D[0], CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_WIDTH, dev);
-        getCudaAttribute<int>(&maxTex2D[1], CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_HEIGHT, dev);
-        getCudaAttribute<int>(&maxTex3D[0], CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_WIDTH, dev);
-        getCudaAttribute<int>(&maxTex3D[1], CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_HEIGHT, dev);
-        getCudaAttribute<int>(&maxTex3D[2], CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_DEPTH, dev);
+        getCudaAttribute<int>(&maxTex1D, CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE1D_WIDTH, device);
+        getCudaAttribute<int>(&maxTex2D[0], CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_WIDTH, device);
+        getCudaAttribute<int>(&maxTex2D[1], CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_HEIGHT, device);
+        getCudaAttribute<int>(&maxTex3D[0], CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_WIDTH, device);
+        getCudaAttribute<int>(&maxTex3D[1], CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_HEIGHT, device);
+        getCudaAttribute<int>(&maxTex3D[2], CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_DEPTH, device);
         printf(
             "  Max Texture Dimension Sizes                    1D=(%d) 2D=(%d, %d) "
             "3D=(%d, %d, %d)\n",
@@ -137,14 +145,14 @@ int main(int argc, char** argv) {
         );
 
         int maxTex1DLayered[2];
-        getCudaAttribute<int>(&maxTex1DLayered[0], CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE1D_LAYERED_WIDTH, dev);
-        getCudaAttribute<int>(&maxTex1DLayered[1], CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE1D_LAYERED_LAYERS, dev);
+        getCudaAttribute<int>(&maxTex1DLayered[0], CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE1D_LAYERED_WIDTH, device);
+        getCudaAttribute<int>(&maxTex1DLayered[1], CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE1D_LAYERED_LAYERS, device);
         printf("  Maximum Layered 1D Texture Size, (num) layers  1D=(%d), %d layers\n", maxTex1DLayered[0], maxTex1DLayered[1]);
 
         int maxTex2DLayered[3];
-        getCudaAttribute<int>(&maxTex2DLayered[0], CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LAYERED_WIDTH, dev);
-        getCudaAttribute<int>(&maxTex2DLayered[1], CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LAYERED_HEIGHT, dev);
-        getCudaAttribute<int>(&maxTex2DLayered[2], CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LAYERED_LAYERS, dev);
+        getCudaAttribute<int>(&maxTex2DLayered[0], CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LAYERED_WIDTH, device);
+        getCudaAttribute<int>(&maxTex2DLayered[1], CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LAYERED_HEIGHT, device);
+        getCudaAttribute<int>(&maxTex2DLayered[2], CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LAYERED_LAYERS, device);
         printf(
             "  Maximum Layered 2D Texture Size, (num) layers  2D=(%d, %d), %d "
             "layers\n",
@@ -154,48 +162,48 @@ int main(int argc, char** argv) {
         );
 
         int totalConstantMemory;
-        getCudaAttribute<int>(&totalConstantMemory, CU_DEVICE_ATTRIBUTE_TOTAL_CONSTANT_MEMORY, dev);
+        getCudaAttribute<int>(&totalConstantMemory, CU_DEVICE_ATTRIBUTE_TOTAL_CONSTANT_MEMORY, device);
         printf("  Total amount of constant memory:               %u bytes\n", totalConstantMemory);
         int sharedMemPerBlock;
-        getCudaAttribute<int>(&sharedMemPerBlock, CU_DEVICE_ATTRIBUTE_MAX_SHARED_MEMORY_PER_BLOCK, dev);
+        getCudaAttribute<int>(&sharedMemPerBlock, CU_DEVICE_ATTRIBUTE_MAX_SHARED_MEMORY_PER_BLOCK, device);
         printf("  Total amount of shared memory per block:       %u bytes\n", sharedMemPerBlock);
         int regsPerBlock;
-        getCudaAttribute<int>(&regsPerBlock, CU_DEVICE_ATTRIBUTE_MAX_REGISTERS_PER_BLOCK, dev);
+        getCudaAttribute<int>(&regsPerBlock, CU_DEVICE_ATTRIBUTE_MAX_REGISTERS_PER_BLOCK, device);
         printf("  Total number of registers available per block: %d\n", regsPerBlock);
         int warpSize;
-        getCudaAttribute<int>(&warpSize, CU_DEVICE_ATTRIBUTE_WARP_SIZE, dev);
+        getCudaAttribute<int>(&warpSize, CU_DEVICE_ATTRIBUTE_WARP_SIZE, device);
         printf("  Warp size:                                     %d\n", warpSize);
         int maxThreadsPerMultiProcessor;
-        getCudaAttribute<int>(&maxThreadsPerMultiProcessor, CU_DEVICE_ATTRIBUTE_MAX_THREADS_PER_MULTIPROCESSOR, dev);
+        getCudaAttribute<int>(&maxThreadsPerMultiProcessor, CU_DEVICE_ATTRIBUTE_MAX_THREADS_PER_MULTIPROCESSOR, device);
         printf("  Maximum number of threads per multiprocessor:  %d\n", maxThreadsPerMultiProcessor);
         int maxThreadsPerBlock;
-        getCudaAttribute<int>(&maxThreadsPerBlock, CU_DEVICE_ATTRIBUTE_MAX_THREADS_PER_BLOCK, dev);
+        getCudaAttribute<int>(&maxThreadsPerBlock, CU_DEVICE_ATTRIBUTE_MAX_THREADS_PER_BLOCK, device);
         printf("  Maximum number of threads per block:           %d\n", maxThreadsPerBlock);
 
         int blockDim[3];
-        getCudaAttribute<int>(&blockDim[0], CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_X, dev);
-        getCudaAttribute<int>(&blockDim[1], CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_Y, dev);
-        getCudaAttribute<int>(&blockDim[2], CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_Z, dev);
+        getCudaAttribute<int>(&blockDim[0], CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_X, device);
+        getCudaAttribute<int>(&blockDim[1], CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_Y, device);
+        getCudaAttribute<int>(&blockDim[2], CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_Z, device);
         printf("  Max dimension size of a thread block (x,y,z): (%d, %d, %d)\n", blockDim[0], blockDim[1], blockDim[2]);
         int gridDim[3];
-        getCudaAttribute<int>(&gridDim[0], CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_X, dev);
-        getCudaAttribute<int>(&gridDim[1], CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_Y, dev);
-        getCudaAttribute<int>(&gridDim[2], CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_Z, dev);
+        getCudaAttribute<int>(&gridDim[0], CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_X, device);
+        getCudaAttribute<int>(&gridDim[1], CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_Y, device);
+        getCudaAttribute<int>(&gridDim[2], CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_Z, device);
         printf("  Max dimension size of a grid size (x,y,z):    (%d, %d, %d)\n", gridDim[0], gridDim[1], gridDim[2]);
 
         int textureAlign;
-        getCudaAttribute<int>(&textureAlign, CU_DEVICE_ATTRIBUTE_TEXTURE_ALIGNMENT, dev);
+        getCudaAttribute<int>(&textureAlign, CU_DEVICE_ATTRIBUTE_TEXTURE_ALIGNMENT, device);
         printf("  Texture alignment:                             %u bytes\n", textureAlign);
 
         int memPitch;
-        getCudaAttribute<int>(&memPitch, CU_DEVICE_ATTRIBUTE_MAX_PITCH, dev);
+        getCudaAttribute<int>(&memPitch, CU_DEVICE_ATTRIBUTE_MAX_PITCH, device);
         printf("  Maximum memory pitch:                          %u bytes\n", memPitch);
 
         int gpuOverlap;
-        getCudaAttribute<int>(&gpuOverlap, CU_DEVICE_ATTRIBUTE_GPU_OVERLAP, dev);
+        getCudaAttribute<int>(&gpuOverlap, CU_DEVICE_ATTRIBUTE_GPU_OVERLAP, device);
 
         int asyncEngineCount;
-        getCudaAttribute<int>(&asyncEngineCount, CU_DEVICE_ATTRIBUTE_ASYNC_ENGINE_COUNT, dev);
+        getCudaAttribute<int>(&asyncEngineCount, CU_DEVICE_ATTRIBUTE_ASYNC_ENGINE_COUNT, device);
         printf(
             "  Concurrent copy and kernel execution:          %s with %d copy "
             "engine(s)\n",
@@ -204,30 +212,30 @@ int main(int argc, char** argv) {
         );
 
         int kernelExecTimeoutEnabled;
-        getCudaAttribute<int>(&kernelExecTimeoutEnabled, CU_DEVICE_ATTRIBUTE_KERNEL_EXEC_TIMEOUT, dev);
+        getCudaAttribute<int>(&kernelExecTimeoutEnabled, CU_DEVICE_ATTRIBUTE_KERNEL_EXEC_TIMEOUT, device);
         printf("  Run time limit on kernels:                     %s\n", kernelExecTimeoutEnabled ? "Yes" : "No");
         int integrated;
-        getCudaAttribute<int>(&integrated, CU_DEVICE_ATTRIBUTE_INTEGRATED, dev);
+        getCudaAttribute<int>(&integrated, CU_DEVICE_ATTRIBUTE_INTEGRATED, device);
         printf("  Integrated GPU sharing Host Memory:            %s\n", integrated ? "Yes" : "No");
         int canMapHostMemory;
-        getCudaAttribute<int>(&canMapHostMemory, CU_DEVICE_ATTRIBUTE_CAN_MAP_HOST_MEMORY, dev);
+        getCudaAttribute<int>(&canMapHostMemory, CU_DEVICE_ATTRIBUTE_CAN_MAP_HOST_MEMORY, device);
         printf("  Support host page-locked memory mapping:       %s\n", canMapHostMemory ? "Yes" : "No");
 
         int concurrentKernels;
-        getCudaAttribute<int>(&concurrentKernels, CU_DEVICE_ATTRIBUTE_CONCURRENT_KERNELS, dev);
+        getCudaAttribute<int>(&concurrentKernels, CU_DEVICE_ATTRIBUTE_CONCURRENT_KERNELS, device);
         printf("  Concurrent kernel execution:                   %s\n", concurrentKernels ? "Yes" : "No");
 
         int surfaceAlignment;
-        getCudaAttribute<int>(&surfaceAlignment, CU_DEVICE_ATTRIBUTE_SURFACE_ALIGNMENT, dev);
+        getCudaAttribute<int>(&surfaceAlignment, CU_DEVICE_ATTRIBUTE_SURFACE_ALIGNMENT, device);
         printf("  Alignment requirement for Surfaces:            %s\n", surfaceAlignment ? "Yes" : "No");
 
         int eccEnabled;
-        getCudaAttribute<int>(&eccEnabled, CU_DEVICE_ATTRIBUTE_ECC_ENABLED, dev);
+        getCudaAttribute<int>(&eccEnabled, CU_DEVICE_ATTRIBUTE_ECC_ENABLED, device);
         printf("  Device has ECC support:                        %s\n", eccEnabled ? "Enabled" : "Disabled");
 
 #if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
         int tccDriver;
-        getCudaAttribute<int>(&tccDriver, CU_DEVICE_ATTRIBUTE_TCC_DRIVER, dev);
+        getCudaAttribute<int>(&tccDriver, CU_DEVICE_ATTRIBUTE_TCC_DRIVER, device);
         printf(
             "  CUDA Device Driver Mode (TCC or WDDM):         %s\n",
             tccDriver ? "TCC (Tesla Compute Cluster Driver)" : "WDDM (Windows Display Driver Model)"
@@ -235,29 +243,29 @@ int main(int argc, char** argv) {
 #endif
 
         int unifiedAddressing;
-        getCudaAttribute<int>(&unifiedAddressing, CU_DEVICE_ATTRIBUTE_UNIFIED_ADDRESSING, dev);
+        getCudaAttribute<int>(&unifiedAddressing, CU_DEVICE_ATTRIBUTE_UNIFIED_ADDRESSING, device);
         printf("  Device supports Unified Addressing (UVA):      %s\n", unifiedAddressing ? "Yes" : "No");
 
         int managedMemory;
-        getCudaAttribute<int>(&managedMemory, CU_DEVICE_ATTRIBUTE_MANAGED_MEMORY, dev);
+        getCudaAttribute<int>(&managedMemory, CU_DEVICE_ATTRIBUTE_MANAGED_MEMORY, device);
         printf("  Device supports Managed Memory:                %s\n", managedMemory ? "Yes" : "No");
 
         int computePreemption;
-        getCudaAttribute<int>(&computePreemption, CU_DEVICE_ATTRIBUTE_COMPUTE_PREEMPTION_SUPPORTED, dev);
+        getCudaAttribute<int>(&computePreemption, CU_DEVICE_ATTRIBUTE_COMPUTE_PREEMPTION_SUPPORTED, device);
         printf("  Device supports Compute Preemption:            %s\n", computePreemption ? "Yes" : "No");
 
         int cooperativeLaunch;
-        getCudaAttribute<int>(&cooperativeLaunch, CU_DEVICE_ATTRIBUTE_COOPERATIVE_LAUNCH, dev);
+        getCudaAttribute<int>(&cooperativeLaunch, CU_DEVICE_ATTRIBUTE_COOPERATIVE_LAUNCH, device);
         printf("  Supports Cooperative Kernel Launch:            %s\n", cooperativeLaunch ? "Yes" : "No");
 
         int cooperativeMultiDevLaunch;
-        getCudaAttribute<int>(&cooperativeMultiDevLaunch, CU_DEVICE_ATTRIBUTE_COOPERATIVE_MULTI_DEVICE_LAUNCH, dev);
+        getCudaAttribute<int>(&cooperativeMultiDevLaunch, CU_DEVICE_ATTRIBUTE_COOPERATIVE_MULTI_DEVICE_LAUNCH, device);
         printf("  Supports MultiDevice Co-op Kernel Launch:      %s\n", cooperativeMultiDevLaunch ? "Yes" : "No");
 
         int pciDomainID, pciBusID, pciDeviceID;
-        getCudaAttribute<int>(&pciDomainID, CU_DEVICE_ATTRIBUTE_PCI_DOMAIN_ID, dev);
-        getCudaAttribute<int>(&pciBusID, CU_DEVICE_ATTRIBUTE_PCI_BUS_ID, dev);
-        getCudaAttribute<int>(&pciDeviceID, CU_DEVICE_ATTRIBUTE_PCI_DEVICE_ID, dev);
+        getCudaAttribute<int>(&pciDomainID, CU_DEVICE_ATTRIBUTE_PCI_DOMAIN_ID, device);
+        getCudaAttribute<int>(&pciBusID, CU_DEVICE_ATTRIBUTE_PCI_BUS_ID, device);
+        getCudaAttribute<int>(&pciDeviceID, CU_DEVICE_ATTRIBUTE_PCI_DEVICE_ID, device);
         printf("  Device PCI Domain ID / Bus ID / location ID:   %d / %d / %d\n", pciDomainID, pciBusID, pciDeviceID);
 
         const char* sComputeMode[] = { "Default (multiple host threads can use ::cudaSetDevice() with device "
@@ -272,18 +280,18 @@ int main(int argc, char** argv) {
                                        NULL };
 
         int computeMode;
-        getCudaAttribute<int>(&computeMode, CU_DEVICE_ATTRIBUTE_COMPUTE_MODE, dev);
+        getCudaAttribute<int>(&computeMode, CU_DEVICE_ATTRIBUTE_COMPUTE_MODE, device);
         printf("  Compute Mode:\n");
         printf("     < %s >\n", sComputeMode[computeMode]);
     }
 
     // If there are 2 or more GPUs, query to determine whether RDMA is supported
-    if (deviceCount >= 2) {
+    if (device_count >= 2) {
         int gpuid[64]; // we want to find the first two GPUs that can support P2P
         int gpu_p2p_count = 0;
         int tccDriver     = 0;
 
-        for (int i = 0; i < deviceCount; i++) {
+        for (int i = 0; i < device_count; i++) {
             checkCudaErrors(cuDeviceGetAttribute(&major, CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR, i));
             checkCudaErrors(cuDeviceGetAttribute(&minor, CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MINOR, i));
             getCudaAttribute<int>(&tccDriver, CU_DEVICE_ATTRIBUTE_TCC_DRIVER, i);

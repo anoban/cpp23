@@ -56,29 +56,8 @@ inline int ftoi(float value) { return value >= 0 ? static_cast<int>(value + 0.5)
 // add a level of protection to the CUDA SDK samples, let's force samples to
 // explicitly include CUDA.H
 #ifdef __cuda_cuda_h__
-    // This will output the proper CUDA error strings in the event that a CUDA host
-    // call returns an error
-    #ifndef checkCudaErrors
-        #define checkCudaErrors(err) __checkCudaErrors(err, __FILE__, __LINE__)
-
-// These are the inline versions for all of the SDK helper functions
-inline void __checkCudaErrors(CUresult err, const char* file, const int line) {
-    if (CUDA_SUCCESS != err) {
-        const char* errorStr = NULL;
-        cuGetErrorString(err, &errorStr);
-        fprintf(
-            stderr,
-            "checkCudaErrors() Driver API error = %04d \"%s\" from file <%s>, "
-            "line %i.\n",
-            err,
-            errorStr,
-            file,
-            line
-        );
-        exit(EXIT_FAILURE);
-    }
-}
-    #endif
+// This will output the proper CUDA error strings in the event that a CUDA host
+// call returns an error
 
 // This function wraps the CUDA Driver API into a template function
 template<class T> inline void getCudaAttribute(T* attribute, CUdevice_attribute device_attribute, int device) {
