@@ -1,5 +1,5 @@
 CompileFlags:
-  Add: [-Wall, -Wextra, -pedantic, -O0, -std=c++23, -c, -I./, -I./googletest/include/, -IC:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.6/include -DDEBUG, -D_DEBUG]
+  Add: [-Wall, -Wextra, -pedantic, -O0, -std=c++23, -c, -I./, -I./googletest/include/, -IC:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.6/include, --cuda-path=C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.6, -LC:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.6/lib, -DDEBUG, -D_DEBUG]
   Compiler:  clang++.exe
   CompilationDatabase: None
 
