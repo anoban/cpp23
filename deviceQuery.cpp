@@ -58,12 +58,12 @@ static_assert(sizeof(cudaDeviceProp) == 1032); // because cudaDeviceProp is a re
 // an error handler for CUDA runtime API calls
 // NOTE THE CHECK TAKES PLACE ON A PRVALUE!
 // THE RETURN VALUE OF API CALLS IS NOT BEING CAPTURED IN A VARIABLE
-static void check(cudaError_t status, const wchar_t* const function, const wchar_t* const file, const int line) noexcept {
+static void check(cudaError_t status, const char* const function, const char* const file, const int line) noexcept {
     // handle if the status is not cudaSuccess
     if (status != cudaSuccess) {
-        ::fwprintf_s(
+        ::fprintf(
             stderr,
-            L"CUDA error in %s @ line %d :: code = %d (%S) in call to \"%s\" \n",
+            "CUDA error in %s @ line %d :: code = %d (%s) in call to \"%s\" \n",
             file,
             line,
             static_cast<unsigned int>(status),
@@ -76,7 +76,7 @@ static void check(cudaError_t status, const wchar_t* const function, const wchar
 
 // this has to be a macro, with a constexpr alternative L#expression, __FILEW__, __LINE__ will expand in-line, will be of no
 // practical use to us
-#define checkCudaErrors(expression) ::check((expression), L#expression, __FILEW__, __LINE__)
+#define checkCudaErrors(expression) ::check((expression), #expression, __FILE__, __LINE__)
 
 // function copied and refactored from https://raw.githubusercontent.com/NVIDIA/cuda-samples/master/Common/helper_cuda.h
 static inline int CoreCountFromSMLookup(int& major, int& minor) noexcept {
@@ -118,14 +118,12 @@ static inline int CoreCountFromSMLookup(int& major, int& minor) noexcept {
     }
 
     // if we don't find the values, we default use the previous one to run properly
-    ::wprintf_s(
-        L"MapSMtoCores for SM %d.%d is undefined.  Default to use %d Cores/SM\n", major, minor, nGpuArchCoresPerSM[index - 1].Cores
-    );
+    ::printf("MapSMtoCores for SM %d.%d is undefined.  Default to use %d Cores/SM\n", major, minor, nGpuArchCoresPerSM[index - 1].Cores);
     return nGpuArchCoresPerSM[index - 1].Cores;
 }
 
 int main() {
-    ::_putws(L" CUDA Device Query (Runtime API) version (CUDART static linking)\n\n");
+    ::puts(" CUDA Device Query (Runtime API) version (CUDART static linking)\n\n");
 
     int32_t     deviceCount {};
     // cudaError_t is a typedef to cudaError, which is a plain C style enum
@@ -133,16 +131,16 @@ int main() {
 
     if (cudaStatus != cudaSuccess) {
         // looks like NVIDIA isn't as keen as MS in providing wchar_t variants for all their APIs
-        ::wprintf_s(L"cudaGetDeviceCount returned %d (%S)\n", static_cast<int32_t>(cudaStatus), ::cudaGetErrorName(cudaStatus));
-        ::_putws(L"Result = FAIL\n");
+        ::printf("cudaGetDeviceCount returned %d (%s)\n", static_cast<int32_t>(cudaStatus), ::cudaGetErrorName(cudaStatus));
+        ::puts("Result = FAIL\n");
         ::exit(EXIT_FAILURE);
     }
 
     // This function call returns 0 if there are no CUDA capable devices.
     if (!deviceCount)
-        ::_putws(L"There are no available device(s) that support CUDA\n");
+        ::puts("There are no available device(s) that support CUDA\n");
     else
-        ::wprintf_s(L"Detected %d CUDA Capable device(s)\n", deviceCount);
+        ::printf("Detected %d CUDA Capable device(s)\n", deviceCount);
 
     int32_t        driverVersion {}, runtimeVersion {};
     cudaDeviceProp deviceProp {};
@@ -151,46 +149,46 @@ int main() {
         ::cudaSetDevice(i);                           // select device i for consideration
         ::cudaGetDeviceProperties_v2(&deviceProp, i); // collect device i's properties
 
-        ::wprintf_s(L"\nDevice %d: \"%S\"\n", i, deviceProp.name);
+        ::printf("\nDevice %d: \"%s\"\n", i, deviceProp.name);
 
         ::cudaDriverGetVersion(&driverVersion);
         ::cudaRuntimeGetVersion(&runtimeVersion);
-        ::wprintf_s(
-            L"  CUDA Driver Version / Runtime Version          %d.%d / %d.%d\n",
+        ::printf(
+            "  CUDA Driver Version / Runtime Version          %d.%d / %d.%d\n",
             driverVersion / 1000,
             (driverVersion % 100) / 10,
             runtimeVersion / 1000,
             (runtimeVersion % 100) / 10
         );
-        ::wprintf_s(L"  CUDA Capability Major/Minor version number:    %d.%d\n", deviceProp.major, deviceProp.minor);
+        ::printf("  CUDA Capability Major/Minor version number:    %d.%d\n", deviceProp.major, deviceProp.minor);
 
-        ::wprintf_s(
-            L"  Total amount of global memory:                 %.0Lf MBytes (%zu bytes)\n",
+        ::printf(
+            "  Total amount of global memory:                 %.0Lf MBytes (%zu bytes)\n",
             deviceProp.totalGlobalMem / BYTES_PER_MB,
             deviceProp.totalGlobalMem
         );
 
-        ::wprintf_s(
-            L"  (%03d) Multiprocessors, (%03d) CUDA Cores/MP:    %d CUDA Cores\n",
+        ::printf(
+            "  (%03d) Multiprocessors, (%03d) CUDA Cores/MP:    %d CUDA Cores\n",
             deviceProp.multiProcessorCount,
             ::CoreCountFromSMLookup(deviceProp.major, deviceProp.minor),
             ::CoreCountFromSMLookup(deviceProp.major, deviceProp.minor) * deviceProp.multiProcessorCount
         );
-        ::wprintf_s(
-            L"  GPU Max Clock rate:                            %.0Lf MHz (%0.2Lf GHz)\n",
+        ::printf(
+            "  GPU Max Clock rate:                            %.0Lf MHz (%0.2Lf GHz)\n",
             deviceProp.clockRate * 1e-3L,
             deviceProp.clockRate * 1e-6L
         );
 
         // This is supported in CUDA 5.0 (runtime API device properties)
-        ::wprintf_s(L"  Memory Clock rate:                             %.0Lf Mhz\n", deviceProp.memoryClockRate * 1e-3L);
-        ::wprintf_s(L"  Memory Bus Width:                              %d-bit\n", deviceProp.memoryBusWidth);
+        ::printf("  Memory Clock rate:                             %.0Lf Mhz\n", deviceProp.memoryClockRate * 1e-3L);
+        ::printf("  Memory Bus Width:                              %d-bit\n", deviceProp.memoryBusWidth);
 
         // if the device does have a L2 cache,
-        if (deviceProp.l2CacheSize) ::wprintf_s(L"  L2 Cache Size:                                 %d bytes\n", deviceProp.l2CacheSize);
+        if (deviceProp.l2CacheSize) ::printf("  L2 Cache Size:                                 %d bytes\n", deviceProp.l2CacheSize);
 
-        ::wprintf_s(
-            L"  Maximum Texture Dimension Size (x,y,z)         1D=(%d), 2D=(%d, %d), 3D=(%d, %d, %d)\n",
+        ::printf(
+            "  Maximum Texture Dimension Size (x,y,z)         1D=(%d), 2D=(%d, %d), 3D=(%d, %d, %d)\n",
             deviceProp.maxTexture1D,
             deviceProp.maxTexture2D[0],
             deviceProp.maxTexture2D[1],
@@ -198,9 +196,9 @@ int main() {
             deviceProp.maxTexture3D[1],
             deviceProp.maxTexture3D[2]
         );
-        ::wprintf_s(
-            L"  Maximum Layered 1D Texture Size, (num) layers  1D=(%d), %d layers\n"
-            L"  Maximum Layered 2D Texture Size, (num) layers  2D=(%d, %d), %d layers\n",
+        ::printf(
+            "  Maximum Layered 1D Texture Size, (num) layers  1D=(%d), %d layers\n"
+            "  Maximum Layered 2D Texture Size, (num) layers  2D=(%d, %d), %d layers\n",
             deviceProp.maxTexture1DLayered[0],
             deviceProp.maxTexture1DLayered[1],
             deviceProp.maxTexture2DLayered[0],
@@ -208,14 +206,14 @@ int main() {
             deviceProp.maxTexture2DLayered[2]
         );
 
-        ::wprintf_s(
-            L"  Total amount of constant memory:               %zu bytes\n"
-            L"  Total amount of shared memory per block:       %zu bytes\n"
-            L"  Total shared memory per multiprocessor:        %zu bytes\n"
-            L"  Total number of registers available per block: %d\n"
-            L"  Warp size:                                     %d\n"
-            L"  Maximum number of threads per multiprocessor:  %d\n"
-            L"  Maximum number of threads per block:           %d\n",
+        ::printf(
+            "  Total amount of constant memory:               %zu bytes\n"
+            "  Total amount of shared memory per block:       %zu bytes\n"
+            "  Total shared memory per multiprocessor:        %zu bytes\n"
+            "  Total number of registers available per block: %d\n"
+            "  Warp size:                                     %d\n"
+            "  Maximum number of threads per multiprocessor:  %d\n"
+            "  Maximum number of threads per block:           %d\n",
             deviceProp.totalConstMem,
             deviceProp.sharedMemPerBlock,
             deviceProp.sharedMemPerMultiprocessor,
@@ -225,9 +223,9 @@ int main() {
             deviceProp.maxThreadsPerBlock
         );
 
-        ::wprintf_s(
-            L"  Max dimension size of a thread block  (x,y,z): (%d, %d, %d)\n"
-            L"  Max dimension size of a grid size     (x,y,z): (%d, %d, %d)\n",
+        ::printf(
+            "  Max dimension size of a thread block  (x,y,z): (%d, %d, %d)\n"
+            "  Max dimension size of a grid size     (x,y,z): (%d, %d, %d)\n",
             deviceProp.maxThreadsDim[0],
             deviceProp.maxThreadsDim[1],
             deviceProp.maxThreadsDim[2],
@@ -236,67 +234,67 @@ int main() {
             deviceProp.maxGridSize[2]
         );
 
-        ::wprintf_s(
-            L"  Maximum memory pitch:                          %zu bytes\n"
-            L"  Texture alignment:                             %zu bytes\n",
+        ::printf(
+            "  Maximum memory pitch:                          %zu bytes\n"
+            "  Texture alignment:                             %zu bytes\n",
             deviceProp.memPitch,
             deviceProp.textureAlignment
         );
 
-        ::wprintf_s(
-            L"  Concurrent copy and kernel execution:          %s with %d copy engine(s)\n",
-            deviceProp.deviceOverlap ? L"Yes" : L"No",
+        ::printf(
+            "  Concurrent copy and kernel execution:          %s with %d copy engine(s)\n",
+            deviceProp.deviceOverlap ? "Yes" : "No",
             deviceProp.asyncEngineCount
         );
 
-        ::wprintf_s(
-            L"  Run time limit on kernels:                     %s\n"
-            L"  Integrated GPU sharing Host Memory:            %s\n"
-            L"  Support host page-locked memory mapping:       %s\n"
-            L"  Alignment requirement for Surfaces:            %s\n"
-            L"  Device has ECC support:                        %s\n",
-            deviceProp.kernelExecTimeoutEnabled ? L"Yes" : L"No",
-            deviceProp.integrated ? L"Yes" : L"No",
-            deviceProp.canMapHostMemory ? L"Yes" : L"No",
-            deviceProp.surfaceAlignment ? L"Yes" : L"No",
-            deviceProp.ECCEnabled ? L"Enabled" : L"Disabled"
+        ::printf(
+            "  Run time limit on kernels:                     %s\n"
+            "  Integrated GPU sharing Host Memory:            %s\n"
+            "  Support host page-locked memory mapping:       %s\n"
+            "  Alignment requirement for Surfaces:            %s\n"
+            "  Device has ECC support:                        %s\n",
+            deviceProp.kernelExecTimeoutEnabled ? "Yes" : "No",
+            deviceProp.integrated ? "Yes" : "No",
+            deviceProp.canMapHostMemory ? "Yes" : "No",
+            deviceProp.surfaceAlignment ? "Yes" : "No",
+            deviceProp.ECCEnabled ? "Enabled" : "Disabled"
         );
 
-        ::wprintf_s(
-            L"  CUDA Device Driver Mode (TCC or WDDM):         %s\n",
-            deviceProp.tccDriver ? L"TCC (Tesla Compute Cluster Driver)" : L"WDDM (Windows Display Driver Model)"
+        ::printf(
+            "  CUDA Device Driver Mode (TCC or WDDM):         %s\n",
+            deviceProp.tccDriver ? "TCC (Tesla Compute Cluster Driver)" : "WDDM (Windows Display Driver Model)"
         );
 
-        ::wprintf_s(
-            L"  Device supports Unified Addressing (UVA):      %s\n"
-            L"  Device supports Managed Memory:                %s\n"
-            L"  Device supports Compute Preemption:            %s\n"
-            L"  Supports Cooperative Kernel Launch:            %s\n"
-            L"  Supports MultiDevice Co-op Kernel Launch:      %s\n",
-            deviceProp.unifiedAddressing ? L"Yes" : L"No",
-            deviceProp.managedMemory ? L"Yes" : L"No",
-            deviceProp.computePreemptionSupported ? L"Yes" : L"No",
-            deviceProp.cooperativeLaunch ? L"Yes" : L"No",
-            deviceProp.cooperativeMultiDeviceLaunch ? L"Yes" : L"No"
+        ::printf(
+            "  Device supports Unified Addressing (UVA):      %s\n"
+            "  Device supports Managed Memory:                %s\n"
+            "  Device supports Compute Preemption:            %s\n"
+            "  Supports Cooperative Kernel Launch:            %s\n"
+            "  Supports MultiDevice Co-op Kernel Launch:      %s\n",
+            deviceProp.unifiedAddressing ? "Yes" : "No",
+            deviceProp.managedMemory ? "Yes" : "No",
+            deviceProp.computePreemptionSupported ? "Yes" : "No",
+            deviceProp.cooperativeLaunch ? "Yes" : "No",
+            deviceProp.cooperativeMultiDeviceLaunch ? "Yes" : "No"
         );
 
-        ::wprintf_s(
-            L"  Device PCI Domain ID / Bus ID / location ID:   %d / %d / %d\n",
+        ::printf(
+            "  Device PCI Domain ID / Bus ID / location ID:   %d / %d / %d\n",
             deviceProp.pciDomainID,
             deviceProp.pciBusID,
             deviceProp.pciDeviceID
         );
 
-        static constexpr std::array<const wchar_t*, 6> sComputeMode {
-            L"Default (multiple host threads can use ::cudaSetDevice() with device simultaneously)",
-            L"Exclusive (only one host thread in one process is able to use ::cudaSetDevice() with this device)",
-            L"Prohibited (no host thread can use ::cudaSetDevice() with this device)",
-            L"Exclusive Process (many threads in one process is able to use ::cudaSetDevice() with this device)",
-            L"Unknown",
+        static constexpr std::array<const char*, 6> sComputeMode {
+            "Default (multiple host threads can use ::cudaSetDevice() with device simultaneously)",
+            "Exclusive (only one host thread in one process is able to use ::cudaSetDevice() with this device)",
+            "Prohibited (no host thread can use ::cudaSetDevice() with this device)",
+            "Exclusive Process (many threads in one process is able to use ::cudaSetDevice() with this device)",
+            "Unknown",
             nullptr
         };
-        ::_putws(L"  Compute Mode:\n");
-        ::wprintf_s(L"     < %s >\n", sComputeMode[deviceProp.computeMode]);
+        ::puts("  Compute Mode:\n");
+        ::printf("     < %s >\n", sComputeMode[deviceProp.computeMode]);
     }
 
     // if there are 2 or more GPUs, query to determine whether RDMA is supported
@@ -322,21 +320,21 @@ int main() {
                 for (int32_t j = 0; j < p2pCount; j++) {
                     if (P2PGpuIds[i] == P2PGpuIds[j]) continue;
                     checkCudaErrors(::cudaDeviceCanAccessPeer(&can_access_peer, P2PGpuIds[i], P2PGpuIds[j]));
-                    ::wprintf_s(
-                        L"> Peer access from %S (GPU%d) -> %S (GPU%d) : %s\n",
+                    ::printf(
+                        "> Peer access from %s (GPU%d) -> %s (GPU%d) : %s\n",
                         devProps[P2PGpuIds[i]].name,
                         P2PGpuIds[i],
                         devProps[P2PGpuIds[j]].name,
                         P2PGpuIds[j],
-                        can_access_peer ? L"Yes" : L"No"
+                        can_access_peer ? "Yes" : "No"
                     );
                 }
             }
         }
     }
-    ::_putws(L"");
-    ::wprintf_s(
-        L"deviceQuery, CUDA Driver = CUDART, CUDA Driver Version = %d.%d, CUDA Runtime Version = %d.%d, Number of Devices = %d\nResult = PASS\n\n",
+    ::puts("");
+    ::printf(
+        "deviceQuery, CUDA Driver = CUDART, CUDA Driver Version = %d.%d, CUDA Runtime Version = %d.%d, Number of Devices = %d\nResult = PASS\n\n",
         driverVersion / 1000,
         (driverVersion % 1000) / 10,
         runtimeVersion / 1000,
