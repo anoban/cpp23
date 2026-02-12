@@ -72,8 +72,8 @@ int main() {
 
     std::wcout << L"rsum = " << rsum << L" and the sum of quadruples is " << qrsum << std::endl;
 
-    // for (std::vector<float>::const_iterator it = randoms.cbegin(), end = randoms.cend(); it != end; ++it) ::wprintf_s(L"%.4f\t", *it);
-    // for (size_t i {}; i < randoms.size(); ++i) ::wprintf_s(L"%f^2 = %f\n", randoms.at(i), results.at(i));
+    // for (std::vector<float>::const_iterator it = randoms.cbegin(), end = randoms.cend(); it != end; ++it) ::printf("%.4f\t", *it);
+    // for (size_t i {}; i < randoms.size(); ++i) ::printf("%f^2 = %f\n", randoms.at(i), results.at(i));
 
     constexpr auto increment = [](auto& e) consteval noexcept -> void { e++; };
     constexpr auto incr      = [](auto& e) consteval noexcept -> void { e++; };

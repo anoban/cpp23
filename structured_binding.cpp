@@ -25,14 +25,14 @@ auto wmain() -> int {
     name = L"Julia";
     ::_putws(name.c_str());
 
-    for (const auto& e : arr) ::wprintf_s(L"%.5f\n", e);
+    for (const auto& e : arr) printf("%.5f\n", e);
 
     auto& [pi, e, sqrt2]  = arr;
     pi                   *= 2;
     e                    *= 2;
     sqrt2                *= 2;
 
-    for (const auto& e : arr) ::wprintf_s(L"%.5f\n", e);
+    for (const auto& e : arr) printf("%.5f\n", e);
 
     std::vector<object> collection(10);
     for (float x { 1.000 }; const auto& _ : std::ranges::views::iota(1, 10)) x *= _;

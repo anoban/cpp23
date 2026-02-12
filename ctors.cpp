@@ -67,17 +67,17 @@ class pencil {
 
     public:
         // default ctor
-        pencil() : price {}, make { new wchar_t[CHAR_MAX] }, grade { GRADE::_HB } { _putws(L"call to class pencil's default constructor"); }
+        pencil() : price {}, make { new wchar_t[CHAR_MAX] }, grade { GRADE::_HB } { puts("call to class pencil's default constructor"); }
 
         explicit pencil(const wchar_t* const wstr) : price {}, make { new wchar_t[CHAR_MAX] }, grade { GRADE::_HB } {
             wcsncpy_s(make, CHAR_MAX, wstr, _TRUNCATE);
-            _putws(L"call to class pencil's pencil(const wchar_t* const wstr) constructor");
+            puts("call to class pencil's pencil(const wchar_t* const wstr) constructor");
         }
 
         // copy ctor
         pencil(const pencil& other) : price { other.price }, make { new wchar_t[CHAR_MAX] }, grade { other.grade } {
             wcsncpy_s(make, CHAR_MAX, other.make, _TRUNCATE);
-            _putws(L"call to class pencil's copy constructor");
+            puts("call to class pencil's copy constructor");
         }
 
         // move ctor
@@ -85,7 +85,7 @@ class pencil {
             other.price = 0.00F;
             other.make  = nullptr;
             other.grade = GRADE::UD;
-            _putws(L"call to class pencil's move constructor");
+            puts("call to class pencil's move constructor");
         }
 
         pencil(const pencil&& other) = delete;
@@ -93,7 +93,7 @@ class pencil {
         // dtor
         ~pencil() noexcept {
             delete[] make;
-            _putws(L"call to class pencil's destructor");
+            puts("call to class pencil's destructor");
         }
 
         // copy assignment
@@ -102,7 +102,7 @@ class pencil {
             price = other.price;
             wcsncpy_s(make, CHAR_MAX, other.make, _TRUNCATE);
             grade = other.grade;
-            _putws(L"call to class pencil's copy assignment operator");
+            puts("call to class pencil's copy assignment operator");
             return *this;
         }
 
@@ -116,7 +116,7 @@ class pencil {
             other.price = 0.00F;
             other.make  = nullptr;
             other.grade = GRADE::UD;
-            _putws(L"call to class pencil's move assignment operator");
+            puts("call to class pencil's move assignment operator");
             return *this;
         }
 

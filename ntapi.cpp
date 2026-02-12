@@ -18,10 +18,10 @@ constexpr auto EXIT_CODE { 0b1010111 };
 
 extern "C" {
     // function to be called when exit() is invoked
-    static void __cdecl SayGoodByeEx() noexcept { ::_putws(L"@exit :: Goodbye!"); }
+    static void __cdecl SayGoodByeEx() noexcept { ::puts("@exit :: Goodbye!"); }
 
     // function to be called when quick_exit is called
-    static void __cdecl SayGoodByeQEx() noexcept { ::_putws(L"@quick_exit :: Goodbye!"); }
+    static void __cdecl SayGoodByeQEx() noexcept { ::puts("@quick_exit :: Goodbye!"); }
 
     // declaration for NtTerminateProcess, which is not avaliable in the SDK headers
     NTSTATUS NTAPI NtTerminateProcess(_In_opt_ HANDLE ProcessHandle, _In_ NTSTATUS ExitStatus);
@@ -46,7 +46,7 @@ template<typename T, typename = std::is_arithmetic<T>::type> class object {
 
         object& operator=(object&&)      = delete;
 
-        ~object() noexcept { _value = ::_putws(L"dtor was calleed!"); }
+        ~object() noexcept { _value = ::puts("dtor was calleed!"); }
 };
 
 int wmain() {

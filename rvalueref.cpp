@@ -20,7 +20,7 @@ template<class T> requires std::is_arithmetic_v<T> class wrapper final {
     public:
         constexpr wrapper() noexcept : _value {} { }
 
-        constexpr explicit wrapper(const T& _init) noexcept : _value { _init } { ::_putws(L"" __FUNCSIG__); }
+        constexpr explicit wrapper(const T& _init) noexcept : _value { _init } { ::puts("" __FUNCSIG__); }
 
         wrapper(const wrapper&)            = delete; // no copy ctor
         wrapper& operator=(const wrapper&) = delete; // no copy assignment operator
@@ -31,7 +31,7 @@ template<class T> requires std::is_arithmetic_v<T> class wrapper final {
 
         // conversion operator
         template<class _Ty> requires std::is_arithmetic_v<_Ty> operator _Ty() const noexcept { // NOLINT(google-explicit-constructor)
-            ::_putws(L"template<class _Ty> requires std::is_arithmetic_v<_Ty> operator _Ty() noexcept");
+            ::puts("template<class _Ty> requires std::is_arithmetic_v<_Ty> operator _Ty() noexcept");
             return static_cast<_Ty>(_value);
         }
 
@@ -40,7 +40,7 @@ template<class T> requires std::is_arithmetic_v<T> class wrapper final {
         // with the acquired wrapped value type
         // NOLINTNEXTLINE(google-explicit-constructor)
         template<class _Ty> constexpr wrapper(const wrapper<_Ty>& other) noexcept : _value { static_cast<T>(other._value) } {
-            ::_putws(L"template<class _Ty> requires std::is_arithmetic_v<_Ty> constexpr wrapper(const wrapper<_Ty>& other) noexcept");
+            ::puts("template<class _Ty> requires std::is_arithmetic_v<_Ty> constexpr wrapper(const wrapper<_Ty>& other) noexcept");
         }
 
         template<> constexpr wrapper<unsigned char>(const wrapper<unsigned char>&) noexcept = delete;

@@ -42,11 +42,11 @@ int main() {
     std::wcout << L"base.get() = " << bObject.get() << L" middle.get() = " << mObject.get() << L" top.get() = " << tObject.get()
                << std::endl;
 
-    ::_putws(L"Let's locate the vtable pointers!");
+    ::puts("Let's locate the vtable pointers!");
     // these pointers are supposed to be stored in an array of function pointers
-    ::wprintf_s(L"base::get() %X\n", &base::get);
-    ::wprintf_s(L"middle::get() %X, middle::base::get() %X, top::get() %X\n", &middle::get, &middle::base::get);
-    ::wprintf_s(
+    printf("base::get() %X\n", &base::get);
+    printf("middle::get() %X, middle::base::get() %X, top::get() %X\n", &middle::get, &middle::base::get);
+    ::printf(
         L"top::get() %X, top::middle::get() %X, top::middle::base::get() %X\n", &top::get, &top::middle::get, &top::middle::base::get
     );
 

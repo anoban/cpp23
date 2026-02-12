@@ -8,7 +8,7 @@
 // templated function without any explicit type constraints
 // implicit requirement :: operand scalar_t must support the binary + operator
 template<typename scalar_t> [[nodiscard]] static constexpr scalar_t gsum(scalar_t x, scalar_t y) noexcept {
-    ::_putws(L"template<typename scalar_t> [[nodiscard]] static constexpr scalar_t isum(scalar_t x, scalar_t y) noexcept");
+    ::puts("template<typename scalar_t> [[nodiscard]] static constexpr scalar_t isum(scalar_t x, scalar_t y) noexcept");
     return x + y;
 }
 

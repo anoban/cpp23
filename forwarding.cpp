@@ -12,9 +12,9 @@ class nomoves {
     public:
         nomoves(); // C++03 compatible way of deleting a ctor overload
 
-        nomoves(const unsigned& _init) throw() : _counter(_init) { ::_putws(L"created!"); }
+        nomoves(const unsigned& _init) throw() : _counter(_init) { ::puts("created!"); }
 
-        nomoves(const nomoves& other) throw() : _counter(other._counter) { ::_putws(L"copied!"); }
+        nomoves(const nomoves& other) throw() : _counter(other._counter) { ::puts("copied!"); }
 
         nomoves& operator=(const nomoves& other) throw() {
             _counter = other._counter;
@@ -24,7 +24,7 @@ class nomoves {
 #if __cplusplus >= 201103L // implement move semantics
 
         nomoves(nomoves&& other) throw() : _counter(other._counter) {
-            ::_putws(L"moved!");
+            ::puts("moved!");
             other._counter = 0;
         }
 
@@ -53,7 +53,7 @@ int wmain() {
     collection.push_back(two);       // copy in all standards
     collection.push_back(one + two); // create a temporary and copy it in C++03 and before create a temporary and move it in C++11 & later
 
-    ::_putws(L"yeehaww!");
+    ::puts("yeehaww!");
 
     // when a reallocation happens, std::vector re constructs all of its elements FUCK??
     collection.reserve(100); // expect three new copies in C++03 and three moves in C++11 and later

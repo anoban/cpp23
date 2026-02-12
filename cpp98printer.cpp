@@ -11,9 +11,9 @@ class printer {
     public:
         printer() throw() : ncalls(0) { }
 
-        // void operator()(const int x) noexcept { ::wprintf_s(L"%d\n", x); } - noexcept is a C++11 keyword
+        // void operator()(const int x) noexcept { ::printf("%d\n", x); } - noexcept is a C++11 keyword
         void operator()(const int x) throw() {
-            ::wprintf_s(L"%d ", x);
+            ::printf("%d ", x);
             ncalls++;
         }
 
@@ -28,7 +28,7 @@ struct greeter {
         explicit greeter(const std::wstring& str) : greeting(str), ncalls(0) { }
 
         void operator()(int x) throw() {
-            ::wprintf_s(L"%s, %u\n", greeting.c_str(), x);
+            ::printf("%s, %u\n", greeting.c_str(), x);
             ++ncalls;
         }
 
@@ -53,11 +53,11 @@ int main() {
 
     // only std::foreach returns the mutated functor
 
-    ::wprintf_s(L"printer has been called %u times!\n", out.calls());
+    ::printf("printer has been called %u times!\n", out.calls());
     printer().operator()(2387); // temporary
 
     const greeter greet = std::for_each(v.begin(), v.end(), greeter(L"Hi there! "));
-    ::wprintf_s(L"greeter has been called %u times!\n", greet.count());
+    ::printf("greeter has been called %u times!\n", greet.count());
 
     return 0;
 }

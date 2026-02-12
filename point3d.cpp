@@ -10,12 +10,12 @@ struct point3d {
         float x, y, z; // no inclass initializers
 };
 
-#define printpoint3d(p3d) (::wprintf_s(L"x:: %.4f, y:: %.4f, z:: %.4f\n", (p3d).x, (p3d).y, (p3d).z))
+#define printpoint3d(p3d) (printf("x:: %.4f, y:: %.4f, z:: %.4f\n", (p3d).x, (p3d).y, (p3d).z))
 
 static_assert(sizeof(point3d) == 12);
 
 // in C, we'd need a helper to print point32 to the console or the user code will have to unpack the struct and print it using a regular *printf* family function
-static void PrintPoint3D(const point3d& point) noexcept { ::wprintf_s(L"Point3D :: (%.4f, %.4f, %.4f)\n", point.x, point.y, point.z); }
+static void PrintPoint3D(const point3d& point) noexcept { printf("Point3D :: (%.4f, %.4f, %.4f)\n", point.x, point.y, point.z); }
 
 static constexpr point3d NewPoint3D() noexcept { return point3d { 0, 0, 0 }; }
 

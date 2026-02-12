@@ -7,11 +7,11 @@
 
 auto main() -> int {
 #ifdef __clang__
-    ::_putws(L"LLVM based compiler\n");
+    ::puts("LLVM based compiler\n");
 #elifdef(_MSC_FULL_VER)
-    ::_putws(L "Visual C++ compiler\n");
+    ::puts( "Visual C++ compiler\n");
 #elifdef(__GNUG__)
-    ::_putws(L"GNU g++ compiler\n");
+    ::puts("GNU g++ compiler\n");
 #endif
 
     return 0;

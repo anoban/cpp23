@@ -1,9 +1,9 @@
 #include <cstdio>
 #include <cstdlib>
 
-static void foo(const int x) noexcept { ::_putws(L"foo(const int)"); }
+static void foo(const int x) noexcept { ::puts("foo(const int)"); }
 
-static void foo(const void* x) noexcept { ::_putws(L"foo(const void*)"); }
+static void foo(const void* x) noexcept { ::puts("foo(const void*)"); }
 
 int main() {
     foo(NULL); // some implementations define NULL as ((void*) 0)
@@ -15,7 +15,7 @@ int main() {
 
     auto type { nullptr }; // type of nullptr is std::nullptr
 
-    if (type) ::_putws(L":)");
+    if (type) ::puts(":)");
 
     unsigned long long x {
         nullptr

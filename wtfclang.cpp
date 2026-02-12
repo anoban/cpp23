@@ -11,4 +11,4 @@ auto wmain() -> int {
     while (true); // an infinite loop
 }
 
-inline void should_not_be_called() noexcept { ::_putws(L"Was called nonetheless!"); }
+inline void should_not_be_called() noexcept { ::puts("Was called nonetheless!"); }

@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#define greet() ::_putws(L"Hello there!")
+#define greet() ::puts("Hello there!")
 
 #define cube(x) ((x) * (x) * (x))
 

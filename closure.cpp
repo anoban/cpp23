@@ -11,7 +11,7 @@ const auto printer = [](const std::wstring& wstring) noexcept -> void { ::_putws
 // compiler generated closure for the above lambda may look something like
 struct __cpp20$$msvc15042024ucrt254_ThU202002LTtZ_printer$12__u35TiX_ {
         // since our lambda did not capture anything, we do not need any data members inside the functor
-        void operator()(const std::wstring& wstring) const noexcept { ::wprintf_s(L"%s ", wstring.c_str()); }
+        void operator()(const std::wstring& wstring) const noexcept { ::printf("%s ", wstring.c_str()); }
 };
 
 // compiler generates a new closure object for each lambda, lambdas with identical signatures and function bodies will therefore be treated as different

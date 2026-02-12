@@ -4,8 +4,6 @@
 #include <numbers>
 #include <type_traits>
 
-#include <sal.h>
-
 template<typename T, size_t _length, typename = std::enable_if<std::is_scalar<T>::value, T>::type> class random_access_iterator {
         using value_type        = T;
         using difference_type   = ptrdiff_t;

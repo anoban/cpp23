@@ -50,11 +50,11 @@ namespace anoban {
 
         public:
             // default ctor
-            constexpr array() noexcept : size { _size }, elements { 0 } { ::_putws(L"anoban::array::array() noexcept"); }
+            constexpr array() noexcept : size { _size }, elements { 0 } { ::puts("anoban::array::array() noexcept"); }
 
             // copy ctor
             constexpr array(const array& other) noexcept : size { other.size } {
-                ::_putws(L"anoban::array::array(const array& other) noexcept");
+                ::puts("anoban::array::array(const array& other) noexcept");
                 ::memcpy_s(elements, size * sizeof(elements[0]), other.elements, other.size * sizeof(other.elements[0]));
             }
 
@@ -63,7 +63,7 @@ namespace anoban {
 
             // copy assignment
             constexpr array& operator=(const array& other) noexcept {
-                ::_putws(L"anoban::array::operator=(const array& other) noexcept");
+                ::puts("anoban::array::operator=(const array& other) noexcept");
                 if (this == &other) return *this;
                 size = other.size;
                 ::memcpy_s(elements, size * sizeof(elements[0]), other.elements, other.size, other.size * sizeof(other.elements[0]));
@@ -75,7 +75,7 @@ namespace anoban {
 
             // dtor
             constexpr ~array() noexcept {
-                ::_putws(L"anoban::array::~array()");
+                ::puts("anoban::array::~array()");
                 size = 0;
                 ::memset(elements, 0U, sizeof(elements));
             }

@@ -23,19 +23,19 @@ namespace bmp {
         std::vector<uint8_t> buffer;
 
         if (hFile == INVALID_HANDLE_VALUE) {
-            ::fwprintf_s(stderr, L"Error %lu in CreateFileW\n", ::GetLastError()); // NOLINT(cppcoreguidelines-pro-type-vararg)
+            ::fprintf(stderr, L"Error %lu in CreateFileW\n", ::GetLastError()); // NOLINT(cppcoreguidelines-pro-type-vararg)
             goto INVALID_HANDLE_ERR;
         }
 
         if (!::GetFileSizeEx(hFile, &liFsize)) {
-            ::fwprintf_s(stderr, L"Error %lu in GetFileSizeEx\n", ::GetLastError()); // NOLINT(cppcoreguidelines-pro-type-vararg)
+            ::fprintf(stderr, L"Error %lu in GetFileSizeEx\n", ::GetLastError()); // NOLINT(cppcoreguidelines-pro-type-vararg)
             goto GET_FILESIZE_ERR;
         }
 
         buffer.resize(liFsize.QuadPart);
 
         if (!::ReadFile(hFile, buffer.data(), liFsize.QuadPart, &nbytes, NULL)) {
-            ::fwprintf_s(stderr, L"Error %lu in ReadFile\n", ::GetLastError()); // NOLINT(cppcoreguidelines-pro-type-vararg)
+            ::fprintf(stderr, L"Error %lu in ReadFile\n", ::GetLastError()); // NOLINT(cppcoreguidelines-pro-type-vararg)
             goto GET_FILESIZE_ERR;
         }
 

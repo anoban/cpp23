@@ -146,30 +146,30 @@ int wmain() {
     // std::wcout << nineteen;
 
     for (const auto& _ : std::ranges::views::iota(0, 15)) std::wcout << nine--;
-    ::_putws(L"");
+    ::puts("");
     for (const auto& _ : std::ranges::views::iota(0, 25)) std::wcout << nine++;
-    ::_putws(L"");
+    ::puts("");
 
     (++nine).reset();
 
     for (const auto& _ : std::ranges::views::iota(0, 25)) std::wcout << --nine;
-    ::_putws(L"");
+    ::puts("");
     for (const auto& _ : std::ranges::views::iota(0, 25)) std::wcout << ++nine;
-    ::_putws(L"");
+    ::puts("");
 
     [[maybe_unused]] constexpr auto nl32 { ::newline<char32_t> };
     static_assert(sizeof nl32 == 4);
 
     auto tuesday { ::days::Tuesday };
     for (size_t i = 0; i < 8; ++i) std::wcout << ++tuesday;
-    ::_putws(L"");
+    ::puts("");
 
     ++tuesday = days::Wednesday; // accepted because the return type is days&, an lvalue
     std::wcout << tuesday;
-    ::_putws(L"");
+    ::puts("");
 
     for (size_t i = 0; i < 8; ++i) std::wcout << --tuesday;
-    ::_putws(L"");
+    ::puts("");
 
     unsigned           a { 11 }, b { 19 };
     constexpr unsigned c { 12 }, d { 18 };

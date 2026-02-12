@@ -36,7 +36,7 @@ int main() {
     [[maybe_unused]] constexpr auto left  = ::left_fold(12, 87, 654.98, 0.7467356F, 'A', L'Q');
     constexpr auto                  right = ::right_fold(12, 87, 654.98, 0.7467356F, 'A', L'Q');
 
-    ::printf_s( // NOLINT(cppcoreguidelines-pro-type-vararg)
+    ::printf( // NOLINT(cppcoreguidelines-pro-type-vararg)
         "Sums are %.5Lf, %.5Lf\n",
         ::left_fold(12, 87, 654.98, 0.7467356F, 'A', L'Q'),
         right

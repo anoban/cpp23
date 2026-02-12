@@ -16,12 +16,12 @@ static std::basic_ostream<char_t>& operator<<(std::basic_ostream<char_t>& ostr, 
     return ostr;
 }
 
-static void func(const float& a) noexcept { ::wprintf_s(L"a = %f\n", a); }
+static void func(const float& a) noexcept { ::printf("a = %f\n", a); }
 
-static void func2args(short a, long b) noexcept { ::wprintf_s(L"a = %hd, b = %ld\n", a, b); }
+static void func2args(short a, long b) noexcept { ::printf("a = %hd, b = %ld\n", a, b); }
 
 [[nodiscard]] static float func3args(float a, float b, float c) noexcept {
-    ::wprintf_s(L"a = %f, b = %f, c = %f\n", a, b, c);
+    ::printf("a = %f, b = %f, c = %f\n", a, b, c);
     return a + b + c;
 }
 
@@ -35,7 +35,7 @@ template<typename scalar_t, size_t length> requires std::is_arithmetic_v<scalar_
 }
 
 static void func5args(int a, int b, int c, const int* const pd, int e) noexcept {
-    ::wprintf_s(L"a = %d, b = %d, c = %d, d = %d, e = %d\n", a, b, c, *pd, e);
+    ::printf("a = %d, b = %d, c = %d, d = %d, e = %d\n", a, b, c, *pd, e);
     return;
 }
 

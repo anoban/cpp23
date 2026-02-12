@@ -1,4 +1,6 @@
-#include <chrono>
+#include <algorithm>
+#include <iomanip>
+#include <iostream>
 #include <numeric>
 #include <random>
 
@@ -8,21 +10,21 @@
 #include <thrust/device_vector.h>
 #include <thrust/reduce.h>
 
-static void __global__ csum(_Inout_ double* const array, _In_ const unsigned size) {
+static void __global__ csum(double* const array, const unsigned size) {
     double sum {};
 #pragma unroll
     for (unsigned i {}; i < size; ++i) sum += array[i];
     array[0] = sum;
 }
 
-static void __global__ custdsum(_In_ const double* const array, _In_ const unsigned size, _Inout_ double* const res) {
-    const auto sum { cuda::std::reduce(array, array + size, 0.0L) };
+[[maybe_unused]] static void __global__ custdsum(const double* const array, const unsigned size, double* const res) {
+    const auto sum { cuda::std::reduce(array, array + size, 0.0000) };
     *res = sum;
 }
 
 template<typename _TyDeviceIterator> static
     typename std::enable_if<std::is_arithmetic<typename _TyDeviceIterator::value_type>::value, void>::type __global__
-    cudastdsum(_In_ _TyDeviceIterator _begin, _In_ _TyDeviceIterator _end, _Inout_ typename _TyDeviceIterator::value_type* const result) {
+    cudastdsum(_TyDeviceIterator _begin, _TyDeviceIterator _end, typename _TyDeviceIterator::value_type* const result) {
     *result = cuda::std::reduce(
         _begin,
         _end,
@@ -37,10 +39,10 @@ int main() {
     std::uniform_real_distribution<double> urdist { -10.0, 100.0 };
 
     std::generate(randoms.begin(), randoms.end(), [&rengine, &urdist]() noexcept -> auto { return urdist(rengine); });
-    const auto hsum { std::reduce(randoms.cbegin(), randoms.cend(), 0.0L) };
+    const auto hsum { std::reduce(randoms.cbegin(), randoms.cend(), 0.0) };
 
     thrust::device_vector<double> drandoms { randoms.cbegin(), randoms.cend() };
-    const auto                    dsum { thrust::reduce(drandoms.cbegin(), drandoms.cend(), 0.000L) };
+    const auto                    dsum { thrust::reduce(drandoms.cbegin(), drandoms.cend(), 0.000) };
 
     double *sum {}, custdsum {}, ksum {};
 
@@ -59,8 +61,6 @@ int main() {
     std::cout << std::setw(30) << "thrust::reduce " << dsum << '\n';
     std::cout << std::setw(30) << "kernel " << ksum << '\n';
     std::cout << std::setw(30) << "cuda::std::reduce " << custdsum << '\n';
-
-    auto x { 10.00 + long double {} };
 
     return EXIT_SUCCESS;
 }

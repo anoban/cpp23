@@ -18,7 +18,7 @@ int wmain(void) {
     const double pie    = M_PI;
     square(&pie);
 
-    ::wprintf_s(L"%lf\n", pie);
+    ::printf("%lf\n", pie);
 
     return EXIT_SUCCESS;
 }

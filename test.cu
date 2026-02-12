@@ -14,7 +14,7 @@ static constexpr auto NELEMENTS_PER_KERNEL { NRANDS / NKERNELS };
 
 // launch a 1,000 kernels to sum this vector in parallel, each kernel will have to sum 100,000 doubles
 
-void __global__ sum(_Inout_ double* const vector) {
+void __global__ sum(double* const vector) {
     const auto index { threadIdx.x + threadIdx.y + threadIdx.z }; // will range from 0 to 999
     const auto start_offset { index * NELEMENTS_PER_KERNEL };
     double     sum {};
@@ -25,7 +25,7 @@ void __global__ sum(_Inout_ double* const vector) {
     vector[start_offset] = sum; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 }
 
-void __global__ fold(_Inout_ double* const vector) {
+void __global__ fold(double* const vector) {
     double sum {};
 #pragma unroll
     for (unsigned long long i = 0; i < NRANDS; i += NELEMENTS_PER_KERNEL)
@@ -34,7 +34,7 @@ void __global__ fold(_Inout_ double* const vector) {
     vector[0] = sum;
 }
 
-auto wmain() -> int {
+auto main() -> int {
     auto         randoms { std::make_unique_for_overwrite<double[]>(NRANDS) };
     std::knuth_b randeng { std::random_device {}() };
     auto         rddist {
@@ -42,8 +42,8 @@ auto wmain() -> int {
     };
     std::generate(randoms.get(), randoms.get() + NRANDS, [&randeng, &rddist]() noexcept -> double { return rddist(randeng); });
 
-    const auto  host_sum { std::reduce(randoms.get(), randoms.get() + NRANDS, 0.000L) };
-    long double device_sum {};
+    const auto host_sum { std::reduce(randoms.get(), randoms.get() + NRANDS, 0.000L) };
+    double     device_sum {};
 
     double* device_vector {};
     ::cudaMalloc(&device_vector, NRANDS * sizeof(decltype(randoms)::element_type));
@@ -57,7 +57,7 @@ auto wmain() -> int {
 
     ::cudaFree(device_vector);
 
-    std::wcout << std::fixed << std::setprecision(10) << L"host => " << host_sum << L" device => " << device_sum << L'\n';
+    std::cout << std::fixed << std::setprecision(10) << "host => " << host_sum << " device => " << device_sum << '\n';
 
     return EXIT_SUCCESS;
 }

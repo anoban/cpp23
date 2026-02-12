@@ -36,8 +36,8 @@ int main() {
     const auto count           = std::count_if(arr.cbegin(), arr.cend(), composed_predicate);
     // const auto count_v2              = std::count_if(arr.cbegin(), arr.cend(), composed_predicate_v2);
 
-    ::wprintf_s(L"What about 9? %d\n", composed_predicate_v2(9));
+    ::printf("What about 9? %d\n", composed_predicate_v2(9));
 
-    ::wprintf_s(L"Between 12 and %d, %zu numbers were greater than 17 and less than 250\n", x, count);
+    ::printf("Between 12 and %d, %zu numbers were greater than 17 and less than 250\n", x, count);
     return EXIT_SUCCESS;
 }

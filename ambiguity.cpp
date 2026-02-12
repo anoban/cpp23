@@ -1,15 +1,15 @@
 #include <iostream>
 
-#define TOSTRING(expression)     (L#expression)       // stringisize
+#define TOSTRING(expression)     (#expression)        // stringisize
 #define LINE(expression)         TOSTRING(expression) // helper to expand the __LINE__ macro
 
-#define PRINT(integer_constexpr) printf_s(L"%d\n", ((##integer_constexpr)))
+#define PRINT(integer_constexpr) printf("%d\n", ((##integer_constexpr)))
 
 class T {
     public:
-        T() noexcept { std::wcout << L"T()\n"; }
+        T() noexcept { std::cout << "T()\n"; }
 
-        T(int) throw() { std::wcout << __FUNCTIONW__ << L"(int)\n"; } // note the absence of the parameter name
+        T(int) throw() { std::cout << __FUNCTION__ << "(int)\n"; } // note the absence of the parameter name
 };
 
 static constexpr int a = 87, b { 54 }; //globals
@@ -30,7 +30,7 @@ int main() {
     T P(static_cast<T>(b));
     T Q { b }; // or use the braced initializer
 
-    std::wcout << LINE(__LINE__) << std::endl;
+    std::cout << LINE(__LINE__) << std::endl;
     PRINT(89);
 
     return EXIT_SUCCESS;

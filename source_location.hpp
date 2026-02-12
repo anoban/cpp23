@@ -3,7 +3,7 @@
 
 template<typename char_t> concept is_iostream_compatible = std::is_same_v<char, char_t> || std::is_same_v<wchar_t, char_t>;
 
-#define __builtin_FUNCSIGW()  (L##__FUNCSIG__)
+#define __builtin_FUNCSIGW()  (L##__PRETTY_FUNCTION__)
 #define __builtin_FUNCTIONW() (__FUNCTIONW__)
 
 namespace experimental {
@@ -12,8 +12,8 @@ namespace experimental {
 
     template<> struct source_location<char> final {
             [[nodiscard]] static consteval source_location current(
-                const unsigned _Line_           = __builtin_LINE(),
-                const unsigned _Column_         = __builtin_COLUMN(),
+                const unsigned    _Line_        = __builtin_LINE(),
+                const unsigned    _Column_      = __builtin_COLUMN(),
                 const char* const _File_        = __builtin_FILE(),
                 const char* const _FunctionSig_ = __builtin_FUNCSIG(),
                 const char* const _Function_    = __builtin_FUNCTION()
@@ -53,8 +53,8 @@ namespace experimental {
 
     template<> struct source_location<wchar_t> final {
             [[nodiscard]] static consteval source_location current(
-                const unsigned _Line_              = __builtin_LINE(),
-                const unsigned _Column_            = __builtin_COLUMN(),
+                const unsigned       _Line_        = __builtin_LINE(),
+                const unsigned       _Column_      = __builtin_COLUMN(),
                 const wchar_t* const _File_        = __FILEW__,
                 const wchar_t* const _FunctionSig_ = __builtin_FUNCSIGW(),
                 const wchar_t* const _Function_    = __builtin_FUNCTIONW()

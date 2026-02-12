@@ -7,14 +7,14 @@ class base {
     public:
         virtual constexpr const wchar_t* str() const noexcept { return L"base"; }
 
-        void greet() const noexcept { ::_putws(L"Hi from base!"); }
+        void greet() const noexcept { ::puts("Hi from base!"); }
 };
 
 class derived : public base {
     public:
         constexpr const wchar_t* str() const noexcept override { return L"derived"; }
 
-        void greet() const noexcept { ::_putws(L"Hi from derived!"); }
+        void greet() const noexcept { ::puts("Hi from derived!"); }
 };
 
 struct last : derived {
@@ -30,7 +30,7 @@ template<class _Ty> requires std::is_arithmetic_v<_Ty> class simple_wrapper fina
     public:
         explicit constexpr simple_wrapper(const _Ty& init) noexcept : _wrapped_value(init) { }
 
-        virtual void greet() const noexcept { ::_putws(L"Hi from simple_wrapper"); }
+        virtual void greet() const noexcept { ::puts("Hi from simple_wrapper"); }
 
         // return the address of the virtual function table
         uintptr_t vptr() const noexcept { return *reinterpret_cast<const uintptr_t*>(this); }

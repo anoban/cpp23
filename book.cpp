@@ -59,10 +59,10 @@ int main() {
     // after all C does not have references
 
     // prefix ++ and -- operators return a reference
-    ::wprintf_s(L"%ld\n", ++x);
-    ::wprintf_s(L"%ld\n", x);
+    ::printf("%ld\n", ++x);
+    ::printf("%ld\n", x);
     --x = 0; // assignment is possible here as --x returns a reference to x
-    ::wprintf_s(L"%ld\n", x);
+    ::printf("%ld\n", x);
 
     // postfix ++ and -- operators return a value
     // x++ = 0; Error: expression must be a modifiable lvalue

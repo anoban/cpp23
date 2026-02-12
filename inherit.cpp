@@ -18,7 +18,7 @@ class parent {
 
         // copy assignment operator
         parent& operator=(_In_ const parent& other) noexcept {
-            ::_putws(L"" __FUNCSIG__);
+            ::puts("" __FUNCSIG__);
             if (this == std::addressof(other)) return *this;
             length = other.length;
             delete[] buffer;
@@ -27,7 +27,7 @@ class parent {
         }
 
         ~parent() noexcept {
-            ::_putws(L"" __FUNCSIG__);
+            ::puts("" __FUNCSIG__);
             length = 0;
             delete[] buffer;
             buffer = nullptr;
@@ -71,7 +71,7 @@ class child final : public parent {
         // child& operator=(_In_ const child&) noexcept = default;
         ~child() noexcept {
             // EVEN WITH A USER DEFINED DTOR IN THE DERIVED CLASS, A CALL TO THE BASE CLASS'S DTOR WILL BE EMPLACED BY THE COMPILER
-            ::_putws(L"" __FUNCSIG__);
+            ::puts("" __FUNCSIG__);
         }
 };
 

@@ -45,7 +45,7 @@ auto wmain() -> int {
     constexpr auto pi { std::numbers::pi_v<typename std::enable_if_t<
         ::all_identical<const volatile double&&, const volatile double&&, const volatile double&&>::value,
         long double>> };
-    ::wprintf_s(L"%2.15Lf\n", pi); // NOLINT(cppcoreguidelines-pro-type-vararg)
+    printf("%2.15Lf\n", pi); // NOLINT(cppcoreguidelines-pro-type-vararg)
 
     return EXIT_SUCCESS;
 }

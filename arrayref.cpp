@@ -5,28 +5,27 @@
 
 // signature of an array reference is T (&identifier)[length]
 
-static __declspec(noinline) double __stdcall cube(const float& x) noexcept { return x * x * x; }
+static __attribute__((noinline)) double cube(const float& x) noexcept { return x * x * x; }
 
-static __declspec(noinline) double __stdcall quad(const float& x) noexcept { return x * x * x * x; }
+static __attribute__((noinline)) double quad(const float& x) noexcept { return x * x * x * x; }
 
-template<class T, size_t len> static __declspec(noinline) void __stdcall quad(T (&array)[len]) noexcept {
+template<class T, size_t len> static __attribute__((noinline)) void quad(T (&array)[len]) noexcept {
     for (T& e : array) e *= (e * e * e);
 }
 
-template<size_t __len> static inline char* capitalize(_Inout_ char (&string)[__len]) noexcept {
-    ::_putws(L"" __FUNCSIG__);
+template<size_t __len> static inline char* capitalize(char (&string)[__len]) noexcept {
+    ::puts(__PRETTY_FUNCTION__);
     for (unsigned i = 0; i < __len; ++i) string[i] = static_cast<char>(::toupper(string[i]));
     return string;
 }
 
-static inline char* capitalize(_Inout_ char* string) noexcept {
-    ::_putws(L"" __FUNCSIG__);
+static inline char* capitalize(char* string) noexcept {
+    ::puts(__PRETTY_FUNCTION__);
     while (*string) *string++ = static_cast<char>(toupper(*string));
     return string;
 }
 
-template<class T, size_t __len> static constexpr inline void square(_Inout_ T (&array)[__len]) noexcept requires requires(T& x) { x *= x; }
-{
+template<class T, size_t __len> static constexpr inline void square(T (&array)[__len]) noexcept requires requires(T& x) { x *= x; } {
     for (size_t i = 0; i < __len; ++i) array[i] *= array[i];
 }
 
@@ -43,22 +42,22 @@ auto wmain() -> int {
     //  ptrcube = quad;
 
     unsigned array[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-    for (const auto& e : array) ::wprintf_s(L"%6u\n", e);
-    ::_putws(L"\n");
+    for (const auto& e : array) ::printf("%6u\n", e);
+    ::puts("\n");
 
     square(array);
-    for (const auto& e : array) ::wprintf_s(L"%6u\n", e);
+    for (const auto& e : array) ::printf("%6u\n", e);
 
-    ::wprintf_s(L"%lf\n", (*ptrcube)(3.000));
+    ::printf("%lf\n", (*ptrcube)(3.000));
 
     char adele[] { "Let the sky fall.............. when it crumbles...." };
     ::capitalize(adele);
-    ::wprintf_s(L"%S\n", adele);
+    ::printf("%S\n", adele);
 
     quad(array);
-    for (const auto& e : array) ::wprintf_s(L"%6u\n", e);
+    for (const auto& e : array) ::printf("%6u\n", e);
 
-    // ::wprintf_s(L"%S\n", ::capitalize("wayyyy downnn we gooooooooo!"));
+    // ::printf("%S\n", ::capitalize("wayyyy downnn we gooooooooo!"));
 
     int    integers[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     double reals[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };

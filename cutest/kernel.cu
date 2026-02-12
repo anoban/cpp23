@@ -72,7 +72,7 @@ template<typename _TyNumeric, unsigned long long _ArraySize> static inline // NO
     // Check for any errors launching the kernel
     cudaStatus = ::cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
-        ::fwprintf_s(stderr, L"addKernel launch failed: %S\n", ::cudaGetErrorString(cudaStatus));
+        ::fprintf(stderr, L"addKernel launch failed: %S\n", ::cudaGetErrorString(cudaStatus));
         goto ERROR;
     }
 
@@ -80,7 +80,7 @@ template<typename _TyNumeric, unsigned long long _ArraySize> static inline // NO
     // any errors encountered during the launch.
     cudaStatus = ::cudaDeviceSynchronize();
     if (cudaStatus != cudaSuccess) {
-        ::fwprintf_s(stderr, L"cudaDeviceSynchronize returned error code %d after launching addKernel!\n", cudaStatus);
+        ::fprintf(stderr, L"cudaDeviceSynchronize returned error code %d after launching addKernel!\n", cudaStatus);
         goto ERROR;
     }
 
@@ -116,13 +116,13 @@ int wmain() {
     }
 
     for (const auto& i : std::ranges::views::iota(0LLU, ARRAY_LENGTH))
-        ::wprintf_s(L"%3lld + %3lld = %4lld\n", left.at(i), right.at(i), sums.at(i));
+        ::printf(L"%3lld + %3lld = %4lld\n", left.at(i), right.at(i), sums.at(i));
 
     // cudaDeviceReset must be called before exiting in order for profiling and
     // tracing tools such as Nsight and Visual Profiler to show complete traces.
     cudaStatus = ::cudaDeviceReset();
     if (cudaStatus != cudaSuccess) {
-        ::fwprintf_s(stderr, L"cudaDeviceReset failed!");
+        ::fprintf(stderr, L"cudaDeviceReset failed!");
         return EXIT_FAILURE;
     }
 

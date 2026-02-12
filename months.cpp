@@ -45,7 +45,7 @@ auto main() -> int {
     // we need to capture the current state of november or reset november to month::November!
     for (unsigned i = LIMIT + static_cast<unsigned>(november); i > 0; --i) assert(static_cast<unsigned>(november--) == i % 12);
 
-    ::_putws(L"all's good:)");
+    ::puts("all's good:)");
 
     // assert(false);
     return EXIT_SUCCESS;
