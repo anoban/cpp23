@@ -9,7 +9,7 @@
 #include <cuda_runtime.h>
 
 static constexpr auto NRANDS { 100'000'000LLU };
-static constexpr auto NKERNELS { 1000LLU };
+static constexpr auto NKERNELS { 600LLU };
 static constexpr auto NELEMENTS_PER_KERNEL { NRANDS / NKERNELS };
 
 // launch a 1,000 kernels to sum this vector in parallel, each kernel will have to sum 100,000 doubles
