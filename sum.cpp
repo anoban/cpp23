@@ -4,7 +4,7 @@
 #include <vector>
 
 auto main() -> int {
-    std::vector<double> array {};
+    std::vector<float> array {};
     array.resize(10'000'000);
 
     std::mt19937_64 reng { std::random_device {}() };
